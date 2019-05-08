@@ -1,0 +1,6 @@
+[submodule "rbfx"]
+	path = rbfx
+	url = https://github.com/rokups/rbfx
+[submodule "rbfx-newton"]
+	path = rbfx-newton
+	url = https://github.com/TrevorCash/rbfx-newton
