@@ -23,19 +23,8 @@ endif ()
 add_executable(TechGame ${TARGET_TYPE} ${SOURCE_FILES})
 
 
-#target_include_directories(TechGame PUBLIC 
-#$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Urho3D/Source/Samples #${CMAKE_CURRENT_SOURCE_DIR}/../rbfx-mathextras>
-#${CMAKE_CURRENT_SOURCE_DIR}/../rbfx-newton>
-#)
-
-
-target_include_directories(TechGame PUBLIC 
-$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Urho3D/Source/Samples ${CMAKE_CURRENT_SOURCE_DIR}/../rbfx-mathextras>
-${CMAKE_CURRENT_SOURCE_DIR}/../rbfx-newton>
-)
-
 
 
 # Link to libraries.
-target_link_libraries(TechGame Urho3D rbfx-mathextras rbfx-newton)
+target_link_libraries(TechGame Urho3D rbfx-mathextras rbfx-newton rbfx-visualdebugger)
 

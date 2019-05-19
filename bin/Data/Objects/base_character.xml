@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<node id="16777217">
+	<attribute name="Is Enabled" value="true" />
+	<attribute name="Name" value="base_character" />
+	<attribute name="Tags" />
+	<attribute name="Position" value="0 -3.75233 7.53181" />
+	<attribute name="Rotation" value="1 0 0 0" />
+	<attribute name="Scale" value="1 1 1" />
+	<attribute name="Variables" />
+	<component type="AnimatedModel" id="16777228">
+		<attribute name="Model" value="Model;Models/base_character.mdl" />
+		<attribute name="Material" value="Material;Materials/BaseCharacter.xml" />
+		<attribute name="Cast Shadows" value="true" />
+		<attribute name="Bone Animation Enabled">
+			<variant type="Bool" value="true" />
+			<variant type="Bool" value="true" />
+			<variant type="Bool" value="true" />
+		</attribute>
+		<attribute name="Animation States">
+			<variant type="Int" value="3" />
+			<variant type="ResourceRef" value="Animation;Animations/LookAround.ani" />
+			<variant type="String" value="Bone" />
+			<variant type="Bool" value="true" />
+			<variant type="Float" value="1" />
+			<variant type="Float" value="0.888179" />
+			<variant type="Int" value="0" />
+			<variant type="ResourceRef" value="Animation;Animations/Knod.ani" />
+			<variant type="String" value="Bone" />
+			<variant type="Bool" value="true" />
+			<variant type="Float" value="1" />
+			<variant type="Float" value="0.583709" />
+			<variant type="Int" value="0" />
+			<variant type="ResourceRef" value="Animation;Animations/Lookup.ani" />
+			<variant type="String" value="Bone" />
+			<variant type="Bool" value="true" />
+			<variant type="Float" value="1" />
+			<variant type="Float" value="0.323325" />
+			<variant type="Int" value="0" />
+		</attribute>
+	</component>
+	<component type="AnimationController" id="16777229">
+		<attribute name="Node Animation States">
+			<variant type="Int" value="0" />
+		</attribute>
+	</component>
+	<node id="16777218">
+		<attribute name="Is Enabled" value="true" />
+		<attribute name="Name" value="Bone" />
+		<attribute name="Tags" />
+		<attribute name="Position" value="0 0 -0" />
+		<attribute name="Rotation" value="-3.09086e-08 -3.09086e-08 0.707107 0.707107" />
+		<attribute name="Scale" value="1 1 1" />
+		<attribute name="Variables" />
+		<node id="16777219">
+			<attribute name="Is Enabled" value="true" />
+			<attribute name="Name" value="Bone.001" />
+			<attribute name="Tags" />
+			<attribute name="Position" value="0 0.2 -0" />
+			<attribute name="Rotation" value="0.964291 0.264845 -0 0" />
+			<attribute name="Scale" value="1 1 1" />
+			<attribute name="Variables" />
+			<node id="16777220">
+				<attribute name="Is Enabled" value="true" />
+				<attribute name="Name" value="Bone.002" />
+				<attribute name="Tags" />
+				<attribute name="Position" value="0 0.239143 -7.39217e-09" />
+				<attribute name="Rotation" value="1 -0 -0 0" />
+				<attribute name="Scale" value="1 1 1" />
+				<attribute name="Variables" />
+			</node>
+		</node>
+	</node>
+</node>

@@ -4,13 +4,14 @@
 #include "PiecePointRow.h"
 #include "PieceManager.h"
 
+#include "NewtonPhysicsWorld.h"
 
 bool PieceAttachmentStager::AddPotentialAttachement(PiecePoint* pointA, PiecePoint* pointB)
 {
 	if (pointA == nullptr || pointB == nullptr)
 		return false;
 
-	if (potentialAttachmentMapA_.Contains(pointA) || potentialAttachmentMapB_.Contains(pointB))
+	if (potentialAttachmentMapA_.contains(pointA) || potentialAttachmentMapB_.contains(pointB))
 	{
 		//already a potential attachment.
 		return false;
@@ -25,10 +26,10 @@ bool PieceAttachmentStager::AddPotentialAttachement(PiecePoint* pointA, PiecePoi
 		pair->pieceA = pointA->GetPiece();
 		pair->pieceB = pointB->GetPiece();
 
-		potentialAttachments_.Push(pair);
+		potentialAttachments_.push_back(pair);
 
-		potentialAttachmentMapA_.Insert(Pair<PiecePoint*, AttachmentPair*>(pointA, pair));
-		potentialAttachmentMapB_.Insert(Pair<PiecePoint*, AttachmentPair*>(pointB, pair));
+		potentialAttachmentMapA_.insert_or_assign(pointA, pair);
+		potentialAttachmentMapB_.insert_or_assign(pointB, pair);
 
 		needsAnalyzed_ = true;
 
@@ -38,15 +39,15 @@ bool PieceAttachmentStager::AddPotentialAttachement(PiecePoint* pointA, PiecePoi
 
 bool PieceAttachmentStager::RemovePotentialAttachment(PiecePoint* pointA, PiecePoint* pointB)
 {
-	if (potentialAttachmentMapA_.Contains(pointA) || potentialAttachmentMapB_.Contains(pointB))
+	if (potentialAttachmentMapA_.contains(pointA) || potentialAttachmentMapB_.contains(pointB))
 	{
 		AttachmentPair* pair = potentialAttachmentMapA_[pointA];
 		delete pair;
 
-		potentialAttachmentMapA_.Erase(pointA);
-		potentialAttachmentMapB_.Erase(pointB);
+		potentialAttachmentMapA_.erase(pointA);
+		potentialAttachmentMapB_.erase(pointB);
 
-		potentialAttachments_.Remove(pair);
+		potentialAttachments_.erase(potentialAttachments_.index_of(pair));
 
 		needsAnalyzed_ = true;
 
@@ -61,16 +62,16 @@ bool PieceAttachmentStager::AttachAll()
 		return false;
 
 
-	PODVector<Piece*> pieces;
+	ea::vector<Piece*> pieces;
 
 	//un solididify pieces involved in attachement
 	for (AttachmentPair* pair : finalAttachments_)
 	{
-		if(!pieces.Contains(pair->pieceA))
-			pieces.Push(pair->pieceA);
+		if(!pieces.contains(pair->pieceA))
+			pieces.push_back(pair->pieceA);
 
-		if(!pieces.Contains(pair->pieceB))
-			pieces.Push(pair->pieceB);
+		if(!pieces.contains(pair->pieceB))
+			pieces.push_back(pair->pieceB);
 	}
 	for (Piece* piece : pieces) {
 		PieceGroup* group = piece->GetNearestPieceGroup();
@@ -84,7 +85,7 @@ bool PieceAttachmentStager::AttachAll()
 	//pieces.Front()->GetScene()->GetComponent<PieceManager>()->StripGroups(pieces);
 
 
-	pieces.Front()->GetScene()->GetComponent<PhysicsWorld>()->ForceBuild();
+	pieces.front()->GetScene()->GetComponent<NewtonPhysicsWorld>()->ForceBuild();
 
 
 
@@ -129,23 +130,23 @@ bool PieceAttachmentStager::checkDistances()
 
 bool PieceAttachmentStager::collectRows()
 {
-	rowsA.Clear();
-	rowsB.Clear();
+	rowsA.clear();
+	rowsB.clear();
 
 	for (AttachmentPair* pair : potentialAttachments_)
 	{
 		PiecePointRow* rowA = pair->pointA->GetPiece()->GetNode()->GetComponent<PiecePointRow>();
 		if (rowA)
 		{
-			if (!rowsA.Contains(rowA))
-				rowsA.Push(rowA);
+			if (!rowsA.contains(rowA))
+				rowsA.push_back(rowA);
 		}		
 		
 		PiecePointRow* rowB = pair->pointB->GetPiece()->GetNode()->GetComponent<PiecePointRow>();
 		if (rowB)
 		{
-			if (!rowsB.Contains(rowB))
-				rowsB.Push(rowB);
+			if (!rowsB.contains(rowB))
+				rowsB.push_back(rowB);
 		}
 	}
 

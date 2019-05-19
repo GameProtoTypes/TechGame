@@ -31,7 +31,7 @@ void ManipulationTool::Gather()
 	formGatherContraption();
 	
 
-	RigidBody* rigBody;
+	NewtonRigidBody* rigBody;
 
 	//re parent contraption to single body
 
@@ -46,7 +46,7 @@ void ManipulationTool::Gather()
 
 	gatheredContraptionNode_ = gatheredPieceGroup_->GetNode();
 
-	rigBody = gatheredContraptionNode_->GetComponent<RigidBody>();
+	rigBody = gatheredContraptionNode_->GetComponent<NewtonRigidBody>();
 	rigBody->SetIsKinematic(false);
 	rigBody->SetNoCollideOverride(true);
 	rigBody->SetMassScale(1.0f);
@@ -56,7 +56,7 @@ void ManipulationTool::Gather()
 
 
 
-	kinamaticConstriant_ = rigBody->GetNode()->CreateComponent<KinematicsControllerConstraint>();
+	kinamaticConstriant_ = rigBody->GetNode()->CreateComponent<NewtonKinematicsControllerConstraint>();
 
 
 
@@ -66,7 +66,7 @@ void ManipulationTool::Gather()
 
 	for (Piece* gatheredPiece : allGatherPieces_)
 	{
-		gatheredPiece->GetNode()->GetComponent<RigidBody>()->SetNoCollideOverride(true);
+		gatheredPiece->GetNode()->GetComponent<NewtonRigidBody>()->SetNoCollideOverride(true);
 	}
 
 }
@@ -89,17 +89,17 @@ void ManipulationTool::UnGather(bool freeze)
 
 		PieceManager* pieceManager = GetScene()->GetComponent<PieceManager>();
 
-		PODVector<PiecePoint*> comparisonPoints;
-		pieceManager->GetPointsAroundPoints(allGatherPiecePoints_, comparisonPoints);
+		ea::vector<PiecePoint*> comparisonPoints;
+		pieceManager->GetPointsAroundPoints(allGatherPiecePoints_, comparisonPoints, 0.2f);
 
 
 
 		//check that all other points are within attach tolerance.
 		bool attachmentPotential = false;
-		PODVector<PiecePoint*> goodPoints;
-		Vector<PiecePoint*> closestPoints;
-		closestPoints.Resize(comparisonPoints.Size());
-		for(int i = 0; i < allGatherPiecePoints_.Size(); i++) 
+		ea::vector<PiecePoint*> goodPoints;
+		ea::vector<PiecePoint*> closestPoints;
+		closestPoints.resize(comparisonPoints.size());
+		for(int i = 0; i < allGatherPiecePoints_.size(); i++) 
 		{
 			PiecePoint* point = allGatherPiecePoints_[i];
 
@@ -107,7 +107,7 @@ void ManipulationTool::UnGather(bool freeze)
 			//find closest comparison point to point.
 			PiecePoint* closest = nullptr;
 			float closestDist = M_LARGE_VALUE;
-			for (int i = 0; i < comparisonPoints.Size(); i++) {
+			for (int i = 0; i < comparisonPoints.size(); i++) {
 				
 				PiecePoint* cp = comparisonPoints[i];
 
@@ -134,8 +134,8 @@ void ManipulationTool::UnGather(bool freeze)
 
 		if (attachmentPotential)
 		{
-			SharedPtr<PieceAttachmentStager> attachStager = context_->CreateObject<PieceAttachmentStager>();
-			for (int i = 0; i < allGatherPiecePoints_.Size(); i++) {
+			ea::shared_ptr<PieceAttachmentStager> attachStager = context_->CreateObject<PieceAttachmentStager>();
+			for (int i = 0; i < allGatherPiecePoints_.size(); i++) {
 
 				if (closestPoints[i]) {
 					attachStager->AddPotentialAttachement(allGatherPiecePoints_[i], closestPoints[i]);
@@ -163,12 +163,12 @@ void ManipulationTool::UnGather(bool freeze)
 
 void ManipulationTool::AdvanceGatherPoint(bool forward /*= true*/)
 {
-	for (int i = 0; i < allGatherPiecePoints_.Size(); i++) {
+	for (int i = 0; i < allGatherPiecePoints_.size(); i++) {
 
 		if (allGatherPiecePoints_[i] == gatherPiecePoint_) {
 
 			if (forward) {
-				if (i < allGatherPiecePoints_.Size() - 1)
+				if (i < allGatherPiecePoints_.size() - 1)
 					gatherPiecePoint_ = allGatherPiecePoints_[i + 1];
 				else
 					gatherPiecePoint_ = allGatherPiecePoints_[0];
@@ -178,7 +178,7 @@ void ManipulationTool::AdvanceGatherPoint(bool forward /*= true*/)
 				if (i > 0)
 					gatherPiecePoint_ = allGatherPiecePoints_[i - 1];
 				else
-					gatherPiecePoint_ = allGatherPiecePoints_[allGatherPiecePoints_.Size() - 1];
+					gatherPiecePoint_ = allGatherPiecePoints_[allGatherPiecePoints_.size() - 1];
 			}
 
 
@@ -196,9 +196,9 @@ void ManipulationTool::RotateNextNearest()
 	if (otherPiece_ && otherPiecePoint_)
 	{
 		//get pieces from contraption.
-		Vector<Piece*> attachedPieces;
+		ea::vector<Piece*> attachedPieces;
 		otherPiece_->GetAttachedPieces(attachedPieces, true);
-		attachedPieces += otherPiece_;
+		attachedPieces.push_back(otherPiece_);
 
 		float smallestAngle = M_LARGE_VALUE;
 		Piece* smallestAnglePiece = nullptr;
@@ -244,7 +244,7 @@ Piece* ManipulationTool::GetClosestAimPiece(Vector3& worldPos)
 	RayOctreeQuery querry(Ray(node_->GetWorldPosition(), node_->GetDirection()));
 	octree->Raycast(querry);
 	
-	if (querry.result_.Size() > 1)
+	if (querry.result_.size() > 1)
 	{
 		if (querry.result_[1].node_->GetName() == "visualNode")
 		{
@@ -272,8 +272,8 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 
 
-		PODVector<Piece*> blackList;
-		blackList.Push(gatheredPiece_);
+		ea::vector<Piece*> blackList;
+		blackList.push_back(gatheredPiece_);
 		Piece* otherPiece = pieceManager_->GetClosestGlobalPiece(gatherNode_->GetWorldTransform().Translation(), blackList, 0.1f);
 		if (otherPiece && otherPiece != gatheredPiece_)
 		{
@@ -284,7 +284,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 			PiecePoint* otherPoint = pieceManager_->GetClosestPiecePoint(gatherNode_->GetWorldTransform().Translation(), otherPiece);
 
 
-			if (!allGatherPiecePoints_.Contains(otherPoint) &&
+			if (!allGatherPiecePoints_.contains(otherPoint) &&
 				otherPoint->OccupancyCompatible(gatherPiecePoint_) && 
 				gatherPiecePoint_->OccupancyCompatible(otherPoint)) {
 
@@ -348,7 +348,7 @@ void ManipulationTool::drop(bool freeze)
 	}
 	else
 	{
-		gatheredContraptionNode_->GetComponent<RigidBody>()->SetMassScale(0);
+		gatheredContraptionNode_->GetComponent<NewtonRigidBody>()->SetMassScale(0);
 
 	}
 	
@@ -360,7 +360,7 @@ void ManipulationTool::drop(bool freeze)
 
 	for (Piece* gatheredPiece : allGatherPieces_)
 	{
-		gatheredPiece->GetNode()->GetComponent<RigidBody>()->SetNoCollideOverride(false);
+		gatheredPiece->GetNode()->GetComponent<NewtonRigidBody>()->SetNoCollideOverride(false);
 	}
 	gatheredContraptionNode_ = nullptr;
 
@@ -372,18 +372,18 @@ void ManipulationTool::drop(bool freeze)
 
 void ManipulationTool::formGatherContraption()
 {
-	allGatherPieces_.Clear();
-	allGatherPiecePoints_.Clear();
+	allGatherPieces_.clear();
+	allGatherPiecePoints_.clear();
 
 	gatheredPiece_->GetNode()->GetDerivedComponents<PiecePoint>(allGatherPiecePoints_, true);
-	allGatherPieces_ += gatheredPiece_;
+	allGatherPieces_.push_back( gatheredPiece_ );
 
-	Vector<Piece*> attachedPieces;
+	ea::vector<Piece*> attachedPieces;
 	gatheredPiece_->GetAttachedPieces(attachedPieces, true);
 
 	for (Piece* piece : attachedPieces)
 	{
-		allGatherPieces_ += piece;
+		allGatherPieces_.push_back( piece );
 		piece->GetNode()->GetDerivedComponents<PiecePoint>(allGatherPiecePoints_, true, false);
 	}
 }

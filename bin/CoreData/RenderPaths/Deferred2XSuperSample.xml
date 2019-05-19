@@ -1,0 +1,25 @@
+
+<renderpath>
+    <rendertarget name="ssaa" sizemultiplier="2 2" format="rgba" filter="true" />
+    <rendertarget name="albedo" sizemultiplier="2 2" format="rgba" />
+    <rendertarget name="normal" sizemultiplier="2 2" format="rgba" />
+    <rendertarget name="depth" sizemultiplier="2 2" format="lineardepth" />
+    <command type="clear" color="fog" depth="1.0" stencil="0" output="ssaa" />
+    <command type="scenepass" pass="deferred" marktostencil="true" vertexlights="true" metadata="gbuffer">
+        <output index="0" name="ssaa" />
+        <output index="1" name="albedo" />
+        <output index="2" name="normal" />
+        <output index="3" name="depth" />
+    </command>
+    <command type="lightvolumes" vs="DeferredLight" ps="DeferredLight" output="ssaa">
+        <texture unit="albedo" name="albedo" />
+        <texture unit="normal" name="normal" />
+        <texture unit="depth" name="depth" />
+    </command>
+    <command type="scenepass" pass="postopaque" output="ssaa" />
+    <command type="scenepass" pass="alpha" vertexlights="true" sort="backtofront" metadata="alpha" output="ssaa" />
+    <command type="scenepass" pass="postalpha" sort="backtofront" output="ssaa" />
+    <command type="quad" vs="CopyFramebuffer" ps="CopyFramebuffer" output="viewport">
+        <texture unit="diffuse" name="ssaa" />
+    </command>
+</renderpath>

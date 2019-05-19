@@ -1,0 +1,4 @@
+<sound>
+    <format frequency="44100" sixteenbit="true" stereo="true" />
+    <!-- <loop enable="true" start="x" end="x" /> -->
+</sound>

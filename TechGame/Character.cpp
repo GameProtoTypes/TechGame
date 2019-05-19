@@ -9,6 +9,10 @@
 #include <Urho3D/Scene/Scene.h>
 #include <Urho3D/Scene/SceneEvents.h>
 
+
+#include "NewtonPhysicsWorld.h"
+#include "NewtonPhysicsEvents.h"
+
 #include "Character.h"
 #include "Urho3D/IO/Log.h"
 #include "Urho3D/SystemUI/SystemUI.h"
@@ -39,8 +43,8 @@ void Character::RegisterObject(Context* context)
 void Character::Start()
 {
 	// Component has been inserted into its scene node. Subscribe to events now
-	SubscribeToEvent(GetNode(), E_NODECOLLISION, URHO3D_HANDLER(Character, HandleNodeCollision));
-	SubscribeToEvent(GetNode(), E_NODECOLLISIONEND, URHO3D_HANDLER(Character, HandleNodeCollisionEnd));
+	SubscribeToEvent(GetNode(), E_NEWTON_NODECOLLISION, URHO3D_HANDLER(Character, HandleNodeCollision));
+	SubscribeToEvent(GetNode(), E_NEWTON_NODECOLLISIONEND, URHO3D_HANDLER(Character, HandleNodeCollisionEnd));
 }
 
 void Character::FixedUpdate(float timeStep)
@@ -160,9 +164,9 @@ void Character::SetCameraNode(Node* cameraNode)
 void Character::HandleNodeCollision(StringHash eventType, VariantMap& eventData)
 {
 	// Check collision contacts and see if character is standing on ground (look for a contact that has near vertical normal)
-	using namespace NodeCollision;
+	using namespace NewtonNodeCollision;
 
-	RigidBodyContactEntry* contactData = static_cast<RigidBodyContactEntry*>((eventData[NodeCollision::P_CONTACT_DATA].GetPtr()));
+	NewtonRigidBodyContactEntry* contactData = static_cast<NewtonRigidBodyContactEntry*>((eventData[NewtonNodeCollision::P_CONTACT_DATA].GetPtr()));
 
 	for (int i = 0; i < contactData->numContacts; i++)
 	{

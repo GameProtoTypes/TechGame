@@ -35,21 +35,21 @@ void PieceGroup::SetSolidified(bool solid)
 	}
 }
 
-void PieceGroup::GetPieces(PODVector<Piece*>& pieces, int levels /*= 1*/, bool singleLevel /*= false*/)
+void PieceGroup::GetPieces(ea::vector<Piece*>& pieces, int levels /*= 1*/, bool singleLevel /*= false*/)
 {
 	if (levels < 1)
 		return;
 
 	//resolve which root nodes to consider.
-	PODVector<Node*> nodes;
+	ea::vector<Node*> nodes;
 	if (!singleLevel || (singleLevel && levels == 1))
 	{
 		//add immediate children.
 		node_->GetChildrenWithComponent<Piece>(nodes, false);
 		for (Node* node : nodes) {
-			pieces += node->GetComponent<Piece>();
+			pieces.push_back( node->GetComponent<Piece>() );
 		}
-		nodes.Clear();
+		nodes.clear();
 	}
 
 	
@@ -65,7 +65,7 @@ void PieceGroup::GetPieces(PODVector<Piece*>& pieces, int levels /*= 1*/, bool s
 
 void PieceGroup::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
-	PODVector<Piece*> pieces;
+	ea::vector<Piece*> pieces;
 	GetPieces(pieces);
 	for (Piece* piece : pieces) {
 
@@ -73,7 +73,7 @@ void PieceGroup::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 	}
 
 
-	PODVector<Node*> childGroups;
+	ea::vector<Node*> childGroups;
 	node_->GetChildrenWithComponent<PieceGroup>(childGroups);
 	for (Node* childGroupNode : childGroups)
 	{

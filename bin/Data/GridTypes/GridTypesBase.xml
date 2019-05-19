@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+
+<GridShapes>
+
+	<GridShape dataName="GridEmpty">
+	</GridShape>
+
+	<!-- Special Case Terrain Shapes - the "Terrain_" is used in the WorldGenerator class. -->
+	<GridShape dataName="Terrain_Shape_Empty" catagory="Terrain">
+	</GridShape>
+	<GridShape dataName="Terrain_Shape_Empty_Surface" catagory="Terrain">
+		<SamplePoint offset="-0.5 -0.5 -0.5" solid="true"/>
+		<SamplePoint offset="0.5 -0.5 -0.5" solid="true"/>
+		<SamplePoint offset="-0.5 0.5 -0.5" solid="true"/>
+		<SamplePoint offset="0.5 0.5 -0.5" solid="true"/>
+	</GridShape>
+	<GridShape dataName="Terrain_Shape_Solid" materialFile="Materials/voxelMatOutline.xml" catagory="Terrain">
+		<ModelFile path="Models/Terrain_3.mdl"/>
+	</GridShape>
+	<!-- Ramps -->
+	<GridShape  dataName="Terrain_Shape_Ramp"  materialFile="Materials/voxelMatOutline.xml" catagory="Terrain">
+		<ModelFile path="Models/Terrain_2.mdl"/>
+	</GridShape>
+	<!-- Corners Convex -->
+	 <GridShape dataName="Terrain_Shape_CornerConvex1" materialFile="Materials/voxelMatOutline.xml" catagory="Terrain">
+		<ModelFile path="Models/Terrain_1.mdl"/>
+	</GridShape> 
+	<GridShape dataName="Terrain_Shape_CornerConvex2" materialFile="Materials/voxelMatOutline.xml" catagory="Terrain">
+		<ModelFile path="Models/Terrain_1.mdl"/>
+		<SamplePoint offset="0.5 -0.5 -0.5" solid="true"/>
+
+	</GridShape> 
+	<!-- Corners Concave -->
+	<GridShape dataName="Terrain_Shape_CornerConcave" materialFile="Materials/voxelMatOutline.xml" catagory="Terrain">
+		<ModelFile path="Models/Terrain_0.mdl"/>
+	</GridShape> 
+
+	<!-- End Special Case Terrain Shapes -->
+
+
+
+
+
+	<GridShape dataName="Tree" 
+		materialFile="Materials/voxelMatOutline.xml" catagory="Surface">
+		<ModelFile path="Models/Oak-Tree.mdl"/>
+		<!-- <ModelFile path="Models/Tree-1.mdl"/> -->
+		<Tag>tree</Tag>
+	</GridShape>
+		<GridShape dataName="firepit"
+		materialFile="Materials/voxelMatOutline.xml">
+		<ModelFile path="Models/Campfire.mdl"/>
+	</GridShape>
+			<GridShape dataName="tent"
+		materialFile="Materials/voxelMatOutline.xml">
+		<ModelFile path="Models/Tent-Flat-Door_cropped.mdl"/>
+	</GridShape>
+	<GridShape dataName="surfaceRocks" 
+		materialFile="Materials/voxelMatOutline.xml" catagory="Surface">
+		<ModelFile path="Models/rock.mdl"/>
+	</GridShape>
+	<GridShape dataName="pebbles" 
+		materialFile="Materials/voxelMatOutline.xml" catagory="Surface">
+		<ModelFile path="Models/small_top_noise_sparse.mdl"/>
+		<ModelFile path="Models/small_top_noise_sparse_2.mdl"/>
+		<ModelFile path="Models/small_top_noise_sparse_3.mdl"/>
+	</GridShape>
+
+
+	<GridShape dataName="berryBush" 
+		materialFile="Materials/voxelMatOutline.xml" catagory="Surface">
+		<ModelFile path="Models/berryBush.mdl"/>
+	</GridShape>
+
+
+
+</GridShapes>
+

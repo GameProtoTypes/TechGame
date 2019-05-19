@@ -3,6 +3,11 @@
 #include "Piece.h"
 #include "PieceManager.h"
 
+#include "NewtonPhysicsWorld.h"
+#include "NewtonConstraint.h"
+#include "NewtonSliderConstraint.h"
+#include "NewtonFullyFixedConstraint.h"
+#include "NewtonHingeConstraint.h"
 
 bool PiecePointRow::RowsAttachCompatable(PiecePointRow* rowA, PiecePointRow* rowB)
 {
@@ -22,12 +27,12 @@ void PiecePointRow::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
 	BoundingBox bounds;
 
-	for (int i = 0; i < points_.Size(); i++)
+	for (int i = 0; i < points_.size(); i++)
 	{
 		PiecePoint* point = points_[i];
 
 
-		Color c = Color(float(points_.Size() - 1 - i) / (points_.Size() - 1), float(i) / (points_.Size() - 1), 0.0);
+		Color c = Color(float(points_.size() - 1 - i) / (points_.size() - 1), float(i) / (points_.size() - 1), 0.0);
 
 		debug->AddSphere(Sphere(point->GetNode()->GetWorldPosition(), 0.125*0.5f), c, depthTest);
 
@@ -39,9 +44,9 @@ bool PiecePointRow::CheckValid()
 {
 
 
-	for (int i = 0; i < points_.Size(); i++) {
+	for (int i = 0; i < points_.size(); i++) {
 		//no endCap flags allowed mid row.
-		if (i != 0 && i != points_.Size() - 1)
+		if (i != 0 && i != points_.size() - 1)
 		{
 			if (points_[i]->isEndCap_)
 				return false;
@@ -53,7 +58,7 @@ bool PiecePointRow::CheckValid()
 
 void PiecePointRow::FormPointDirectionsOnEndPoints()
 {
-	if (points_.Size() <= 1)
+	if (points_.size() <= 1)
 		return;
 
 	//first find center of row in real coords
@@ -68,21 +73,21 @@ void PiecePointRow::FormPointDirectionsOnEndPoints()
 
 void PiecePointRow::PushBack(PiecePoint* point)
 {
-	if (!points_.Contains(point)) {
-		points_.Push(point);
-		point->row_ = WeakPtr<PiecePointRow>(this);
+	if (!points_.contains(point)) {
+		points_.push_back(point);
+		point->row_ = ea::weak_ptr<PiecePointRow>(this);
 	}
 }
 
 void PiecePointRow::GetEndPoints(PiecePoint*& pointA, PiecePoint*& pointB)
 {
-	pointA = points_.Front();
-	pointB = points_.Back();
+	pointA = points_.front();
+	pointB = points_.back();
 }
 
 Urho3D::Vector3 PiecePointRow::GetRowDirectionLocal()
 {
-	if (points_.Size() <= 1)
+	if (points_.size() <= 1)
 		return Vector3::ZERO;
 
 	PiecePoint* pointA;
@@ -100,7 +105,7 @@ Urho3D::Vector3 PiecePointRow::GetRowDirectionWorld()
 
 bool PiecePointRow::IsEndPoint(PiecePoint* point)
 {
-	if (point == points_.Front() || point == points_.Back())
+	if (point == points_.front() || point == points_.back())
 		return true;
 	else
 		return false;
@@ -111,13 +116,13 @@ PiecePoint* PiecePointRow::GetPointNextToEndPoint(PiecePoint* endPoint)
 	if (!endPoint->isEndCap_)
 		return nullptr;
 
-	if (endPoint == points_.Front())
+	if (endPoint == points_.front())
 	{
 		return points_[1];
 	}
-	else if (endPoint == points_.Back())
+	else if (endPoint == points_.back())
 	{
-		return points_[points_.Size() - 2];
+		return points_[points_.size() - 2];
 	}
 
 	return nullptr;
@@ -132,7 +137,7 @@ Urho3D::Vector3 PiecePointRow::GetLocalCenter()
 	{
 		center += point->GetNode()->GetPosition();
 	}
-	center *= 1.0f / float(points_.Size());
+	center *= 1.0f / float(points_.size());
 
 	return center;
 }
@@ -144,7 +149,7 @@ Urho3D::Vector3 PiecePointRow::GetWorldCenter()
 
 bool PiecePointRow::AttachedToRow(PiecePointRow* row)
 {
-	for (int i = 0; i < attachedRows_.Size(); i++) {
+	for (int i = 0; i < attachedRows_.size(); i++) {
 		if (attachedRows_[i].rowA_ == row)
 			return true;
 	}
@@ -153,16 +158,16 @@ bool PiecePointRow::AttachedToRow(PiecePointRow* row)
 
 bool PiecePointRow::DetachFrom(PiecePointRow* otherRow)
 {
-	for (int i = 0; i < attachedRows_.Size(); i++) {
+	for (int i = 0; i < attachedRows_.size(); i++) {
 		
 		if (attachedRows_[i].rowA_ == otherRow)
 		{
-			if (!attachedRows_[i].constraint_.Expired())
+			if (!attachedRows_[i].constraint_.expired())
 			{
 				attachedRows_[i].constraint_->Remove();
 			}
 
-			attachedRows_.Erase(i);
+			attachedRows_.erase(i);
 			return true;
 		}
 
@@ -173,14 +178,14 @@ bool PiecePointRow::DetachFrom(PiecePointRow* otherRow)
 
 bool PiecePointRow::DetachAll()
 {
-	for (int i = 0; i < attachedRows_.Size(); i++) {
-		if (!attachedRows_[i].constraint_.Expired())
+	for (int i = 0; i < attachedRows_.size(); i++) {
+		if (!attachedRows_[i].constraint_.expired())
 		{
 			attachedRows_[i].constraint_->Remove();
 		}
 	}
 
-	attachedRows_.Clear();
+	attachedRows_.clear();
 
 	return true;
 }
@@ -234,13 +239,13 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 	Piece* theRodPiece = theRodRow->GetPiece();
 
 
-	RigidBody* holeBody = theHolePiece->GetComponent<RigidBody>();
-	RigidBody* rodBody = theRodPiece->GetComponent<RigidBody>();
+	NewtonRigidBody* holeBody = theHolePiece->GetComponent<NewtonRigidBody>();
+	NewtonRigidBody* rodBody = theRodPiece->GetComponent<NewtonRigidBody>();
 
 
 
 		//wait for update finished because we need to do some manual rigidbody moving and hacking.
-		holeBody->GetScene()->GetComponent<PhysicsWorld>()->WaitForUpdateFinished();
+		holeBody->GetScene()->GetComponent<NewtonPhysicsWorld>()->WaitForUpdateFinished();
 
 		Matrix3x4 origHoldBodyTransform = holeBody->GetWorldTransform();
 		Matrix3x4 origRodBodyTransform = rodBody->GetWorldTransform();
@@ -251,7 +256,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 		PieceManager* pieceManager = holeBody->GetScene()->GetComponent<PieceManager>();
 
 		//create the constraint
-		Constraint* constraint = nullptr;
+		NewtonConstraint* constraint = nullptr;
 		if (theRodRow->GetRowType() == PiecePointRow::RowType_RodHard || theHoleRow->GetRowType() == PiecePointRow::RowType_HoleTight)
 		{
 
@@ -275,7 +280,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 
 
-			constraint = holeBody->GetNode()->CreateComponent<FullyFixedConstraint>();
+			constraint = holeBody->GetNode()->CreateComponent<NewtonFullyFixedConstraint>();
 
 
 			constraint->SetOtherBody(rodBody);
@@ -326,15 +331,15 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 			if (!attachAsFullRow) {
 
-				constraint = holeBody->GetNode()->CreateComponent<SliderConstraint>();
-				static_cast<SliderConstraint*>(constraint)->SetTwistLowerLimitEnable(false);
-				static_cast<SliderConstraint*>(constraint)->SetTwistUpperLimitEnable(false);
-				static_cast<SliderConstraint*>(constraint)->SetEnableSliderLimits(true, true);
+				constraint = holeBody->GetNode()->CreateComponent<NewtonSliderConstraint>();
+				static_cast<NewtonSliderConstraint*>(constraint)->SetTwistLowerLimitEnable(false);
+				static_cast<NewtonSliderConstraint*>(constraint)->SetTwistUpperLimitEnable(false);
+				static_cast<NewtonSliderConstraint*>(constraint)->SetEnableSliderLimits(true, true);
 			}
 			else
 			{
-				constraint = holeBody->GetNode()->CreateComponent<HingeConstraint>();
-				static_cast<HingeConstraint*>(constraint)->SetEnableLimits(false);
+				constraint = holeBody->GetNode()->CreateComponent<NewtonHingeConstraint>();
+				static_cast<NewtonHingeConstraint*>(constraint)->SetEnableLimits(false);
 			}
 
 				//compute slide limits
@@ -402,8 +407,8 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 				const float slopDist = 0.01f;
 				if (!attachAsFullRow) {
-					static_cast<SliderConstraint*>(constraint)->SetSliderLimits(slideLimits.x_ - slopDist, slideLimits.y_ + slopDist);
-					static_cast<SliderConstraint*>(constraint)->SetSliderFriction(0.01f);
+					static_cast<NewtonSliderConstraint*>(constraint)->SetSliderLimits(slideLimits.x_ - slopDist, slideLimits.y_ + slopDist);
+					static_cast<NewtonSliderConstraint*>(constraint)->SetSliderFriction(0.01f);
 				}
 
 
@@ -439,12 +444,12 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 		attachment.rowB_ = theRodRow;
 		attachment.constraint_ = constraint;
 
-		theRodRow->attachedRows_.Push(attachment);
+		theRodRow->attachedRows_.push_back(attachment);
 		attachment.rowA_ = theRodRow;
 		attachment.rowB_ = theHoleRow;
 		attachment.pointA_ = pointB;
 		attachment.pointB = pointA;
-		theHoleRow->attachedRows_.Push(attachment);
+		theHoleRow->attachedRows_.push_back(attachment);
 
 		rowA->UpdatePointOccupancies();
 		rowB->UpdatePointOccupancies();
@@ -457,7 +462,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 bool PiecePointRow::OptimizeFullRow(PiecePointRow* row)
 {
-	Vector<PiecePoint*> points = row->GetPoints();
+	ea::vector<PiecePoint*> points = row->GetPoints();
 
 	bool fullyOccupied = true;
 	for (PiecePoint* point : points)
@@ -475,7 +480,7 @@ bool PiecePointRow::OptimizeFullRow(PiecePointRow* row)
 				if (attachment.rowB_->GetGeneralRowType() != RowTypeGeneral_Hole)
 					continue;
 
-				float curSliderPos = static_cast<SliderConstraint*>(attachment.constraint_.Get())->GetSliderPosition();
+				float curSliderPos = static_cast<NewtonSliderConstraint*>(attachment.constraint_.get())->GetSliderPosition();
 
 				curSliderPos = RoundToNearestMultiple(curSliderPos, RowPointDistance());
 
@@ -545,7 +550,7 @@ void PiecePointRow::HandleUpdate(StringHash event, VariantMap& eventData)
 
 void PiecePointRow::UpdatePointOccupancies()
 {
-	if (!attachedRows_.Size())
+	if (!attachedRows_.size())
 		return;
 
 	if (rowType_ == RowType_RodHard || rowType_ == RowType_HoleTight)
@@ -559,11 +564,11 @@ void PiecePointRow::UpdatePointOccupancies()
 		point->occupiedPoint_ = nullptr;
 	}
 
-	Vector<PiecePoint*> otherPoints;
+	ea::vector<PiecePoint*> otherPoints;
 
 	for (RowAttachement& row : attachedRows_)
 	{
-		otherPoints.Push(row.rowA_->points_);	
+		otherPoints.push_back(row.rowA_->points_);	
 	}
 
 	bool aPointIsStillOccupied = false;

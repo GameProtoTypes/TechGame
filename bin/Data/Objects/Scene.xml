@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<node id="1">
+	<attribute name="Is Enabled" value="true" />
+	<attribute name="Name" value="Scene" />
+	<attribute name="Tags" />
+	<attribute name="Variables" />
+	<node id="2">
+		<attribute name="Is Enabled" value="true" />
+		<attribute name="Name" value="Shape_IndexedFaceSet.002" />
+		<attribute name="Tags" />
+		<attribute name="Variables" />
+		<component id="1" type="StaticModel">
+			<attribute name="Model" value="Model;Models/Shape_IndexedFaceSet.002.mdl" />
+			<attribute name="Material" value="Material;" />
+		</component>
+		<node id="3">
+			<attribute name="Is Enabled" value="true" />
+			<attribute name="Name" value="Shape_IndexedFaceSet" />
+			<attribute name="Tags" />
+			<attribute name="Variables" />
+			<component id="2" type="StaticModel">
+				<attribute name="Model" value="Model;Models/Shape_IndexedFaceSet.mdl" />
+				<attribute name="Material" value="Material;" />
+			</component>
+		</node>
+		<node id="4">
+			<attribute name="Is Enabled" value="true" />
+			<attribute name="Name" value="Shape_IndexedFaceSet.001" />
+			<attribute name="Tags" />
+			<attribute name="Variables" />
+			<component id="3" type="StaticModel">
+				<attribute name="Model" value="Model;Models/Shape_IndexedFaceSet.001.mdl" />
+				<attribute name="Material" value="Material;" />
+			</component>
+		</node>
+	</node>
+</node>

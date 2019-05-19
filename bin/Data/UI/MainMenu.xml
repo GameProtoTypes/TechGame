@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<element type="Window">
+	<attribute name="Name" value="MainMenu" />
+	<attribute name="Position" value="453 302" />
+	<attribute name="Size" value="231 400" />
+	<attribute name="Pivot" value="0 0" />
+	<attribute name="Color" value="0.85 0.85 0.85 1" />
+	<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+	<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+	<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+	<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+	<attribute name="Layout Mode" value="Vertical" />
+	<attribute name="Layout Spacing" value="38" />
+	<attribute name="Layout Border" value="9 7 10 7" />
+	<attribute name="Is Movable" value="true" />
+	<element type="Button">
+		<attribute name="Name" value="NewGameButton" />
+		<attribute name="Pivot" value="0 0" />
+		<attribute name="Color" value="-1.36 1 0.76 1" />
+		<attribute name="Top Left Color" value="-1.36 1 0.76 1" />
+		<attribute name="Top Right Color" value="-1.36 1 0.76 1" />
+		<attribute name="Bottom Left Color" value="-1.36 1 0.76 1" />
+		<attribute name="Bottom Right Color" value="-1.36 1 0.76 1" />
+		<element type="Text">
+			<attribute name="Min Anchor" value="0.5 0.5" />
+			<attribute name="Max Anchor" value="0.5 0.5" />
+			<attribute name="Pivot" value="0.5 0.5" />
+			<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Font" value="Font;Fonts/BlueHighway.ttf" />
+			<attribute name="Text" value="New Game" />
+		</element>
+	</element>
+	<element type="Button">
+		<attribute name="Name" value="LoadGameButton" />
+		<attribute name="Pivot" value="0 0" />
+		<attribute name="Color" value="0.33 1 1 1" />
+		<attribute name="Top Left Color" value="0.33 1 1 1" />
+		<attribute name="Top Right Color" value="0.33 1 1 1" />
+		<attribute name="Bottom Left Color" value="0.33 1 1 1" />
+		<attribute name="Bottom Right Color" value="0.33 1 1 1" />
+		<element type="Text">
+			<attribute name="Min Anchor" value="0.5 0.5" />
+			<attribute name="Max Anchor" value="0.5 0.5" />
+			<attribute name="Pivot" value="0.5 0.5" />
+			<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Font" value="Font;Fonts/BlueHighway.ttf" />
+			<attribute name="Text" value="LoadGame" />
+		</element>
+	</element>
+	<element type="Button">
+		<attribute name="Name" value="SaveGameButton" />
+		<attribute name="Pivot" value="0 0" />
+		<attribute name="Color" value="0 0.7 0 1" />
+		<attribute name="Top Left Color" value="0 0.7 0 1" />
+		<attribute name="Top Right Color" value="0 0.7 0 1" />
+		<attribute name="Bottom Left Color" value="0 0.7 0 1" />
+		<attribute name="Bottom Right Color" value="0 0.7 0 1" />
+		<element type="Text">
+			<attribute name="Min Anchor" value="0.5 0.5" />
+			<attribute name="Max Anchor" value="0.5 0.5" />
+			<attribute name="Pivot" value="0.5 0.5" />
+			<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Font" value="Font;Fonts/BlueHighway.ttf" />
+			<attribute name="Text" value="Save Game" />
+		</element>
+	</element>
+	<element type="Button">
+		<attribute name="Name" value="quitButton" />
+		<attribute name="Pivot" value="0 0" />
+		<attribute name="Color" value="1 0 0 1" />
+		<attribute name="Top Left Color" value="1 0 0 1" />
+		<attribute name="Top Right Color" value="1 0 0 1" />
+		<attribute name="Bottom Left Color" value="1 0 0 1" />
+		<attribute name="Bottom Right Color" value="1 0 0 1" />
+		<element type="Text">
+			<attribute name="Min Anchor" value="0.5 0.5" />
+			<attribute name="Max Anchor" value="0.5 0.5" />
+			<attribute name="Pivot" value="0.5 0.5" />
+			<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Font" value="Font;Fonts/BlueHighway.ttf" />
+			<attribute name="Text" value="Quit" />
+		</element>
+	</element>
+</element>

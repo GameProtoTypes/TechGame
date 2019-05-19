@@ -13,6 +13,9 @@
 #include "NewtonCollisionShape.h"
 #include "NewtonCollisionShapesDerived.h"
 #include "Newton6DOFConstraint.h"
+#include "NewtonPhysicsEvents.h"
+
+#include "VisualDebugger.h"
 
 void TechGame::Setup()
 {
@@ -37,6 +40,8 @@ void TechGame::Setup()
 	PieceGroup::RegisterObject(context_);
 	PiecePoint::RegisterObject(context_);
 	PiecePointRow::RegisterObject(context_);
+
+	RegisterNewtonPhysicsLibrary(context_);
 }
 
 void TechGame::Start()
@@ -159,8 +164,8 @@ void TechGame::SubscribeToEvents()
 	SubscribeToEvent(E_POSTRENDERUPDATE, URHO3D_HANDLER(TechGame, HandlePostRenderUpdate));
 
 
-	SubscribeToEvent(E_NODECOLLISIONSTART, URHO3D_HANDLER(TechGame, HandleNodeCollisionStart));
-	SubscribeToEvent(E_NODECOLLISIONEND, URHO3D_HANDLER(TechGame, HandleNodeCollisionEnd));
+	SubscribeToEvent(E_NEWTON_NODECOLLISIONSTART, URHO3D_HANDLER(TechGame, HandleNodeCollisionStart));
+	SubscribeToEvent(E_NEWTON_NODECOLLISIONEND, URHO3D_HANDLER(TechGame, HandleNodeCollisionEnd));
 
 
 
@@ -521,10 +526,10 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 
 void TechGame::HandleNodeCollisionStart(StringHash eventType, VariantMap& eventData)
 {
-	NewtonRigidBody* bodyA = static_cast<NewtonRigidBody*>(eventData[PhysicsCollisionStart::P_BODYA].GetPtr());
-	NewtonRigidBody* bodyB = static_cast<NewtonRigidBody*>(eventData[PhysicsCollisionStart::P_BODYB].GetPtr());
+	NewtonRigidBody* bodyA = static_cast<NewtonRigidBody*>(eventData[NewtonPhysicsCollisionStart::P_BODYA].GetPtr());
+	NewtonRigidBody* bodyB = static_cast<NewtonRigidBody*>(eventData[NewtonPhysicsCollisionStart::P_BODYB].GetPtr());
 
-	RigidBodyContactEntry* contactData = static_cast<RigidBodyContactEntry*>(eventData[PhysicsCollisionStart::P_CONTACT_DATA].GetPtr());
+	NewtonRigidBodyContactEntry* contactData = static_cast<NewtonRigidBodyContactEntry*>(eventData[NewtonPhysicsCollisionStart::P_CONTACT_DATA].GetPtr());
 
 	float largestForce = 0.0f;
 	Vector3 position;

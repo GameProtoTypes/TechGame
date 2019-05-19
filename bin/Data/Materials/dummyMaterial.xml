@@ -1,0 +1,6 @@
+<material>
+	<technique name="Techniques/Diff.xml"/>
+	<texture name="Textures/ground_size_8_color_1_shape_0_flipx_0_flipy_0_flipz_0_noiseId_0.png" unit="diffuse"/>
+	<parameter name="MatDiffColor" value="1 1 1 1"/>
+	<parameter name="MatSpecColor" value="0 0 0 50"/>
+</material>

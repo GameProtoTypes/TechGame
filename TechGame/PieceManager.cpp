@@ -4,13 +4,13 @@
 #include "PiecePointRow.h"
 
 
-
+#include "EASTL/sort.h"
 
 PiecePoint* PieceManager::GetClosestPiecePoint(Vector3 worldPosition, Piece* piece)
 {
-	PODVector<PiecePoint*> points;
+	ea::vector<PiecePoint*> points;
 	piece->GetNode()->GetDerivedComponents<PiecePoint>(points, true);
-	if (points.Size()) {
+	if (points.size()) {
 
 		PiecePoint* closest = nullptr;
 		float closestDist = M_LARGE_VALUE;
@@ -30,11 +30,11 @@ PiecePoint* PieceManager::GetClosestPiecePoint(Vector3 worldPosition, Piece* pie
 	}
 }
 
-Piece* PieceManager::GetClosestGlobalPiece(Vector3 worldPosition, PODVector<Piece*> blacklist, float radius)
+Piece* PieceManager::GetClosestGlobalPiece(Vector3 worldPosition, ea::vector<Piece*> blacklist, float radius)
 {
 	Octree* octTree = GetScene()->GetComponent<Octree>();
 
-	PODVector<Drawable*> result;
+	ea::vector<Drawable*> result;
 	SphereOctreeQuery query(result, Sphere(worldPosition, radius));
 	octTree->GetDrawables(query);
 
@@ -46,7 +46,7 @@ Piece* PieceManager::GetClosestGlobalPiece(Vector3 worldPosition, PODVector<Piec
 
 		Piece* piece = drawable->GetNode()->GetParent()->GetComponent<Piece>(false);
 
-		if (piece && !blacklist.Contains(piece)) {
+		if (piece && !blacklist.contains(piece)) {
 			float delta = (piece->GetNode()->GetWorldPosition() - worldPosition).Length();
 			if (delta < closestDist)
 			{
@@ -61,7 +61,7 @@ Piece* PieceManager::GetClosestGlobalPiece(Vector3 worldPosition, PODVector<Piec
 
 PiecePoint* PieceManager::GetClosestGlobalPiecePoint(Vector3 worldPosition)
 {
-	PODVector<Piece*> blacklist;
+	ea::vector<Piece*> blacklist;
 	Piece* piece = GetClosestGlobalPiece(worldPosition, blacklist, 5);
 
 	if (piece)
@@ -72,11 +72,11 @@ PiecePoint* PieceManager::GetClosestGlobalPiecePoint(Vector3 worldPosition)
 		return nullptr;
 }
 
-void PieceManager::GetPointsInRadius(PODVector<PiecePoint*>& points, Vector3 worldPosition, float radius)
+void PieceManager::GetPointsInRadius(ea::vector<PiecePoint*>& points, Vector3 worldPosition, float radius)
 {
 	Octree* octTree = GetScene()->GetComponent<Octree>();
 
-	PODVector<Drawable*> result;
+	ea::vector<Drawable*> result;
 	SphereOctreeQuery query(result, Sphere(worldPosition, radius));
 	octTree->GetDrawables(query);
 
@@ -85,7 +85,7 @@ void PieceManager::GetPointsInRadius(PODVector<PiecePoint*>& points, Vector3 wor
 		Piece* piece = drawable->GetNode()->GetParent()->GetComponent<Piece>(false);
 		if (piece)
 		{
-			PODVector<PiecePoint*> pointsInPiece;
+			ea::vector<PiecePoint*> pointsInPiece;
 			piece->GetPoints(pointsInPiece);
 
 			for (PiecePoint* point : pointsInPiece) {
@@ -93,7 +93,7 @@ void PieceManager::GetPointsInRadius(PODVector<PiecePoint*>& points, Vector3 wor
 				float dist = (point->GetNode()->GetWorldPosition() - worldPosition).Length();
 
 				if (dist <= radius) {
-					points += point;
+					points.push_back(point);
 				}
 			}
 		}
@@ -107,30 +107,31 @@ void PieceManager::GetPointsInRadius(PODVector<PiecePoint*>& points, Vector3 wor
 
 
 
-void PieceManager::GetPointsAroundPoints(PODVector<PiecePoint*>& inPieces, PODVector<PiecePoint*>& outPieces, float radius)
+void PieceManager::GetPointsAroundPoints(ea::vector<PiecePoint*>& inPieces, ea::vector<PiecePoint*>& outPieces, float radius)
 {
-	outPieces.Clear();
+	outPieces.clear();
 
 	//Form a list of all potential points that we could attach too.
-	PODVector<PiecePoint*> comparisonPoints;
+	ea::vector<PiecePoint*> comparisonPoints;
 	for (PiecePoint* point : inPieces) {
 		GetPointsInRadius(comparisonPoints, point->GetNode()->GetWorldPosition(), radius);
 	}
 
-	std::vector<PiecePoint*> finalList;
+	ea::vector<PiecePoint*> finalList;
 	for (PiecePoint* point : comparisonPoints)
 	{
-		if(!inPieces.Contains(point))
+		if(!inPieces.contains(point))
 			finalList.push_back(point);
 	}
 
 	//remove duplicates
-	std::sort(finalList.begin(), finalList.end());
-	finalList.erase(unique(finalList.begin(), finalList.end()), finalList.end());
+
+	eastl::sort(finalList.begin(), finalList.end());
+	finalList.erase(ea::unique(finalList.begin(), finalList.end()), finalList.end());
 
 	for (PiecePoint* piece : finalList)
 	{
-		outPieces += piece;
+		outPieces.push_back(piece);
 	}
 }
 
@@ -162,12 +163,12 @@ void PieceManager::GetPointsAroundPoints(PODVector<PiecePoint*>& inPieces, PODVe
 
 
 
-PieceGroup* PieceManager::AddPiecesToNewGroup(PODVector<Piece*> pieces)
+PieceGroup* PieceManager::AddPiecesToNewGroup(ea::vector<Piece*> pieces)
 {
-	PODVector<Node*> nodes;
+	ea::vector<Node*> nodes;
 	for (Piece* pc : pieces)
 	{
-		nodes += pc->GetNode();
+		nodes.push_back(pc->GetNode());
 	}
 
 	Node* commonParent = GetCommonParentWithComponent(nodes);
@@ -208,8 +209,8 @@ PieceGroup* PieceManager::AddPiecesToNewGroup(PODVector<Piece*> pieces)
 
 void PieceManager::MovePieceToGroup(Piece* piece, PieceGroup* group)
 {
-	PODVector<Piece*> list;
-	list += piece;
+	ea::vector<Piece*> list;
+	list.push_back(piece);
 
 	Node* oldParent = piece->GetNode()->GetParent();
 	piece->GetNode()->SetParent(group->GetNode());
@@ -226,12 +227,12 @@ void PieceManager::MovePieceToGroup(Piece* piece, PieceGroup* group)
 	RebuildSolidifies();
 }
 
-PieceGroup* PieceManager::GetCommonGroup(PODVector<Piece*> pieces)
+PieceGroup* PieceManager::GetCommonGroup(ea::vector<Piece*> pieces)
 {
-	PODVector<Node*> nodes;
+	ea::vector<Node*> nodes;
 	for (Piece* piece : pieces)
 	{
-		nodes += piece->GetNode();
+		nodes.push_back(piece->GetNode());
 	}
 
 	Node* commonGroupNode = GetCommonParentWithComponent(nodes, PieceGroup::GetTypeStatic());
@@ -241,12 +242,12 @@ PieceGroup* PieceManager::GetCommonGroup(PODVector<Piece*> pieces)
 	return nullptr;
 }
 
-void PieceManager::RemovePiecesFromFirstCommonGroup(PODVector<Piece*> pieces)
+void PieceManager::RemovePiecesFromFirstCommonGroup(ea::vector<Piece*> pieces)
 {
-	PODVector<Node*> nodes;
+	ea::vector<Node*> nodes;
 	for (Piece* pc : pieces)
 	{
-		nodes += pc->GetNode();
+		nodes.push_back(pc->GetNode());
 	}
 	Node* commonParent = GetCommonParentWithComponent(nodes, PieceGroup::GetTypeStatic());
 
@@ -262,12 +263,12 @@ void PieceManager::RemovePiecesFromFirstCommonGroup(PODVector<Piece*> pieces)
 	RebuildSolidifies();
 }
 
-void PieceManager::StripGroups(PODVector<Piece*> pieces)
+void PieceManager::StripGroups(ea::vector<Piece*> pieces)
 {
-	PODVector<Node*> oldParents;
+	ea::vector<Node*> oldParents;
 	for (Piece* pc : pieces)
 	{
-		oldParents += pc->GetNode()->GetParent();
+		oldParents.push_back(pc->GetNode()->GetParent());
 		pc->GetNode()->SetParent(GetScene());
 	}
 
@@ -287,7 +288,7 @@ void PieceManager::StripGroups(PODVector<Piece*> pieces)
 
 void PieceManager::RemoveGroup(PieceGroup* group)
 {
-	PODVector<Node*> children;
+	ea::vector<Node*> children;
 	group->GetNode()->GetChildren(children);
 
 	Node* parent = group->GetNode()->GetParent();
@@ -323,7 +324,7 @@ void PieceManager::RebuildSolidifiesSub(Node* startNode, bool branchSolidified)
 	}
 
 
-	PODVector<Node*> children;
+	ea::vector<Node*> children;
 	startNode->GetChildren(children);
 
 	for (Node* child : children)
@@ -378,40 +379,40 @@ void PieceManager::FormGroups(Piece* startingPiece)
 	//}
 }
 
-void PieceManager::FindLoops(Piece* piece, Vector<Vector<Piece*>>& loops) {
-	Vector<Piece*> traverseList;
+void PieceManager::FindLoops(Piece* piece, ea::vector<ea::vector<Piece*>>& loops) {
+	ea::vector<Piece*> traverseList;
 	FindLoops(piece, loops, traverseList, 0);
 }
 
-void PieceManager::FindLoops(Piece* piece, Vector<Vector<Piece*>>& loops, Vector<Piece*>& traverseList, int depth)
+void PieceManager::FindLoops(Piece* piece, ea::vector<ea::vector<Piece*>>& loops, ea::vector<Piece*>& traverseList, int depth)
 {
 
 	//if the traverse list contains the piece - we may have detected a loop.
-	if (traverseList.Contains(piece)) {
-		int loopSize = traverseList.IndexOf(piece) + 1;
+	if (traverseList.contains(piece)) {
+		int loopSize = traverseList.index_of(piece) + 1;
 
 		if (loopSize >= 3)
 		{
-			loops.Push(Vector<Piece*>());
+			loops.push_back(ea::vector<Piece*>());
 			//its a cycle.  count how far back the piece is in the visited list to determine how long the cycle is and what nodes are present.
-			for (int i = traverseList.IndexOf(piece); i >= 0; i--) {
+			for (int i = traverseList.index_of(piece); i >= 0; i--) {
 				//URHO3D_LOGINFO(String((int)(void*)traverseList[i]));
-				loops.Back().Push(traverseList[i]);
+				loops.back().push_back(traverseList[i]);
 			}
 
 		}
 		return;
 	}
 
-	traverseList.Insert(0, piece);
+	traverseList.insert(traverseList.begin(), piece);
 
-	PODVector<PiecePointRow*> attachedRows;
+	ea::vector<PiecePointRow*> attachedRows;
 	piece->GetAttachedRows(attachedRows);
 
 	for (PiecePointRow* row : attachedRows) {
 		FindLoops(row->GetPiece(), loops, traverseList, depth + 1);
 	}
-	traverseList.Erase(0);
+	traverseList.erase(0);
 }
 
 

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<node id="16777217">
+	<attribute name="Is Enabled" value="true" />
+	<attribute name="Name" value="" />
+	<attribute name="Tags" />
+	<attribute name="Position" value="0 -3.41302 8.35729" />
+	<attribute name="Rotation" value="1 0 0 0" />
+	<attribute name="Scale" value="1 1 1" />
+	<attribute name="Variables" />
+	<component type="StaticModel" id="16777228">
+		<attribute name="Model" value="Model;Models/simple_ring1.mdl" />
+		<attribute name="Material" value="Material;Materials/voxelMatUnlit.xml" />
+	</component>
+</node>

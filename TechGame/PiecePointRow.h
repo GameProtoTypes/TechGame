@@ -1,8 +1,11 @@
 #pragma once
 #include "Urho3D/Urho3DAll.h"
 
+#include "NewtonConstraint.h"
+
 class PiecePoint;
 class Piece;
+
 class PiecePointRow : public Component
 {
 	URHO3D_OBJECT(PiecePointRow, Component);
@@ -21,11 +24,11 @@ public:
 	};
 
 	struct RowAttachement {
-		WeakPtr<PiecePoint> pointA_ = nullptr;
-		WeakPtr<PiecePoint> pointB = nullptr;
-		WeakPtr<PiecePointRow> rowA_ = nullptr;
-		WeakPtr<PiecePointRow> rowB_ = nullptr;
-		WeakPtr<Constraint> constraint_ = nullptr;
+		ea::weak_ptr<PiecePoint> pointA_;
+		ea::weak_ptr<PiecePoint> pointB ;
+		ea::weak_ptr<PiecePointRow> rowA_ ;
+		ea::weak_ptr<PiecePointRow> rowB_ ;
+		ea::weak_ptr<NewtonConstraint> constraint_ ;
 	};
 
 
@@ -101,12 +104,12 @@ public:
 
 	bool IsEndPoint(PiecePoint* point);
 
-	int Count() { return points_.Size(); }
+	int Count() { return points_.size(); }
 
 	///return the next point going inside the row from the given endPoint.
 	PiecePoint* GetPointNextToEndPoint(PiecePoint* endPoint);
 
-	const Vector<PiecePoint*>& GetPoints() { return points_; }
+	const ea::vector<PiecePoint*>& GetPoints() { return points_; }
 
 	Vector3 GetLocalCenter();
 
@@ -122,9 +125,9 @@ public:
 
 
 
-	Vector<PiecePoint*> points_;
+	ea::vector<PiecePoint*> points_;
 
-	Vector<RowAttachement> attachedRows_;
+	ea::vector<RowAttachement> attachedRows_;
 protected:
 
 	void HandleUpdate(StringHash event, VariantMap& eventData);

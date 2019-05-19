@@ -3,21 +3,23 @@
 #include "Piece.h"
 #include "PiecePointRow.h"
 
+#include "NewtonCollisionShapesDerived.h"
 
-Node* TechGame::CreatePiece(Node* parent, String name, bool loadExisting)
+
+Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 {
 	Node* root;
 
 	if (loadExisting)
 	{
-		SharedPtr<File> file = SharedPtr<File>(new File(context_));
+		ea::shared_ptr<File> file = ea::shared_ptr<File>(new File(context_));
 		file->Open(name + ".xml", FILE_READ);
 		root = scene_->InstantiateXML(*file, Vector3::ZERO, Quaternion::IDENTITY);
 	}
 	else {
 		root = parent->CreateChild();
 
-		auto* body = root->CreateComponent<RigidBody>();
+		auto* body = root->CreateComponent<NewtonRigidBody>();
 		Node* visualNode = root->CreateChild("visualNode");
 		StaticModel* staticMdl = visualNode->CreateComponent<StaticModel>();
 
@@ -30,29 +32,29 @@ Node* TechGame::CreatePiece(Node* parent, String name, bool loadExisting)
 			Vector3 offset(0, -0.25, 0);
 
 			//make shapes
-			auto* shape1 = root->CreateComponent<CollisionShape_Box>();
+			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Box>();
 			shape1->SetScaleFactor(Vector3(2, 1, 1)*scaleFactor);
 			shape1->SetPositionOffset((Vector3(0, 1, 0) + offset)*scaleFactor);
 
-			auto* shape2 = root->CreateComponent<CollisionShape_Box>();
+			auto* shape2 = root->CreateComponent<NewtonCollisionShape_Box>();
 			shape2->SetScaleFactor(Vector3(1, 3, 1)*scaleFactor);
 			shape2->SetPositionOffset((Vector3(1.5, 0, 0) + offset)*scaleFactor);
 
-			auto* shape3 = root->CreateComponent<CollisionShape_Box>();
+			auto* shape3 = root->CreateComponent<NewtonCollisionShape_Box>();
 			shape3->SetScaleFactor(Vector3(1, 3, 1)*scaleFactor);
 			shape3->SetPositionOffset((Vector3(-1.5, 0, 0) + offset)*scaleFactor);
 
 
 
-			Vector<Vector3> positions;
-			positions += Vector3(-1.5, -0.25, 0);
-			positions += Vector3(-0.5, 0.75,  0);
-			positions += Vector3(0.5, 0.75,   0);
-			positions += Vector3(-1.5, 0.75,  0);
-			positions += Vector3(1.5, 0.75,   0);
-			positions += Vector3(1.5, -0.25,  0);
-			positions += Vector3(1.5, -1.25,  0);
-			positions += Vector3(-1.5, -1.25, 0);
+			ea::vector<Vector3> positions;
+			positions.push_back(Vector3(-1.5, -0.25, 0));
+			positions.push_back(Vector3(-0.5, 0.75,  0));
+			positions.push_back(Vector3(0.5, 0.75,   0));
+			positions.push_back(Vector3(-1.5, 0.75,  0));
+			positions.push_back(Vector3(1.5, 0.75,   0));
+			positions.push_back(Vector3(1.5, -0.25,  0));
+			positions.push_back(Vector3(1.5, -1.25,  0));
+			positions.push_back(Vector3(-1.5, -1.25, 0));
 
 
 			
@@ -88,7 +90,7 @@ Node* TechGame::CreatePiece(Node* parent, String name, bool loadExisting)
 			const float thickness = 2.0f;
 
 			//make shapes
-			auto* shape1 = root->CreateComponent<CollisionShape_Box>();
+			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Box>();
 			shape1->SetScaleFactor(Vector3(1, 1, thickness)*scaleFactor);
 			shape1->SetPositionOffset((Vector3(0, 0, 0) + offset)*scaleFactor);
 
@@ -121,7 +123,7 @@ Node* TechGame::CreatePiece(Node* parent, String name, bool loadExisting)
 			const float thickness = 0.5f;
 
 			//make shapes
-			auto* shape1 = root->CreateComponent<CollisionShape_Box>();
+			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Box>();
 			shape1->SetScaleFactor(Vector3(1, 1, thickness)*scaleFactor);
 			shape1->SetPositionOffset((Vector3(0, 0, 0) + offset)*scaleFactor);
 
@@ -155,7 +157,7 @@ Node* TechGame::CreatePiece(Node* parent, String name, bool loadExisting)
 			const float thickness = 0.5f;
 
 			//make shapes
-			auto* shape1 = root->CreateComponent<CollisionShape_Box>();
+			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Box>();
 			shape1->SetScaleFactor(Vector3(length, 1, thickness)*scaleFactor);
 			shape1->SetPositionOffset((Vector3(0, 0, 0) + offset)*scaleFactor);
 
@@ -188,7 +190,7 @@ Node* TechGame::CreatePiece(Node* parent, String name, bool loadExisting)
 			Vector3 offset(0, 0, 0);
 
 			//make shapes
-			auto* shape1 = root->CreateComponent<CollisionShape_Cylinder>();
+			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Cylinder>();
 			shape1->SetScaleFactor(Vector3(4, 0.5, 0.5)*scaleFactor);
 
 			//shape1->SetRadius(0.25*scaleFactor);
@@ -229,7 +231,7 @@ Node* TechGame::CreatePiece(Node* parent, String name, bool loadExisting)
 			Vector3 offset(0, 0, 0);
 
 			//make shapes
-			auto* shape1 = root->CreateComponent<CollisionShape_Cylinder>();
+			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Cylinder>();
 			shape1->SetScaleFactor(Vector3(4, 0.5, 0.5)*scaleFactor);
 			shape1->SetRotationOffset(Quaternion(90, Vector3(0, 1, 0)));
 
@@ -256,7 +258,7 @@ Node* TechGame::CreatePiece(Node* parent, String name, bool loadExisting)
 			Vector3 offset(0, 0, 0);
 
 			//make shapes
-			auto* shape1 = root->CreateComponent<CollisionShape_Cylinder>();
+			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Cylinder>();
 			shape1->SetScaleFactor(Vector3(4, 0.5, 0.5)*scaleFactor);
 			shape1->SetRotationOffset(Quaternion(90, Vector3(0, 1, 0)));
 
@@ -289,10 +291,10 @@ Node* TechGame::CreatePiece(Node* parent, String name, bool loadExisting)
 		staticMdl->SetCastShadows(true);
 
 		Piece* piece = root->CreateComponent<Piece>();
-		piece->primaryColor_.FromUInt(name.ToHash());;
+		//piece->primaryColor_.FromUInt(ea::string_hash);
 
 
-		SharedPtr<File> file = SharedPtr<File>(new File(context_));
+		ea::shared_ptr<File> file = ea::shared_ptr<File>(new File(context_));
 		file->Open(name + ".xml", FILE_WRITE);
 		root->SaveXML(*file);
 	}
@@ -303,7 +305,7 @@ Node* TechGame::CreatePiece(Node* parent, String name, bool loadExisting)
 
 
 	Material* mat = GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/Piece.xml");
-	SharedPtr<Material> clonedMat = mat->Clone();
+	ea::shared_ptr<Material> clonedMat = mat->Clone();
 	clonedMat->SetShaderParameter("MatDiffColor", Vector4(Random(), Random(), Random(), 0.0f));
 
 	root->GetChild("visualNode")->GetComponent<StaticModel>()->SetMaterial(clonedMat);

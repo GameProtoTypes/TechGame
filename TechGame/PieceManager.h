@@ -28,19 +28,17 @@ public:
 
 
 
-
-
-	Piece* GetClosestGlobalPiece(Vector3 worldPosition, PODVector<Piece*> blacklist, float radius);
+	Piece* GetClosestGlobalPiece(Vector3 worldPosition, ea::vector<Piece*> blacklist, float radius);
 
 	PiecePoint* GetClosestGlobalPiecePoint(Vector3 worldPosition);
 
 	PiecePoint* GetClosestPiecePoint(Vector3 worldPosition, Piece* piece);
 
 
-	void GetPointsInRadius(PODVector<PiecePoint*>& pieces, Vector3 worldPosition, float radius);
+	void GetPointsInRadius(ea::vector<PiecePoint*>& pieces, Vector3 worldPosition, float radius);
 
 	///given inPieces - returns a list of possible connection pieces using radius searches around each point.  outPieces should contain no duplicates and contain no points from inPieces.
-	void GetPointsAroundPoints(PODVector<PiecePoint*>& inPieces, PODVector<PiecePoint*>& outPieces, float radius);
+	void GetPointsAroundPoints(ea::vector<PiecePoint*>& inPieces, ea::vector<PiecePoint*>& outPieces, float radius);
 
 
 	
@@ -49,19 +47,19 @@ public:
 
 
 	///Creates a new common group surrounding all pieces. 
-	PieceGroup* AddPiecesToNewGroup(PODVector<Piece*> pieces);
+	PieceGroup* AddPiecesToNewGroup(ea::vector<Piece*> pieces);
 
 	///move a piece to an existing group potentially changing its position in the group tree.
 	void MovePieceToGroup(Piece* piece, PieceGroup* group);
 
 	///return the first common group for the given pieces.
-	PieceGroup* GetCommonGroup(PODVector<Piece*> pieces);
+	PieceGroup* GetCommonGroup(ea::vector<Piece*> pieces);
 
 	///finds the most child-like common group and removes all pieces from it.
-	void RemovePiecesFromFirstCommonGroup(PODVector<Piece*> pieces);
+	void RemovePiecesFromFirstCommonGroup(ea::vector<Piece*> pieces);
 
 	///sets all pieces with no grouping. (moves nodes to scene)  cleans up afterwards.
-	void StripGroups(PODVector<Piece*> pieces);
+	void StripGroups(ea::vector<Piece*> pieces);
 
 	///
 	void RemoveGroup(PieceGroup* group);
@@ -84,8 +82,8 @@ public:
 
 
 
-	void FindLoops(Piece* piece, Vector<Vector<Piece*>>& loops);
-	void FindLoops(Piece* piece, Vector<Vector<Piece*>>& loops, Vector<Piece*>& traverseStack, int depth);
+	void FindLoops(Piece* piece, ea::vector<ea::vector<Piece*>>& loops);
+	void FindLoops(Piece* piece, ea::vector<ea::vector<Piece*>>& loops, ea::vector<Piece*>& traverseStack, int depth);
 
 protected:
 

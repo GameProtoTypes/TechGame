@@ -101,15 +101,15 @@ protected:
 	bool endPointRulePass(AttachmentPair* attachPair);
 
 	
-	HashMap<PiecePoint*, AttachmentPair*> potentialAttachmentMapA_;
-	HashMap<PiecePoint*, AttachmentPair*> potentialAttachmentMapB_;
-	Vector<AttachmentPair*> potentialAttachments_;
+	ea::hash_map<PiecePoint*, AttachmentPair*> potentialAttachmentMapA_;
+	ea::hash_map<PiecePoint*, AttachmentPair*> potentialAttachmentMapB_;
+	ea::vector<AttachmentPair*> potentialAttachments_;
 
 
-	Vector<PiecePointRow*> rowsA;
-	Vector<PiecePointRow*> rowsB;
+	ea::vector<PiecePointRow*> rowsA;
+	ea::vector<PiecePointRow*> rowsB;
 
-	Vector<AttachmentPair*> finalAttachments_;
+	ea::vector<AttachmentPair*> finalAttachments_;
 
 	bool needsAnalyzed_ = true;
 	bool isValid_ = false;

@@ -5,6 +5,8 @@
 #include "PiecePoint.h"
 #include "PieceManager.h"
 
+#include "NewtonKinematicsJoint.h"
+
 //tool to be attached to Camera Node (or arm node)
 class Tool : public Component {
 	URHO3D_OBJECT(Tool, Component);

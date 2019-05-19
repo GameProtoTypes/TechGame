@@ -1,0 +1,8 @@
+<material>
+	<technique name="Techniques/DiffOutline.xml"/>
+	<texture name="Textures/base_character.png" unit="diffuse"/>
+	<parameter name="MatDiffColor" value="1 1 1 1"/>
+	<parameter name="MatSpecColor" value="0 0 0 50"/>
+	<parameter name="OutlineColor" value="1 1 1 0" />
+    <parameter name="OutlineEnable" value="false" />
+</material>

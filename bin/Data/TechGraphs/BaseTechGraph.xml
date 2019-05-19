@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<TechGraph>
+
+	<TechGraphNode name="rootnode">
+		<Children>
+			<Child name="wood"/>
+			<Child name="grass"/>
+			<Child name="rock"/>
+			<Child name="sand"/>
+			<Child name="snow"/>
+			<Child name="beef"/>
+			<Child name="lamb"/>
+			<Child name="goat"/>
+			<Child name="bison"/>
+			<Child name="chicken"/>
+			<Child name="pork"/>
+		</Children>
+	</TechGraphNode>
+
+
+
+	<TechGraphNode name="wood"/>
+	<TechGraphNode name="grass"/>
+	<TechGraphNode name="rock"/>
+	<TechGraphNode name="sand"/>
+	<TechGraphNode name="snow"/>
+
+
+	<TechGraphNode name="beef"/>
+		<Children>
+			<Child name="cooked_beef"/>
+		</Children>
+	<TechGraphNode name="lamb"/>
+		<Children>
+			<Child name="cooked_lamb"/>
+		</Children>
+	<TechGraphNode name="goat"/>
+		<Children>
+			<Child name="cooked_goat"/>
+		</Children>
+	<TechGraphNode name="bison"/>
+			<Children>
+			<Child name="cooked_bison"/>
+		</Children>
+	<TechGraphNode name="chicken"/>
+			<Children>
+			<Child name="cooked_chicken"/>
+		</Children>
+	<TechGraphNode name="pork"/>
+		<Children>
+			<Child name="cooked_pork"/>
+		</Children>
+	
+	<TechGraphNode name="cooked_beef"/>
+	<TechGraphNode name="cooked_lamb"/>
+	<TechGraphNode name="cooked_goat"/>
+	<TechGraphNode name="cooked_bison"/>
+	<TechGraphNode name="cooked_chicken"/>
+	<TechGraphNode name="cooked_pork"/>
+
+</TechGraph>
+

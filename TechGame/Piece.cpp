@@ -1,12 +1,15 @@
 #include "Piece.h"
 #include "PiecePoint.h"
-#include "Urho3D/Graphics/VisualDebugger.h"
 #include "PiecePointRow.h"
+
+#include "NewtonPhysicsEvents.h"
+
+#include "VisualDebugger.h"
 
 
 Piece::Piece(Context* context) : Component(context)
 {
-	SubscribeToEvent(E_PHYSICSPOSTSTEP, URHO3D_HANDLER(Piece, HandlePhysicsPostStep));
+	SubscribeToEvent(E_NEWTON_PHYSICSPOSTSTEP, URHO3D_HANDLER(Piece, HandlePhysicsPostStep));
 }
 
 void Piece::RegisterObject(Context* context)
@@ -27,7 +30,7 @@ void Piece::GetAttachedRows(ea::vector<PiecePointRow*>& rows)
 	for (PiecePointRow* row : ownRows) {
 		for (PiecePointRow::RowAttachement& attachedRow : row->attachedRows_) {
 
-			rows += attachedRow.rowA_;
+			rows.push_back(attachedRow.rowA_);
 		}
 	}
 }
@@ -55,7 +58,7 @@ void Piece::GetAttachedPiecesRec(ea::vector<Piece*>& pieces, bool recursive)
 	{
 		Piece* attachedPiece = nullptr;
 
-		if (row->attachedRows_.Size()) {
+		if (row->attachedRows_.size()) {
 			
 			for (PiecePointRow::RowAttachement& attachedRow : row->attachedRows_) {
 				
