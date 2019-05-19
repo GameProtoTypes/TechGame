@@ -1,0 +1,313 @@
+#include "TechGame.h"
+#include "PiecePoint.h"
+#include "Piece.h"
+#include "PiecePointRow.h"
+
+
+Node* TechGame::CreatePiece(Node* parent, String name, bool loadExisting)
+{
+	Node* root;
+
+	if (loadExisting)
+	{
+		SharedPtr<File> file = SharedPtr<File>(new File(context_));
+		file->Open(name + ".xml", FILE_READ);
+		root = scene_->InstantiateXML(*file, Vector3::ZERO, Quaternion::IDENTITY);
+	}
+	else {
+		root = parent->CreateChild();
+
+		auto* body = root->CreateComponent<RigidBody>();
+		Node* visualNode = root->CreateChild("visualNode");
+		StaticModel* staticMdl = visualNode->CreateComponent<StaticModel>();
+
+		Color color;
+
+		if (name == "8_piece_Cshape") {
+
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/8_piece_Cshape.mdl");
+			float scaleFactor = 0.025 / 0.1;
+			Vector3 offset(0, -0.25, 0);
+
+			//make shapes
+			auto* shape1 = root->CreateComponent<CollisionShape_Box>();
+			shape1->SetScaleFactor(Vector3(2, 1, 1)*scaleFactor);
+			shape1->SetPositionOffset((Vector3(0, 1, 0) + offset)*scaleFactor);
+
+			auto* shape2 = root->CreateComponent<CollisionShape_Box>();
+			shape2->SetScaleFactor(Vector3(1, 3, 1)*scaleFactor);
+			shape2->SetPositionOffset((Vector3(1.5, 0, 0) + offset)*scaleFactor);
+
+			auto* shape3 = root->CreateComponent<CollisionShape_Box>();
+			shape3->SetScaleFactor(Vector3(1, 3, 1)*scaleFactor);
+			shape3->SetPositionOffset((Vector3(-1.5, 0, 0) + offset)*scaleFactor);
+
+
+
+			Vector<Vector3> positions;
+			positions += Vector3(-1.5, -0.25, 0);
+			positions += Vector3(-0.5, 0.75,  0);
+			positions += Vector3(0.5, 0.75,   0);
+			positions += Vector3(-1.5, 0.75,  0);
+			positions += Vector3(1.5, 0.75,   0);
+			positions += Vector3(1.5, -0.25,  0);
+			positions += Vector3(1.5, -1.25,  0);
+			positions += Vector3(-1.5, -1.25, 0);
+
+
+			
+			for (Vector3& position : positions)
+			{
+				PiecePointRow* pointRow = root->CreateComponent<PiecePointRow>();
+				//make hole nodes.
+				Node* hole0 = root->CreateChild();
+				hole0->SetPosition((position + Vector3(0,0,-0.25))*scaleFactor);
+				PiecePoint* point0 = hole0->CreateComponent<PiecePoint>();
+
+				Node* hole1 = root->CreateChild();
+				hole1->SetPosition((position + Vector3(0, 0, 0.25))*scaleFactor);
+				PiecePoint* point1 = hole1->CreateComponent<PiecePoint>();
+				
+				pointRow->PushBack(point1);
+				pointRow->PushBack(point0);
+				pointRow->SetRowType(PiecePointRow::RowType_Hole);
+				pointRow->Finalize();
+			}
+
+
+			staticMdl->SetModel(pieceModel);
+		}
+
+		if (name == "2_sleeve") {
+
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/2_sleeve.mdl");
+			float scaleFactor = 0.025 / 0.1;
+			Vector3 offset(0, 0, 0);
+
+			
+			const float thickness = 2.0f;
+
+			//make shapes
+			auto* shape1 = root->CreateComponent<CollisionShape_Box>();
+			shape1->SetScaleFactor(Vector3(1, 1, thickness)*scaleFactor);
+			shape1->SetPositionOffset((Vector3(0, 0, 0) + offset)*scaleFactor);
+
+
+			//make hole nodes.
+			PiecePointRow* pointRow = root->CreateComponent<PiecePointRow>();
+
+			
+			Node* prevHole = nullptr;
+			for (float z = -thickness/2.0f + 0.25f; z <= thickness/2.0f - 0.25f; z += 0.5f) {
+
+				Node* hole0 = root->CreateChild();
+				hole0->SetPosition(Vector3(0, 0, z)*scaleFactor);
+				PiecePoint* point = hole0->CreateComponent<PiecePoint>();
+
+				pointRow->SetRowType(PiecePointRow::RowType_Hole);
+				pointRow->PushBack(point);
+			}
+			pointRow->Finalize();
+			staticMdl->SetModel(pieceModel);
+		}
+
+		if (name == "1_cap_small") {
+
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/1_cap_small.mdl");
+			float scaleFactor = 0.025 / 0.1;
+			Vector3 offset(0, 0, 0);
+
+
+			const float thickness = 0.5f;
+
+			//make shapes
+			auto* shape1 = root->CreateComponent<CollisionShape_Box>();
+			shape1->SetScaleFactor(Vector3(1, 1, thickness)*scaleFactor);
+			shape1->SetPositionOffset((Vector3(0, 0, 0) + offset)*scaleFactor);
+
+
+			//make hole nodes.
+
+			Node* prevHole = nullptr;
+
+			Node* hole0 = root->CreateChild();
+			hole0->SetPosition(Vector3(0, 0, 0)*scaleFactor);
+			PiecePointRow* row = root->CreateComponent<PiecePointRow>();
+			PiecePoint* point = hole0->CreateComponent<PiecePoint>();
+			point->isEndCap_ = true;
+			point->direction_ = -Vector3::FORWARD;
+			
+			row->PushBack(point);
+			
+			row->SetRowType(PiecePointRow::RowType_HoleTight);
+			row->Finalize();
+			staticMdl->SetModel(pieceModel);
+		}
+
+
+		if (name == "6_piece_thin") {
+
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/6_piece_thin.mdl");
+			float scaleFactor = 0.025 / 0.1;
+			Vector3 offset(0, 0, 0);
+
+			const int length = 6;
+			const float thickness = 0.5f;
+
+			//make shapes
+			auto* shape1 = root->CreateComponent<CollisionShape_Box>();
+			shape1->SetScaleFactor(Vector3(length, 1, thickness)*scaleFactor);
+			shape1->SetPositionOffset((Vector3(0, 0, 0) + offset)*scaleFactor);
+
+
+			//make hole nodes.
+			for (int i = 0; i < length; i++) {
+
+				float x = (float(i) + 0.5f) - length / 2.0f;
+
+				Node* hole0 = root->CreateChild();
+				hole0->SetPosition(Vector3(x, 0, 0)*scaleFactor);
+				PiecePoint* point = hole0->CreateComponent<PiecePoint>();
+
+				PiecePointRow* row = root->CreateComponent<PiecePointRow>();
+				row->PushBack(point);
+				row->SetRowType(PiecePointRow::RowType_Hole);
+				row->Finalize();
+			}
+
+			staticMdl->SetModel(pieceModel);
+
+			body->SetUseInertiaHack(true);
+		}
+
+
+		if (name == "rod_round_4")
+		{
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/rod_round_4.mdl");
+			float scaleFactor = 0.025 / 0.1;
+			Vector3 offset(0, 0, 0);
+
+			//make shapes
+			auto* shape1 = root->CreateComponent<CollisionShape_Cylinder>();
+			shape1->SetScaleFactor(Vector3(4, 0.5, 0.5)*scaleFactor);
+
+			//shape1->SetRadius(0.25*scaleFactor);
+			//shape1->SetLength(4 * scaleFactor);
+
+			shape1->SetRotationOffset(Quaternion(90, Vector3(0, 1, 0)));
+
+			PiecePointRow* pointRow = root->CreateComponent<PiecePointRow>();
+
+			for (int p = 0; p < 8; p++)
+			{
+				Node* point = root->CreateChild();
+				point->SetPosition(Vector3(0, 0, (p*0.5f - 3.5*0.5f)*scaleFactor));
+				PiecePoint* piecePoint = point->CreateComponent<PiecePoint>();
+				
+				pointRow->PushBack(piecePoint);
+				
+				
+
+				if (p == 0 || p == 7)
+					piecePoint->isEndCap_ = true;
+
+			}
+			pointRow->Finalize();
+			pointRow->SetRowType(PiecePointRow::RowType_RodRound);
+
+			body->SetUseInertiaHack(true);
+
+			staticMdl->SetModel(pieceModel);
+			
+			
+		}
+
+		if (name == "rod_round_no_caps_4")
+		{
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/rod_round_no_caps_4.mdl");
+			float scaleFactor = 0.025 / 0.1;
+			Vector3 offset(0, 0, 0);
+
+			//make shapes
+			auto* shape1 = root->CreateComponent<CollisionShape_Cylinder>();
+			shape1->SetScaleFactor(Vector3(4, 0.5, 0.5)*scaleFactor);
+			shape1->SetRotationOffset(Quaternion(90, Vector3(0, 1, 0)));
+
+			PiecePointRow* pointRow = root->CreateComponent<PiecePointRow>();
+
+			for (int p = 0; p < 8; p++)
+			{
+				Node* point = root->CreateChild();
+				point->SetPosition(Vector3(0, 0, (p*0.5f - 3.5*0.5f)*scaleFactor));
+				PiecePoint* piecePoint = point->CreateComponent<PiecePoint>();
+
+				pointRow->PushBack(piecePoint);
+			}
+			body->SetUseInertiaHack(true);
+			pointRow->Finalize();
+			pointRow->SetRowType(PiecePointRow::RowType_RodRound);
+			staticMdl->SetModel(pieceModel);
+		}
+
+		if (name == "rod_hard_4")
+		{
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/rod_hard_4.mdl");
+			float scaleFactor = 0.025 / 0.1;
+			Vector3 offset(0, 0, 0);
+
+			//make shapes
+			auto* shape1 = root->CreateComponent<CollisionShape_Cylinder>();
+			shape1->SetScaleFactor(Vector3(4, 0.5, 0.5)*scaleFactor);
+			shape1->SetRotationOffset(Quaternion(90, Vector3(0, 1, 0)));
+
+			PiecePointRow* pointRow = root->CreateComponent<PiecePointRow>();
+
+
+			for (int p = 0; p < 8; p++)
+			{
+				Node* point = root->CreateChild();
+				point->SetPosition(Vector3(0, 0, (p*0.5f - 3.5*0.5f)*scaleFactor));
+				PiecePoint* piecePoint = point->CreateComponent<PiecePoint>();
+
+
+
+				pointRow->PushBack(piecePoint);
+
+				if (p == 0 || p == 7)
+					piecePoint->isEndCap_ = true;
+			}
+			body->SetUseInertiaHack(true);
+			pointRow->Finalize();
+			pointRow->SetRowType(PiecePointRow::RowType_RodHard);
+
+			staticMdl->SetModel(pieceModel);
+
+		}
+
+
+
+		staticMdl->SetCastShadows(true);
+
+		Piece* piece = root->CreateComponent<Piece>();
+		piece->primaryColor_.FromUInt(name.ToHash());;
+
+
+		SharedPtr<File> file = SharedPtr<File>(new File(context_));
+		file->Open(name + ".xml", FILE_WRITE);
+		root->SaveXML(*file);
+	}
+
+
+
+
+
+
+	Material* mat = GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/Piece.xml");
+	SharedPtr<Material> clonedMat = mat->Clone();
+	clonedMat->SetShaderParameter("MatDiffColor", Vector4(Random(), Random(), Random(), 0.0f));
+
+	root->GetChild("visualNode")->GetComponent<StaticModel>()->SetMaterial(clonedMat);
+
+	return root;
+}
+
