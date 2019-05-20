@@ -61,5 +61,5 @@ private:
 	float inAirTimer_;
 
 	/// camera
-	ea::weak_ptr<Node> cameraNode_;
+	WeakPtr<Node> cameraNode_;
 };

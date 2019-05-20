@@ -176,12 +176,12 @@ void TechGame::SetupViewport()
 {
 	auto* renderer = GetSubsystem<Renderer>();
 	XMLFile* file = GetSubsystem<ResourceCache>()->GetResource<XMLFile>("RenderPaths/Deferred.xml");
-	ea::shared_ptr<RenderPath> renderPath = ea::shared_ptr<RenderPath>(new RenderPath());
+	SharedPtr<RenderPath> renderPath = SharedPtr<RenderPath>(new RenderPath());
 	renderPath->Load(file);
 	renderer->SetDefaultRenderPath(renderPath);
 
 	// Set up a viewport to the Renderer subsystem so that the 3D scene can be seen
-	ea::shared_ptr<Viewport> viewport(new Viewport(context_, scene_, cameraNode_->GetComponent<Camera>()));
+	SharedPtr<Viewport> viewport(new Viewport(context_, scene_, cameraNode_->GetComponent<Camera>()));
 	renderer->SetViewport(0, viewport);
 }
 
@@ -307,7 +307,7 @@ void TechGame::CreateScene()
 
 
 			Material* mat = GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/Piece2.xml");
-			ea::shared_ptr<Material> clonedMat = mat->Clone();
+			SharedPtr<Material> clonedMat = mat->Clone();
 			//clonedMat->SetShaderParameter("MatDiffColor", Vector4(0.3f + Random() / 8, 0.3f + Random() / 8, 0.3f + Random() / 8, 0.0f));
 
 			stmdl->SetMaterial(clonedMat);

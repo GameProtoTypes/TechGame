@@ -75,7 +75,7 @@ void PiecePointRow::PushBack(PiecePoint* point)
 {
 	if (!points_.contains(point)) {
 		points_.push_back(point);
-		point->row_ = ea::weak_ptr<PiecePointRow>(this);
+		point->row_ = WeakPtr<PiecePointRow>(this);
 	}
 }
 
@@ -162,7 +162,7 @@ bool PiecePointRow::DetachFrom(PiecePointRow* otherRow)
 		
 		if (attachedRows_[i].rowA_ == otherRow)
 		{
-			if (!attachedRows_[i].constraint_.expired())
+			if (!attachedRows_[i].constraint_.Expired())
 			{
 				attachedRows_[i].constraint_->Remove();
 			}
@@ -179,7 +179,7 @@ bool PiecePointRow::DetachFrom(PiecePointRow* otherRow)
 bool PiecePointRow::DetachAll()
 {
 	for (int i = 0; i < attachedRows_.size(); i++) {
-		if (!attachedRows_[i].constraint_.expired())
+		if (!attachedRows_[i].constraint_.Expired())
 		{
 			attachedRows_[i].constraint_->Remove();
 		}
@@ -480,7 +480,7 @@ bool PiecePointRow::OptimizeFullRow(PiecePointRow* row)
 				if (attachment.rowB_->GetGeneralRowType() != RowTypeGeneral_Hole)
 					continue;
 
-				float curSliderPos = static_cast<NewtonSliderConstraint*>(attachment.constraint_.get())->GetSliderPosition();
+				float curSliderPos = static_cast<NewtonSliderConstraint*>(attachment.constraint_.Get())->GetSliderPosition();
 
 				curSliderPos = RoundToNearestMultiple(curSliderPos, RowPointDistance());
 

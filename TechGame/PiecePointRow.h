@@ -24,11 +24,11 @@ public:
 	};
 
 	struct RowAttachement {
-		ea::weak_ptr<PiecePoint> pointA_;
-		ea::weak_ptr<PiecePoint> pointB ;
-		ea::weak_ptr<PiecePointRow> rowA_ ;
-		ea::weak_ptr<PiecePointRow> rowB_ ;
-		ea::weak_ptr<NewtonConstraint> constraint_ ;
+		WeakPtr<PiecePoint> pointA_;
+		WeakPtr<PiecePoint> pointB ;
+		WeakPtr<PiecePointRow> rowA_ ;
+		WeakPtr<PiecePointRow> rowB_ ;
+		WeakPtr<NewtonConstraint> constraint_ ;
 	};
 
 

@@ -137,7 +137,7 @@ void ManipulationTool::UnGather(bool freeze)
 
 		if (attachmentPotential)
 		{
-			ea::shared_ptr<PieceAttachmentStager> attachStager = context_->CreateObject<PieceAttachmentStager>();
+			SharedPtr<PieceAttachmentStager> attachStager = context_->CreateObject<PieceAttachmentStager>();
 			for (int i = 0; i < allGatherPiecePoints_.size(); i++) {
 
 				if (closestPoints[i]) {
@@ -367,7 +367,7 @@ void ManipulationTool::drop(bool freeze)
 	}
 	gatheredContraptionNode_ = nullptr;
 
-	if (!kinamaticConstriant_.expired()) {
+	if (!kinamaticConstriant_.Expired()) {
 		kinamaticConstriant_->Remove();
 		kinamaticConstriant_ = nullptr;
 	}

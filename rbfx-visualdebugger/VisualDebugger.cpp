@@ -80,7 +80,7 @@ VisualDebugger::VisualDebuggerUILabel* VisualDebugger::AddLabel(const Vector3& c
 VisualDebugger::VisualDebuggerNode* VisualDebugger::AddNode(Node* node, const float& scale, bool depthTest)
 {
 	VisualDebuggerNode* newDbgObject = new VisualDebuggerNode(this, context_);
-	newDbgObject->SetNode(ea::weak_ptr<Node>(node));
+	newDbgObject->SetNode(WeakPtr<Node>(node));
 	newDbgObject->SetScale(scale);
 	SetupAndAddObjectToList(newDbgObject, depthTest, Color::WHITE);
 	return newDbgObject;
@@ -200,7 +200,7 @@ void VisualDebugger::DrawDebugGeometry(DebugRenderer* debugRenderer, unsigned in
 	unsigned int drawCount = 0;
 	for (int i = 0; i < mDebuggerObjects.size(); i++)
 	{
-		ea::shared_ptr<VisualDebuggerObject> debObject = mDebuggerObjects[i];
+		SharedPtr<VisualDebuggerObject> debObject = mDebuggerObjects[i];
 
 		if (timer.GetMSec(false) >= (startTimeMs + maxTimeMs))
 			return;
@@ -226,7 +226,7 @@ void VisualDebugger::SetEnabled(bool enabled)
 	if (mEnabled == enabled)
 		return;
 
-	for(ea::shared_ptr<VisualDebuggerObject> obj : mDebuggerObjects) {
+	for(SharedPtr<VisualDebuggerObject> obj : mDebuggerObjects) {
 		obj->SetEnabled(enabled);
 	}
 	mEnabled = enabled;
@@ -249,7 +249,7 @@ void VisualDebugger::SetMaxRenderObjects(unsigned int maxObjects /*= UINT_MAX*/)
 
 void VisualDebugger::SetupAndAddObjectToList(VisualDebuggerObject* object, bool depthTest, Color color)
 {
-	mDebuggerObjects.push_front(ea::shared_ptr<VisualDebuggerObject>(object));
+	mDebuggerObjects.push_front(SharedPtr<VisualDebuggerObject>(object));
 	object->creationTimeMS_ = mTimer.GetMSec(false);
 	object->depthTest_ = depthTest;
 	object->color_ = color;
@@ -294,7 +294,7 @@ void VisualDebugger::VisualDebuggerUILabel::Setup()
 void VisualDebugger::VisualDebuggerUILabel::TearDown()
 {
 	mUIText->Remove();
-	mUIText.detach();
+	mUIText.Detach();
 }
 
 void VisualDebugger::VisualDebuggerUILabel::SetEnabled(bool enabled)
@@ -308,7 +308,7 @@ void VisualDebugger::VisualDebuggerUILabel::UpdatePosition()
 	//default to screen middle.
 	Vector2 screenPoint = Vector2(GetSubsystem<Graphics>()->GetSize())*0.5f;
 	
-	if (!visDebugger_->mCamera.expired()) {
+	if (!visDebugger_->mCamera.Expired()) {
 		screenPoint = visDebugger_->mCamera->WorldToScreenPoint(GetCenter());
 		//screen point has range of 0-1. - convert back to pixels
 		screenPoint *= Vector2(GetSubsystem<Graphics>()->GetSize());

@@ -12,7 +12,7 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 
 	if (loadExisting)
 	{
-		ea::shared_ptr<File> file = ea::shared_ptr<File>(new File(context_));
+		SharedPtr<File> file = SharedPtr<File>(new File(context_));
 		file->Open(name + ".xml", FILE_READ);
 		root = scene_->InstantiateXML(*file, Vector3::ZERO, Quaternion::IDENTITY);
 	}
@@ -294,7 +294,7 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 		piece->primaryColor_.FromUInt(StringHash(name).ToHash());
 
 
-		ea::shared_ptr<File> file = ea::shared_ptr<File>(new File(context_));
+		SharedPtr<File> file = SharedPtr<File>(new File(context_));
 		file->Open(name + ".xml", FILE_WRITE);
 		root->SaveXML(*file);
 	}
@@ -305,7 +305,7 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 
 
 	Material* mat = GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/Piece.xml");
-	ea::shared_ptr<Material> clonedMat = mat->Clone();
+	SharedPtr<Material> clonedMat = mat->Clone();
 	clonedMat->SetShaderParameter("MatDiffColor", Vector4(Random(), Random(), Random(), 0.0f));
 
 	root->GetChild("visualNode")->GetComponent<StaticModel>()->SetMaterial(clonedMat);

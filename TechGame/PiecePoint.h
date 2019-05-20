@@ -38,10 +38,10 @@ public:
 
 
 
-	ea::weak_ptr<PiecePointRow> row_;
+	WeakPtr<PiecePointRow> row_;
 
-	ea::weak_ptr<PiecePoint> occupiedPoint_;//other point that is "occupying the space of this point"
-	ea::weak_ptr<PiecePoint> occupiedPointPrev_;
+	WeakPtr<PiecePoint> occupiedPoint_;//other point that is "occupying the space of this point"
+	WeakPtr<PiecePoint> occupiedPointPrev_;
 
 
 protected:

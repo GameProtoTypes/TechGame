@@ -46,11 +46,11 @@ public:
 
 protected:
 	/// Scene.
-	ea::shared_ptr<Scene> scene_;
+	SharedPtr<Scene> scene_;
 	/// Camera scene node.
-	ea::shared_ptr<Node> cameraNode_;
+	SharedPtr<Node> cameraNode_;
 	/// The controllable character component.
-	ea::weak_ptr<Character> character_;
+	WeakPtr<Character> character_;
 
 	/// Camera yaw angle.
 	float yaw_ = 0.0f;

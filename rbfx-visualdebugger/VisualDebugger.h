@@ -78,7 +78,7 @@ namespace Urho3D
 			unsigned int lifetimeMS_ = 2000;
 			bool depthTest_ = false;
 			bool enabled_ = false;
-			ea::weak_ptr<VisualDebugger> visDebugger_;
+			WeakPtr<VisualDebugger> visDebugger_;
 		};
 
 		class URHOVISUALDEBUGGER_API VisualDebuggerCircle : public VisualDebuggerObject {
@@ -376,11 +376,11 @@ namespace Urho3D
 			virtual void DrawDebugGeometry(DebugRenderer* debugRenderer);
 			float GetScale() const { return mScale; }
 			void SetScale(float val) { mScale = val; }
-			ea::weak_ptr<Urho3D::Node> GetNode() const { return node_; }
-			void SetNode(ea::weak_ptr<Urho3D::Node> val) { node_ = val; }
+			WeakPtr<Urho3D::Node> GetNode() const { return node_; }
+			void SetNode(WeakPtr<Urho3D::Node> val) { node_ = val; }
 		protected:
 			float mScale = 1.0f;
-			ea::weak_ptr<Node> node_;
+			WeakPtr<Node> node_;
 		};
 
 		class URHOVISUALDEBUGGER_API VisualDebuggerUILabel : public VisualDebuggerObject {
@@ -407,7 +407,7 @@ namespace Urho3D
 		protected:
 			ea::string mText;
 			Vector3 mCenter;
-			ea::shared_ptr<Text> mUIText;
+			SharedPtr<Text> mUIText;
 		};
 
 
@@ -465,10 +465,10 @@ namespace Urho3D
 
         void SetupAndAddObjectToList(VisualDebuggerObject* object, bool depthTest, Color color);
 
-		ea::vector<ea::shared_ptr<VisualDebuggerObject>> mDebuggerObjects;
+		ea::vector<SharedPtr<VisualDebuggerObject>> mDebuggerObjects;
 		Timer mTimer;
 		unsigned int mDefaultLifetimeMs = 2000;
-		ea::weak_ptr<Camera> mCamera;
+		WeakPtr<Camera> mCamera;
         unsigned int mMaxRenderObjects = UINT_MAX;
 		bool mEnabled = true;
 	};

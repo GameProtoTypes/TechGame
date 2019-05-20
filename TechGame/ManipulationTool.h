@@ -83,24 +83,24 @@ protected:
 		}
 	}
 
-	ea::weak_ptr<Node> gatherNode_;
-	ea::weak_ptr<PieceGroup> gatheredPieceGroup_;
-	ea::weak_ptr<Node> gatheredContraptionNode_;
-	ea::weak_ptr<Piece> gatheredPiece_;
-	ea::weak_ptr<PiecePoint> gatherPiecePoint_;
+	WeakPtr<Node> gatherNode_;
+	WeakPtr<PieceGroup> gatheredPieceGroup_;
+	WeakPtr<Node> gatheredContraptionNode_;
+	WeakPtr<Piece> gatheredPiece_;
+	WeakPtr<PiecePoint> gatherPiecePoint_;
 	ea::vector<PiecePoint*> allGatherPiecePoints_;
 	ea::vector<Piece*> allGatherPieces_;
 	
 	Quaternion gatherRotation_;
 
 
-	ea::weak_ptr<NewtonKinematicsControllerConstraint> kinamaticConstriant_;
+	WeakPtr<NewtonKinematicsControllerConstraint> kinamaticConstriant_;
 
 
 
-	ea::weak_ptr<Piece> otherPiece_;
-	ea::weak_ptr<PiecePoint> otherPiecePoint_;
+	WeakPtr<Piece> otherPiece_;
+	WeakPtr<PiecePoint> otherPiecePoint_;
 
-	ea::shared_ptr<PieceManager> pieceManager_;
+	SharedPtr<PieceManager> pieceManager_;
 };
 
