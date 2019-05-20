@@ -1,0 +1,15 @@
+#!/bin/bash
+
+mkdir build
+cd build 
+rm -f -r *
+
+
+cmake .. -G "Visual Studio 15 2017 Win64" \
+-DURHO3D_CSHARP=OFF \
+-DURHO3D_MONOLITHIC_HEADER=ON \
+-DURHO3D_SAMPLES=OFF \
+-DURHO3D_WIN32_CONSOLE=ON \
+-DURHO3D_WEBP=OFF \
+-DURHO3D_NAVIGATION=OFF \
+-DURHO3D_NETWORK=OFF

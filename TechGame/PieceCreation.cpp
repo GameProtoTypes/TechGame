@@ -291,7 +291,7 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 		staticMdl->SetCastShadows(true);
 
 		Piece* piece = root->CreateComponent<Piece>();
-		//piece->primaryColor_.FromUInt(ea::string_hash);
+		piece->primaryColor_.FromUInt(StringHash(name).ToHash());
 
 
 		ea::shared_ptr<File> file = ea::shared_ptr<File>(new File(context_));

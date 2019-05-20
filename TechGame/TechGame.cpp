@@ -21,8 +21,8 @@ void TechGame::Setup()
 {
 	// Engine is not initialized yet. Set up all the parameters now.
 	engineParameters_[EP_FULL_SCREEN] = false;
-	engineParameters_[EP_WINDOW_HEIGHT] = 1080;
-	engineParameters_[EP_WINDOW_WIDTH] = 1920;
+	engineParameters_[EP_WINDOW_HEIGHT] = 768;
+	engineParameters_[EP_WINDOW_WIDTH] = 1024;
 	// Resource prefix path is a list of semicolon-separated paths which will be checked for containing resource directories. They are relative to application executable file.
 #if _WIN32
 	engineParameters_[EP_RESOURCE_PREFIX_PATHS] = "../../../bin";
@@ -50,6 +50,7 @@ void TechGame::Start()
 
 	// Create the scene content
 	CreateScene();
+
 
 	CreateCharacter();
 
@@ -99,7 +100,7 @@ void TechGame::SpawnObject()
 
 	const float OBJECT_VELOCITY = 10.0f;
 
-	// Set initial velocity for the RigidBody based on camera forward vector. Add also a slight up component
+	// Set initial velocity for the NewtonRigidBody based on camera forward vector. Add also a slight up component
 	// to overcome gravity better
 	body->SetLinearVelocity(cameraNode_->GetRotation() * Vector3(0.0f, 0.25f, 1.0f) * OBJECT_VELOCITY);
 }
@@ -321,7 +322,7 @@ void TechGame::CreateScene()
 	//floorObject->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
 	//floorObject->SetMaterial(cache->GetResource<Material>("Materials/StoneTiled.xml"));
 
-	// Make the floor physical by adding RigidBody and CollisionShape components. The RigidBody's default
+	// Make the floor physical by adding NewtonRigidBody and CollisionShape components. The NewtonRigidBody's default
 	// parameters make the object static (zero mass.) Note that a CollisionShape by itself will not participate
 	// in the physics simulation
 	NewtonRigidBody* body = floorNode->CreateComponent<NewtonRigidBody>();

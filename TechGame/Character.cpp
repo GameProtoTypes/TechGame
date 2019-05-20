@@ -12,6 +12,7 @@
 
 #include "NewtonPhysicsWorld.h"
 #include "NewtonPhysicsEvents.h"
+#include "NewtonRigidBody.h"
 
 #include "Character.h"
 #include "Urho3D/IO/Log.h"
@@ -24,7 +25,7 @@ Character::Character(Context* context) :
 	okToJump_(true),
 	inAirTimer_(0.0f)
 {
-	SetUpdateEventMask(USE_FIXEDUPDATE | USE_UPDATE);
+	SetUpdateEventMask(USE_UPDATE);
 }
 
 void Character::RegisterObject(Context* context)
@@ -49,66 +50,6 @@ void Character::Start()
 
 void Character::FixedUpdate(float timeStep)
 {
-	if (cameraNode_ == nullptr)
-		return;
-
-	/// \todo Could cache the components for faster access instead of finding them each frame
-	auto* body = GetComponent<RigidBody>();
-
-
-	// Update the in air timer. Reset if grounded
-	if (!onGround_)
-		inAirTimer_ += timeStep;
-	else
-		inAirTimer_ = 0.0f;
-	// When character has been in air less than 1/10 second, it's still interpreted as being on ground
-	bool softGrounded = inAirTimer_ < INAIR_THRESHOLD_TIME;
-
-	// Update movement & animation
-	const Quaternion& rot = cameraNode_->GetWorldRotation();
-	Vector3 moveDir = Vector3::ZERO;
-	const Vector3& velocity = body->GetLinearVelocity();
-	// Velocity on the XZ plane
-	Vector3 planeVelocity(velocity.x_, 0.0f, velocity.z_);
-	Vector3 verticalVelocity(0.0f, velocity.y_, 0.0f);
-
-	if (controls_.IsDown(CTRL_FORWARD))
-		moveDir += Vector3::FORWARD;
-	if (controls_.IsDown(CTRL_BACK))
-		moveDir += Vector3::BACK;
-	if (controls_.IsDown(CTRL_LEFT))
-		moveDir += Vector3::LEFT;
-	if (controls_.IsDown(CTRL_RIGHT))
-		moveDir += Vector3::RIGHT;
-
-	// Normalize move vector so that diagonal strafing is not faster
-	if (moveDir.LengthSquared() > 0.0f)
-		moveDir.Normalize();
-
-
-
-
-	Vector3 forwardVectorWorld = (rot * moveDir);
-	forwardVectorWorld.y_ = 0;
-	forwardVectorWorld.Normalize();
-
-	body->SetLinearVelocity(forwardVectorWorld * (softGrounded ? MOVE_SPEED : INAIR_MOVE_SPEED) + Vector3(0, velocity.y_, 0));
-
-	//ui::Checkbox("onGround", &onGround_);
-	if (onGround_ && softGrounded)
-	{
-			// Jump. Must release jump control between jumps
-			if (controls_.IsDown(CTRL_JUMP))
-			{
-				
-				body->SetLinearVelocity(velocity + Vector3::UP * JUMP_FORCE*2.0f);
-				
-			}
-	}
-
-
-	// Reset grounded flag for next frame
-	onGround_ = false;
 
 }
 
@@ -154,6 +95,13 @@ void Character::Update(float timeStep)
 
 	cameraNode_->SetPosition(node_->GetWorldPosition() + Vector3(0, 0.7, 0) + rot * Vector3(0.0f, 0.15f, 0.2f));
 	cameraNode_->SetRotation(dir);
+
+
+
+
+	updatePhysics(timeStep);
+
+
 }
 
 void Character::SetCameraNode(Node* cameraNode)
@@ -190,5 +138,72 @@ void Character::HandleNodeCollision(StringHash eventType, VariantMap& eventData)
 
 void Character::HandleNodeCollisionEnd(StringHash eventType, VariantMap& eventData)
 {
+
+}
+
+void Character::updatePhysics(float timeStep)
+{
+
+	if (cameraNode_ == nullptr)
+		return;
+
+	/// \todo Could cache the components for faster access instead of finding them each frame
+	auto* body = GetComponent<NewtonRigidBody>();
+
+
+	// Update the in air timer. Reset if grounded
+	if (!onGround_)
+		inAirTimer_ += timeStep;
+	else
+		inAirTimer_ = 0.0f;
+	// When character has been in air less than 1/10 second, it's still interpreted as being on ground
+	bool softGrounded = inAirTimer_ < INAIR_THRESHOLD_TIME;
+
+	// Update movement & animation
+	const Quaternion& rot = cameraNode_->GetWorldRotation();
+	Vector3 moveDir = Vector3::ZERO;
+	const Vector3& velocity = body->GetLinearVelocity();
+	// Velocity on the XZ plane
+	Vector3 planeVelocity(velocity.x_, 0.0f, velocity.z_);
+	Vector3 verticalVelocity(0.0f, velocity.y_, 0.0f);
+
+	if (controls_.IsDown(CTRL_FORWARD))
+		moveDir += Vector3::FORWARD;
+	if (controls_.IsDown(CTRL_BACK))
+		moveDir += Vector3::BACK;
+	if (controls_.IsDown(CTRL_LEFT))
+		moveDir += Vector3::LEFT;
+	if (controls_.IsDown(CTRL_RIGHT))
+		moveDir += Vector3::RIGHT;
+
+	// Normalize move vector so that diagonal strafing is not faster
+	if (moveDir.LengthSquared() > 0.0f)
+		moveDir.Normalize();
+
+
+
+
+	Vector3 forwardVectorWorld = (rot * moveDir);
+	forwardVectorWorld.y_ = 0;
+	forwardVectorWorld.Normalize();
+
+	body->SetLinearVelocity(forwardVectorWorld * (softGrounded ? MOVE_SPEED : INAIR_MOVE_SPEED) + Vector3(0, velocity.y_, 0));
+
+	//ui::Checkbox("onGround", &onGround_);
+	if (onGround_ && softGrounded)
+	{
+		// Jump. Must release jump control between jumps
+		if (controls_.IsDown(CTRL_JUMP))
+		{
+
+			body->SetLinearVelocity(velocity + Vector3::UP * JUMP_FORCE*2.0f);
+
+		}
+	}
+
+
+	// Reset grounded flag for next frame
+	onGround_ = false;
+
 
 }

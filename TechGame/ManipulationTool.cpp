@@ -107,9 +107,11 @@ void ManipulationTool::UnGather(bool freeze)
 			//find closest comparison point to point.
 			PiecePoint* closest = nullptr;
 			float closestDist = M_LARGE_VALUE;
-			for (int i = 0; i < comparisonPoints.size(); i++) {
+			int closestIdx = 0;
+
+			for (int j = 0; j < comparisonPoints.size(); j++) {
 				
-				PiecePoint* cp = comparisonPoints[i];
+				PiecePoint* cp = comparisonPoints[j];
 
 				if (cp->GetPiece() == gatheredPiece_)
 					continue;
@@ -120,11 +122,12 @@ void ManipulationTool::UnGather(bool freeze)
 				{
 					closestDist = dist;
 					closest = cp;
+					closestIdx = j;
 				}
 			}
 
 			if (closest && closestDist < 0.002f) {
-				closestPoints[i] = closest;
+				closestPoints[closestIdx] = closest;
 				attachmentPotential = true;
 			}
 		}
@@ -364,7 +367,10 @@ void ManipulationTool::drop(bool freeze)
 	}
 	gatheredContraptionNode_ = nullptr;
 
-	kinamaticConstriant_->Remove();
+	if (!kinamaticConstriant_.expired()) {
+		kinamaticConstriant_->Remove();
+		kinamaticConstriant_ = nullptr;
+	}
 
 	gatheredPiece_ = nullptr;
 	gatherPiecePoint_ = nullptr;

@@ -313,13 +313,13 @@ void PieceManager::RebuildSolidifiesSub(Node* startNode, bool branchSolidified)
 
 			branchSolidified = true;
 			startNode->GetComponent<PieceGroup>()->isEffectivelySolidified_ = true;
-			RigidBody* body = startNode->GetOrCreateComponent<RigidBody>();
+			NewtonRigidBody* body = startNode->GetOrCreateComponent<NewtonRigidBody>();
 			body->SetEnabled(true);
 		}
 		else
 		{
 			startNode->GetComponent<PieceGroup>()->isEffectivelySolidified_ = false;
-			startNode->RemoveComponent<RigidBody>();
+			startNode->RemoveComponent<NewtonRigidBody>();
 		}
 	}
 
@@ -330,7 +330,7 @@ void PieceManager::RebuildSolidifiesSub(Node* startNode, bool branchSolidified)
 	for (Node* child : children)
 	{
 		if (child->GetComponent<Piece>()) {
-			child->GetComponent<RigidBody>()->SetEnabled(!branchSolidified);
+			child->GetComponent<NewtonRigidBody>()->SetEnabled(!branchSolidified);
 			
 		}
 		else

@@ -50,6 +50,9 @@ private:
 	void HandleNodeCollision(StringHash eventType, VariantMap& eventData);
 	void HandleNodeCollisionEnd(StringHash eventType, VariantMap& eventData);
 
+	void updatePhysics(float timeStep);
+
+
 	/// Grounded flag for movement.
 	bool onGround_;
 	/// Jump flag.

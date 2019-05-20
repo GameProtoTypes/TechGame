@@ -94,7 +94,7 @@ protected:
 	Quaternion gatherRotation_;
 
 
-	NewtonKinematicsControllerConstraint* kinamaticConstriant_;
+	ea::weak_ptr<NewtonKinematicsControllerConstraint> kinamaticConstriant_;
 
 
 

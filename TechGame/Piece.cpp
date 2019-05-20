@@ -78,7 +78,7 @@ void Piece::GetAttachedPiecesRec(ea::vector<Piece*>& pieces, bool recursive)
 void Piece::HandlePhysicsPostStep(StringHash eventType, VariantMap& eventData)
 {
 
-	//RigidBody* rigBody = GetRigidBody();
+	//NewtonRigidBody* rigBody = GetRigidBody();
 	//if ((rigBody->GetWorldPosition() - lastRigBodyTransform_.Translation()).Length() > 10.0f) {
 	//	URHO3D_LOGINFO("Jumpy Rigid Body!");
 	//	rigBody->SetWorldTransform(lastRigBodyTransform_);
