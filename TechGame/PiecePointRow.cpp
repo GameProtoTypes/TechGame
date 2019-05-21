@@ -264,19 +264,24 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			//holeBody->SetWorldRotation(Quaternion::IDENTITY);
 
 			rodBody->SetWorldPosition(-theRodPoint->GetNode()->GetPosition());
-			//rodBody->SetWorldRotation()
 
 
 			Quaternion diff = (holeBody->GetWorldRotation().Inverse() * rodBody->GetWorldRotation()).Normalized();
-			//URHO3D_LOGINFO(String(diff));
-			Quaternion diffSnap90 = Quaternion(RoundToNearestMultiple(diff.Angle(), 90.0f), diff.Axis()).Normalized();
 
+			Quaternion diffSnap90;
+
+			if (!diff.IsNaN() && Abs(diff.Axis().x_) <= 1.0f)
+			{
+				//URHO3D_LOGINFO("non nan");
+				diffSnap90 = Quaternion(RoundToNearestMultiple(diff.Angle(), 90.0f), diff.Axis());
+			}
+			else {
+				//URHO3D_LOGINFO("nan");
+				diffSnap90 = Quaternion::IDENTITY;
+			}
 
 			holeBody->SetWorldRotation(Quaternion::IDENTITY);
 			rodBody->SetWorldRotation(diffSnap90);
-
-
-
 
 
 

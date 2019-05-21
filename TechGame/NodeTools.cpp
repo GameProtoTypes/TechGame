@@ -57,6 +57,7 @@ Node* GetCommonParentWithComponent(ea::vector<Node*>& nodes, StringHash componen
 	{
 		return parents.back();
 	}
+	return nullptr;
 }
 
 Urho3D::Vector3 GetNodePositionAverage(ea::vector<Node*>& nodes)

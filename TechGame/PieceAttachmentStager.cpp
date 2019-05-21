@@ -121,8 +121,11 @@ bool PieceAttachmentStager::checkDistances()
 		Vector3 posB = pair->pointB->GetNode()->GetWorldPosition();
 
 
-		if ((posA - posB).Length() > 0.002f)
+		if ((posA - posB).Length() > 0.002f) {
+			URHO3D_LOGINFO(ea::to_string((posA - posB).Length()));
 			return false;
+
+		}
 	}
 
 	return true;

@@ -93,21 +93,18 @@ void ManipulationTool::UnGather(bool freeze)
 		pieceManager->GetPointsAroundPoints(allGatherPiecePoints_, comparisonPoints, 0.2f);
 
 
-
 		//check that all other points are within attach tolerance.
 		bool attachmentPotential = false;
 		ea::vector<PiecePoint*> goodPoints;
-		ea::vector<PiecePoint*> closestPoints;
-		closestPoints.resize(comparisonPoints.size());
+		ea::vector<PiecePoint*> closestPoints;//corresponds the allGatherPiecePoints
+		closestPoints.resize(allGatherPiecePoints_.size());
 		for(int i = 0; i < allGatherPiecePoints_.size(); i++) 
 		{
 			PiecePoint* point = allGatherPiecePoints_[i];
 
-
 			//find closest comparison point to point.
 			PiecePoint* closest = nullptr;
 			float closestDist = M_LARGE_VALUE;
-			int closestIdx = 0;
 
 			for (int j = 0; j < comparisonPoints.size(); j++) {
 				
@@ -122,12 +119,11 @@ void ManipulationTool::UnGather(bool freeze)
 				{
 					closestDist = dist;
 					closest = cp;
-					closestIdx = j;
 				}
 			}
 
 			if (closest && closestDist < 0.002f) {
-				closestPoints[closestIdx] = closest;
+				closestPoints[i] = closest;
 				attachmentPotential = true;
 			}
 		}
@@ -337,7 +333,7 @@ void ManipulationTool::OnNodeSet(Node* node)
 	}
 	else
 	{
-		UnGather(false);
+		//UnGather(false);
 	}
 }
 
