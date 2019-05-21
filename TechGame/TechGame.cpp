@@ -16,6 +16,7 @@
 #include "NewtonPhysicsEvents.h"
 
 #include "VisualDebugger.h"
+#include "ContraptionAttachmentMonitor.h"
 
 void TechGame::Setup()
 {
@@ -38,6 +39,7 @@ void TechGame::Setup()
 
 	PieceManager::RegisterObject(context_);
 	PieceAttachmentStager::RegisterObject(context_);
+	ContraptionAttachmentMonitor::RegisterObject(context_);
 	Piece::RegisterObject(context_);
 	PieceGroup::RegisterObject(context_);
 	PiecePoint::RegisterObject(context_);

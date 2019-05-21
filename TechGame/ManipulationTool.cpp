@@ -135,7 +135,7 @@ void ManipulationTool::UnGather(bool freeze)
 				}
 			}
 
-			if (closest && closestDist < pieceManager->GetAttachPointThreshold()) {
+			if (closest && closestDist <= pieceManager->GetAttachPointThreshold()) {
 				closestPoints[i] = closest;
 				attachmentPotential = true;
 				URHO3D_LOGINFO("closest updated");
@@ -303,8 +303,6 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 				otherPiecePoint_ = otherPoint;
 
-				
-				
 				
 				Vector3 worldPos = otherPoint->GetNode()->GetWorldPosition();
 				Quaternion worldRot = otherPoint->GetNode()->GetWorldRotation() * gatherNode_->GetRotation();

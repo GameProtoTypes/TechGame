@@ -67,7 +67,7 @@ public:
 
 		FormPointDirectionsOnEndPoints();
 
-		if (localDirection_.Length() <= 0.0f)
+		if (GetRowDirectionLocal().Length() <= 0.0f)
 		{
 			URHO3D_LOGWARNING("PiecePointRow has no direction defined, Use SetLocalDirection(...)");
 		}
@@ -97,6 +97,7 @@ public:
 	RowTypeGeneral GetGeneralRowType() const { return rowTypeGeneral_; }
 
 	void SetPiecePlaner(bool planer) { isPiecePlaner_ = planer; }
+
 	bool GetIsPiecePlaner() const { return isPiecePlaner_; }
 
 	void PushBack(PiecePoint* point);
@@ -109,7 +110,7 @@ public:
 	Vector3 GetRowDirectionLocal();
 
 
-	//return direction pointing from pointA to pointB. in row space
+	//return direction pointing from pointA to pointB. in world space
 	Vector3 GetRowDirectionWorld();
 
 

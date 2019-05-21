@@ -23,9 +23,6 @@ bool PiecePointRow::RowsAttachCompatable(PiecePointRow* rowA, PiecePointRow* row
 
 
 	//check that the row directions agree within tolerance of 45 degrees.
-	URHO3D_LOGINFO(ea::to_string(rowA->GetRowDirectionWorld().CrossProduct(rowB->GetRowDirectionWorld()).Length()));
-
-
 	if (!(rowA->GetRowDirectionWorld().CrossProduct(rowB->GetRowDirectionWorld()).Length() <= 0.25f))
 		return false;
 
@@ -40,11 +37,9 @@ void PiecePointRow::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 	{
 		PiecePoint* point = points_[i];
 
-
 		Color c = Color(float(points_.size() - 1 - i) / (points_.size() - 1), float(i) / (points_.size() - 1), 0.0);
 
 		debug->AddSphere(Sphere(point->GetNode()->GetWorldPosition(), 0.125*0.5f), c, depthTest);
-
 	}
 
 	PiecePoint* pointA;

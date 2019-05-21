@@ -142,6 +142,7 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 			row->PushBack(point);
 			
 			row->SetRowType(PiecePointRow::RowType_HoleTight);
+			row->SetRowDirectionLocal(Vector3(0, 0, 1));
 			row->Finalize();
 			staticMdl->SetModel(pieceModel);
 		}
