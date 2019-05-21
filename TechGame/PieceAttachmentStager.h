@@ -28,12 +28,17 @@ public:
 
 
 	PieceAttachmentStager(Context* context) : Object(context)
-	{}
+	{
+
+	}
 
 	static void RegisterObject(Context* context)
 	{
 		context->RegisterFactory<PieceAttachmentStager>();
 	}
+
+	void SetScene(Scene* scene){ scene_ = scene; }
+
 
 	bool AddPotentialAttachement(PiecePoint* pointA, PiecePoint* pointB);
 
@@ -43,6 +48,11 @@ public:
 	
 	void AnalyzeAndFix()
 	{
+		if (scene_ == nullptr) {
+			URHO3D_LOGERROR("PieceAttachementStager: Set the active scene (SetScene) before AnalyzeAndFix!");
+			return;
+		}
+
 		if (!needsAnalyzed_)
 			return;
 
@@ -56,19 +66,23 @@ public:
 
 		collectRows();
 
-		
+		if (!checkRowBasicCompatability())
+		{
+			URHO3D_LOGINFO("PieceAttachmentStager: Rows did not pass basic compatability test.");
+			return;
+		}
+
 		if (!checkEndPointRules()) {
 			URHO3D_LOGINFO("PieceAttachmentStager: End Point Check Failed");
 			return;
 		}
 
-
-
+		
 
 
 		finalAttachments_ = potentialAttachments_;
 
-
+		URHO3D_LOGINFO("final attachment size " + ea::to_string(finalAttachments_.size()));
 
 		needsAnalyzed_ = false;
 		isValid_ = true;
@@ -97,6 +111,7 @@ protected:
 	bool checkDistances();
 	bool collectRows();
 
+	bool checkRowBasicCompatability();
 	bool checkEndPointRules();
 	bool endPointRulePass(AttachmentPair* attachPair);
 
@@ -113,6 +128,8 @@ protected:
 
 	bool needsAnalyzed_ = true;
 	bool isValid_ = false;
+
+	WeakPtr<Scene> scene_ = nullptr;
 };
 
 

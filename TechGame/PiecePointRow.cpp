@@ -20,6 +20,15 @@ bool PiecePointRow::RowsAttachCompatable(PiecePointRow* rowA, PiecePointRow* row
 	if (rowA->rowType_ == RowType_RodHard && rowB->rowType_ == RowType_RodHard)
 		return false;
 
+
+
+	//check that the row directions agree within tolerance of 45 degrees.
+	URHO3D_LOGINFO(ea::to_string(rowA->GetRowDirectionWorld().CrossProduct(rowB->GetRowDirectionWorld()).Length()));
+
+
+	if (!(rowA->GetRowDirectionWorld().CrossProduct(rowB->GetRowDirectionWorld()).Length() <= 0.25f))
+		return false;
+
 	return true;
 }
 
@@ -37,7 +46,11 @@ void PiecePointRow::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 		debug->AddSphere(Sphere(point->GetNode()->GetWorldPosition(), 0.125*0.5f), c, depthTest);
 
 	}
-	
+
+	PiecePoint* pointA;
+	PiecePoint* pointB;
+	GetEndPoints(pointA, pointB);
+	debug->AddLine(pointA->GetNode()->GetWorldPosition(), pointA->GetNode()->GetWorldPosition() + GetRowDirectionWorld(), debugColor_, depthTest);
 }
 
 bool PiecePointRow::CheckValid()
@@ -88,7 +101,10 @@ void PiecePointRow::GetEndPoints(PiecePoint*& pointA, PiecePoint*& pointB)
 Urho3D::Vector3 PiecePointRow::GetRowDirectionLocal()
 {
 	if (points_.size() <= 1)
-		return Vector3::ZERO;
+	{
+		return localDirection_;
+	}
+		
 
 	PiecePoint* pointA;
 	PiecePoint* pointB;
@@ -100,7 +116,7 @@ Urho3D::Vector3 PiecePointRow::GetRowDirectionLocal()
 
 Urho3D::Vector3 PiecePointRow::GetRowDirectionWorld()
 {
-	return node_->GetWorldRotation().RotationMatrix().Inverse() * GetRowDirectionLocal();
+	return node_->GetWorldRotation().RotationMatrix() * GetRowDirectionLocal();
 }
 
 bool PiecePointRow::IsEndPoint(PiecePoint* point)
@@ -267,16 +283,16 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 
 			Quaternion diff = (holeBody->GetWorldRotation().Inverse() * rodBody->GetWorldRotation()).Normalized();
-
+			diff = diff.Inverse();
 			Quaternion diffSnap90;
 
 			if (!diff.IsNaN() && Abs(diff.Axis().x_) <= 1.0f)
 			{
-				//URHO3D_LOGINFO("non nan");
-				diffSnap90 = Quaternion(RoundToNearestMultiple(diff.Angle(), 90.0f), diff.Axis());
+				URHO3D_LOGINFO("non nan");
+				diffSnap90 = Quaternion(RoundToNearestMultiple(diff.Angle(), 45.0f), diff.Axis());
 			}
 			else {
-				//URHO3D_LOGINFO("nan");
+				URHO3D_LOGINFO("nan");
 				diffSnap90 = Quaternion::IDENTITY;
 			}
 
@@ -307,10 +323,9 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			rodBody->SetWorldPosition(-theRodRow->GetLocalCenter());
 
 			Quaternion diff = (holeBody->GetWorldRotation().Inverse() * rodBody->GetWorldRotation()).Normalized();
-			
+			diff = diff.Inverse();
 			//URHO3D_LOGINFO("Diff Angle: " + String(diff.Angle()));
 			//URHO3D_LOGINFO("Diff Axis: "  + String(diff.Axis()));
-
 			
 			
 			Quaternion diffSnap90; 
@@ -318,7 +333,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			if (!diff.IsNaN() && Abs(diff.Axis().x_) <= 1.0f)
 			{
 				//URHO3D_LOGINFO("non nan");
-				diffSnap90 = Quaternion(RoundToNearestMultiple(diff.Angle(), 90.0f), diff.Axis());
+				diffSnap90 = Quaternion(RoundToNearestMultiple(diff.Angle(), 45.0f), diff.Axis());
 			}
 			else {
 			

@@ -174,6 +174,8 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 				PiecePointRow* row = root->CreateComponent<PiecePointRow>();
 				row->PushBack(point);
 				row->SetRowType(PiecePointRow::RowType_Hole);
+
+				row->SetRowDirectionLocal(Vector3(0, 0, 1));
 				row->Finalize();
 			}
 

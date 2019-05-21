@@ -82,25 +82,36 @@ bool ManipulationTool::IsGathering()
 
 void ManipulationTool::UnGather(bool freeze)
 {
+	URHO3D_LOGINFO("");
+	URHO3D_LOGINFO("");
+	URHO3D_LOGINFO("");
+
+
 
 	bool goodToDrop = true;
 	if (otherPiece_ && otherPiecePoint_) {
-
 
 		PieceManager* pieceManager = GetScene()->GetComponent<PieceManager>();
 
 		ea::vector<PiecePoint*> comparisonPoints;
 		pieceManager->GetPointsAroundPoints(allGatherPiecePoints_, comparisonPoints, 0.2f);
 
+		URHO3D_LOGINFO("comparisonPoints Size: " + ea::to_string(comparisonPoints.size()));
 
 		//check that all other points are within attach tolerance.
 		bool attachmentPotential = false;
 		ea::vector<PiecePoint*> goodPoints;
 		ea::vector<PiecePoint*> closestPoints;//corresponds the allGatherPiecePoints
 		closestPoints.resize(allGatherPiecePoints_.size());
+
+
 		for(int i = 0; i < allGatherPiecePoints_.size(); i++) 
 		{
+			URHO3D_LOGINFO("looking at allGatherPiecePoints[" + ea::to_string(i) + "]");
+			
 			PiecePoint* point = allGatherPiecePoints_[i];
+
+
 
 			//find closest comparison point to point.
 			PiecePoint* closest = nullptr;
@@ -108,6 +119,8 @@ void ManipulationTool::UnGather(bool freeze)
 
 			for (int j = 0; j < comparisonPoints.size(); j++) {
 				
+				//URHO3D_LOGINFO("looking at comparisonPoints[" + ea::to_string(j) + "]");
+
 				PiecePoint* cp = comparisonPoints[j];
 
 				if (cp->GetPiece() == gatheredPiece_)
@@ -122,9 +135,10 @@ void ManipulationTool::UnGather(bool freeze)
 				}
 			}
 
-			if (closest && closestDist < 0.002f) {
+			if (closest && closestDist < pieceManager->GetAttachPointThreshold()) {
 				closestPoints[i] = closest;
 				attachmentPotential = true;
+				URHO3D_LOGINFO("closest updated");
 			}
 		}
 
@@ -134,6 +148,7 @@ void ManipulationTool::UnGather(bool freeze)
 		if (attachmentPotential)
 		{
 			SharedPtr<PieceAttachmentStager> attachStager = context_->CreateObject<PieceAttachmentStager>();
+			attachStager->SetScene(GetScene());
 			for (int i = 0; i < allGatherPiecePoints_.size(); i++) {
 
 				if (closestPoints[i]) {
@@ -155,7 +170,6 @@ void ManipulationTool::UnGather(bool freeze)
 	if (goodToDrop) {
 
 		//check collisions
-
 		drop(freeze);
 	}
 }

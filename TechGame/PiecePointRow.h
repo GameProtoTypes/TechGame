@@ -60,10 +60,17 @@ public:
 
 
 	bool Finalize() {
+
+
 		if (!CheckValid())
 			return false;
 
 		FormPointDirectionsOnEndPoints();
+
+		if (localDirection_.Length() <= 0.0f)
+		{
+			URHO3D_LOGWARNING("PiecePointRow has no direction defined, Use SetLocalDirection(...)");
+		}
 
 		return true;
 	}
@@ -96,11 +103,15 @@ public:
 
 	void GetEndPoints(PiecePoint*& pointA, PiecePoint*& pointB);
 
+	void SetRowDirectionLocal(Vector3 direction) { localDirection_ = direction.Normalized(); }
 
-	//return direction pointing from pointA to pointB.
+	//return direction pointing from pointA to pointB. in piece space
 	Vector3 GetRowDirectionLocal();
 
+
+	//return direction pointing from pointA to pointB. in row space
 	Vector3 GetRowDirectionWorld();
+
 
 	bool IsEndPoint(PiecePoint* point);
 
@@ -138,6 +149,8 @@ protected:
 	Vector2 oldSliderLimits_;
 
 	Color debugColor_;
+
+	Vector3 localDirection_ = Vector3::ZERO;
 
 	RowType rowType_ = RowType_Hole;
 	RowTypeGeneral rowTypeGeneral_ = RowTypeGeneral_Hole;

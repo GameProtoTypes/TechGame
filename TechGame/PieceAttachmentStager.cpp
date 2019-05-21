@@ -1,3 +1,6 @@
+#include "Urho3D/Scene/Node.h"
+#include "Urho3D/Scene/Scene.h"
+
 #include "PieceAttachmentStager.h"
 #include "Piece.h"
 #include "PiecePoint.h"
@@ -8,6 +11,9 @@
 
 bool PieceAttachmentStager::AddPotentialAttachement(PiecePoint* pointA, PiecePoint* pointB)
 {
+	URHO3D_LOGINFO("AddPotentialAttachement");
+
+
 	if (pointA == nullptr || pointB == nullptr)
 		return false;
 
@@ -56,6 +62,148 @@ bool PieceAttachmentStager::RemovePotentialAttachment(PiecePoint* pointA, PieceP
 	return false;
 }
 
+bool PieceAttachmentStager::checkDistances()
+{
+	for (AttachmentPair* pair : potentialAttachments_)
+	{
+		Vector3 posA = pair->pointA->GetNode()->GetWorldPosition();
+		Vector3 posB = pair->pointB->GetNode()->GetWorldPosition();
+
+		float thresh = scene_->GetComponent<PieceManager>()->GetAttachPointThreshold();
+
+		if ((posA - posB).Length() > thresh) {
+			URHO3D_LOGINFO(ea::to_string((posA - posB).Length()));
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool PieceAttachmentStager::checkEndPointRules()
+{
+
+	bool allPass = true;
+	for (AttachmentPair* pair : potentialAttachments_) {
+		allPass &= endPointRulePass(pair);
+	}
+
+	return allPass;
+}
+
+bool PieceAttachmentStager::collectRows()
+{
+	rowsA.clear();
+	rowsB.clear();
+
+	for (AttachmentPair* pair : potentialAttachments_)
+	{
+		PiecePointRow* rowA = pair->pointA->GetPiece()->GetNode()->GetComponent<PiecePointRow>();
+		if (rowA)
+		{
+			if (!rowsA.contains(rowA))
+				rowsA.push_back(rowA);
+		}		
+		
+		PiecePointRow* rowB = pair->pointB->GetPiece()->GetNode()->GetComponent<PiecePointRow>();
+		if (rowB)
+		{
+			if (!rowsB.contains(rowB))
+				rowsB.push_back(rowB);
+		}
+	}
+
+	return true;
+}
+
+bool PieceAttachmentStager::checkRowBasicCompatability()
+{
+	bool allPass = true;
+	for (AttachmentPair* pair : potentialAttachments_)
+	{
+		allPass &= PiecePointRow::RowsAttachCompatable(pair->rowA, pair->rowB);
+	}
+	return allPass;
+}
+
+bool PieceAttachmentStager::endPointRulePass(AttachmentPair* attachPair)
+{
+
+	PiecePoint* pointA = attachPair->pointA;
+	PiecePoint* pointB = attachPair->pointB;
+
+	bool pass = true;
+
+	for (int i = 0; i < 2; i++) {
+
+		if (pointA->isEndCap_) {
+			if (pointB->row_) {
+				if (!pointB->row_->IsEndPoint(pointB)) {
+					pass = false;
+					URHO3D_LOGINFO("end cap mid row.");
+				}
+				else
+				{
+					if (pointA->GetDirectionWorld().DotProduct(pointB->GetDirectionWorld()) < 0.0f) {
+						pass = false;
+						URHO3D_LOGINFO("end cap direction does not agree");
+					}
+
+				}
+			}
+		}
+
+
+		//if pointA has no row..
+		if (!pointA->row_) {
+
+			//if pointA is an end cap (ie its a small cap piece)
+			if (pointA->isEndCap_)
+			{
+				if (pointB->row_)
+				{
+					if (!pointB->row_->IsEndPoint(pointB))
+						pass = false;
+					else
+					{
+						if (!(pointA->GetDirectionWorld().DotProduct(pointB->GetDirectionWorld()) > 0.0f)) {
+							pass = false;
+							URHO3D_LOGINFO("direction disagreement");
+						}
+					}
+				}
+				else
+				{
+					if (pointB->isEndCap_) {
+						if (!(pointA->GetDirectionWorld().DotProduct(pointB->GetDirectionWorld()) > 0.0f)) {
+							pass = false;
+							URHO3D_LOGINFO("direction disagreement");
+						}
+					}
+				}
+			}
+		}
+
+
+
+
+
+
+		//swap and try from other point of view.
+		PiecePoint* tmp;
+		tmp = pointB;
+		pointB = pointA;
+		pointA = tmp;
+	}
+
+
+
+
+
+
+	return pass;
+
+}
 bool PieceAttachmentStager::AttachAll()
 {
 	if (!IsValid())
@@ -110,142 +258,4 @@ bool PieceAttachmentStager::AttachAll()
 
 
 	return allAttachSuccess;
-}
-
-bool PieceAttachmentStager::checkDistances()
-{
-	for (AttachmentPair* pair : potentialAttachments_)
-	{
-		Vector3 posA = pair->pointA->GetNode()->GetWorldPosition();
-
-		Vector3 posB = pair->pointB->GetNode()->GetWorldPosition();
-
-
-		if ((posA - posB).Length() > 0.002f) {
-			URHO3D_LOGINFO(ea::to_string((posA - posB).Length()));
-			return false;
-
-		}
-	}
-
-	return true;
-}
-
-bool PieceAttachmentStager::collectRows()
-{
-	rowsA.clear();
-	rowsB.clear();
-
-	for (AttachmentPair* pair : potentialAttachments_)
-	{
-		PiecePointRow* rowA = pair->pointA->GetPiece()->GetNode()->GetComponent<PiecePointRow>();
-		if (rowA)
-		{
-			if (!rowsA.contains(rowA))
-				rowsA.push_back(rowA);
-		}		
-		
-		PiecePointRow* rowB = pair->pointB->GetPiece()->GetNode()->GetComponent<PiecePointRow>();
-		if (rowB)
-		{
-			if (!rowsB.contains(rowB))
-				rowsB.push_back(rowB);
-		}
-	}
-
-	return true;
-}
-
-bool PieceAttachmentStager::checkEndPointRules()
-{
-
-	bool allPass = true;
-	for (AttachmentPair* pair : potentialAttachments_) {
-
-
-		allPass &= endPointRulePass(pair);
-
-
-	}
-
-	return allPass;
-}
-
-bool PieceAttachmentStager::endPointRulePass(AttachmentPair* attachPair)
-{
-
-	PiecePoint* pointA = attachPair->pointA;
-	PiecePoint* pointB = attachPair->pointB;
-
-	bool pass = true;
-
-	for (int i = 0; i < 2; i++) {
-
-		if (pointA->isEndCap_) {
-			if (pointB->row_) {
-				if (!pointB->row_->IsEndPoint(pointB)) {
-					pass = false;
-					URHO3D_LOGINFO("end cap mid row.");
-				}
-				else
-				{
-					if (pointA->GetDirectionWorld().DotProduct(pointB->GetDirectionWorld()) < 0.0f) {
-						pass = false;
-						URHO3D_LOGINFO("end cap direction does not agree");
-					}
-
-				}
-			}
-		}
-
-
-		//if pointA has no row..
-		if (!pointA->row_) {
-
-			//if pointA is an endcap (ie its a smallcap piece)
-			if (pointA->isEndCap_)
-			{
-				if (pointB->row_)
-				{
-					if (!pointB->row_->IsEndPoint(pointB))
-						pass = false;
-					else
-					{
-						if (!(pointA->GetDirectionWorld().DotProduct(pointB->GetDirectionWorld()) > 0.0f)) {
-							pass = false;
-							URHO3D_LOGINFO("direction disagreement");
-						}
-					}
-				}
-				else
-				{
-					if (pointB->isEndCap_) {
-						if (!(pointA->GetDirectionWorld().DotProduct(pointB->GetDirectionWorld()) > 0.0f)) {
-							pass = false;
-							URHO3D_LOGINFO("direction disagreement");
-						}
-					}
-				}
-			}
-		}
-
-
-
-
-
-
-		//swap and try from other point of view.
-		PiecePoint* tmp;
-		tmp = pointB;
-		pointB = pointA;
-		pointA = tmp;
-	}
-
-
-
-
-
-
-	return pass;
-
 }
