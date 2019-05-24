@@ -48,28 +48,29 @@ public:
 
 
 	///Creates a new common group surrounding all pieces. 
-	PieceSolidificationGroup* AddPiecesToNewGroup(ea::vector<Piece*> pieces);
+	PieceSolidificationGroup* AddPiecesToNewSolidGroup(ea::vector<Piece*> pieces);
 
 	///move a piece to an existing group potentially changing its position in the group tree.
-	void MovePieceToGroup(Piece* piece, PieceSolidificationGroup* group);
+	void MovePieceToSolidGroup(Piece* piece, PieceSolidificationGroup* group);
 
 	///return the first common group for the given pieces.
-	PieceSolidificationGroup* GetCommonGroup(ea::vector<Piece*> pieces);
+	PieceSolidificationGroup* GetCommonSolidGroup(ea::vector<Piece*> pieces);
 
 	///finds the most child-like common group and removes all pieces from it.
-	void RemovePiecesFromFirstCommonGroup(ea::vector<Piece*> pieces);
+	void RemovePiecesFromFirstCommonSolidGroup(ea::vector<Piece*> pieces);
 
 	///sets all pieces with no grouping. (moves nodes to scene)  cleans up afterwards.
-	void StripGroups(const ea::vector<Piece*>& pieces);
+	void StripSolidGroups(const ea::vector<Piece*>& pieces);
 
 	///removes the group if the piece is the only member of the group.
-	void RemoveUnnecesaryGroup(Piece* piece);
+	void RemoveUnnecesarySolidGroup(Piece* piece);
 	///
-	void RemoveGroup(PieceSolidificationGroup* group);
+	void RemoveSolidGroup(PieceSolidificationGroup* group);
 
 	///Resolves solidification state for group trees starting at startNode. (Best if scene is used as startNode)
 	void RebuildSolidifiesSub(Node* startNode, bool branchSolidified = false);
 	void RebuildSolidifies();
+
 
 
 

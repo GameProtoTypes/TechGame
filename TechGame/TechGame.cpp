@@ -50,8 +50,6 @@ void TechGame::Setup()
 
 void TechGame::Start()
 {
-
-
 	// Create the scene content
 	CreateScene();
 
@@ -369,6 +367,14 @@ void TechGame::CreateScene()
 
 
 			piece->SetWorldPosition(Vector3(Random(-5,5), y * .2, Random(-5, 5)));
+
+			//ea::vector<Piece*> singlePiece;
+			//singlePiece.push_back(piece->GetComponent<Piece>());
+			//PieceSolidificationGroup* group = scene_->GetComponent<PieceManager>()->AddPiecesToNewSolidGroup(singlePiece);
+			//group->SetSolidified(true);
+
+
+
 			pieces.push_back(piece);
 
 

@@ -163,7 +163,7 @@ void PieceManager::GetPointsAroundPoints(ea::vector<PiecePoint*>& inPieces, ea::
 
 
 
-PieceSolidificationGroup* PieceManager::AddPiecesToNewGroup(ea::vector<Piece*> pieces)
+PieceSolidificationGroup* PieceManager::AddPiecesToNewSolidGroup(ea::vector<Piece*> pieces)
 {
 	ea::vector<Node*> nodes;
 	for (Piece* pc : pieces)
@@ -205,7 +205,7 @@ PieceSolidificationGroup* PieceManager::AddPiecesToNewGroup(ea::vector<Piece*> p
 	}
 }
 
-void PieceManager::MovePieceToGroup(Piece* piece, PieceSolidificationGroup* group)
+void PieceManager::MovePieceToSolidGroup(Piece* piece, PieceSolidificationGroup* group)
 {
 	ea::vector<Piece*> list;
 	list.push_back(piece);
@@ -225,7 +225,7 @@ void PieceManager::MovePieceToGroup(Piece* piece, PieceSolidificationGroup* grou
 	RebuildSolidifies();
 }
 
-PieceSolidificationGroup* PieceManager::GetCommonGroup(ea::vector<Piece*> pieces)
+PieceSolidificationGroup* PieceManager::GetCommonSolidGroup(ea::vector<Piece*> pieces)
 {
 	ea::vector<Node*> nodes;
 	for (Piece* piece : pieces)
@@ -240,7 +240,7 @@ PieceSolidificationGroup* PieceManager::GetCommonGroup(ea::vector<Piece*> pieces
 	return nullptr;
 }
 
-void PieceManager::RemovePiecesFromFirstCommonGroup(ea::vector<Piece*> pieces)
+void PieceManager::RemovePiecesFromFirstCommonSolidGroup(ea::vector<Piece*> pieces)
 {
 	ea::vector<Node*> nodes;
 	for (Piece* pc : pieces)
@@ -261,7 +261,7 @@ void PieceManager::RemovePiecesFromFirstCommonGroup(ea::vector<Piece*> pieces)
 	RebuildSolidifies();
 }
 
-void PieceManager::StripGroups(const ea::vector<Piece*>& pieces)
+void PieceManager::StripSolidGroups(const ea::vector<Piece*>& pieces)
 {
 	ea::vector<Node*> oldParents;
 	for (Piece* pc : pieces)
@@ -286,7 +286,7 @@ void PieceManager::StripGroups(const ea::vector<Piece*>& pieces)
 	RebuildSolidifies();
 }
 
-void PieceManager::RemoveUnnecesaryGroup(Piece* piece)
+void PieceManager::RemoveUnnecesarySolidGroup(Piece* piece)
 {
 	PieceSolidificationGroup* group = piece->GetNearestPieceGroup();
 
@@ -296,14 +296,14 @@ void PieceManager::RemoveUnnecesaryGroup(Piece* piece)
 		group->GetPieces(pieces, 99);
 		if (pieces.size() <= 1)
 		{
-			StripGroups(pieces);
+			StripSolidGroups(pieces);
 			URHO3D_LOGINFO("removed not necessary group.");
 		}
 	}
 
 }
 
-void PieceManager::RemoveGroup(PieceSolidificationGroup* group)
+void PieceManager::RemoveSolidGroup(PieceSolidificationGroup* group)
 {
 	ea::vector<Node*> children;
 	group->GetNode()->GetChildren(children);

@@ -198,9 +198,6 @@ bool PieceAttachmentStager::endPointRulePass(AttachmentPair* attachPair)
 
 
 
-
-
-
 	return pass;
 
 }
@@ -257,15 +254,19 @@ bool PieceAttachmentStager::AttachAll()
 
 			if (allAttachSuccess)
 			{
-				if(groupB)
-					scene_->GetComponent<PieceManager>()->MovePieceToGroup(pair->pieceA, groupB);
+				if (!PiecePointRow::RowsHaveDegreeOfFreedom(pair->rowA, pair->rowB))
+				{
+					if (groupB)
+						scene_->GetComponent<PieceManager>()->MovePieceToSolidGroup(pair->pieceA, groupB);
 
-				if(groupA)
-					scene_->GetComponent<PieceManager>()->MovePieceToGroup(pair->pieceB, groupA);
+					if (groupA)
+						scene_->GetComponent<PieceManager>()->MovePieceToSolidGroup(pair->pieceB, groupA);
+				}
+				else
+				{
+					URHO3D_LOGINFO("rows have degree of freedom - solid group therefore not joined.");
+				}
 			}
-
-
-
 		}
 	}
 
@@ -278,6 +279,10 @@ bool PieceAttachmentStager::AttachAll()
 			group->PopSolidState();
 		}
 	}
+
+
+
+
 
 
 

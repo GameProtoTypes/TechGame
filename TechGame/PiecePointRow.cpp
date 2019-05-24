@@ -484,6 +484,41 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 }
 
+bool PiecePointRow::RowsHaveDegreeOfFreedom(PiecePointRow* rowA, PiecePointRow* rowB)
+{
+	if (!RowsAttachCompatable(rowA, rowB))
+		return false;
+
+	PiecePointRow* rodRow;
+	PiecePointRow* holeRow;
+
+
+
+	if (rowA->GetGeneralRowType() == RowTypeGeneral_Hole)
+	{
+		holeRow = rowA;
+		rodRow = rowB;
+	}
+	else
+	{
+		holeRow = rowB;
+		rodRow = rowA;
+	}
+
+
+	if (holeRow->GetRowType() == RowType_HoleTight)
+	{
+		return false;
+	}
+	else
+	{
+		if (rodRow->GetRowType() == RowType_RodHard)
+			return false;
+		else
+			return true;
+	}
+}
+
 bool PiecePointRow::OptimizeFullRow(PiecePointRow* row)
 {
 	ea::vector<PiecePoint*> points = row->GetPoints();

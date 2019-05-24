@@ -12,8 +12,8 @@ class PiecePointRow : public Component
 public:
 
 	enum RowType {
-		RowType_Hole = 0,
-		RowType_HoleTight,
+		RowType_Hole = 0, // a hole
+		RowType_HoleTight, // a hole that limits movement (glued hole)
 		RowType_RodHard,
 		RowType_RodRound
 	};
@@ -43,6 +43,8 @@ public:
 
 	//attach 2 rows together.  Must be in setup in world configuration first.
 	static bool AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePoint* pointA, PiecePoint* pointB, bool attachAsFullRow = false);
+
+	static bool RowsHaveDegreeOfFreedom(PiecePointRow* rowA, PiecePointRow* rowB);
 
 	// checks if the given row is full and if it is, reforms constraints.
 	static bool OptimizeFullRow(PiecePointRow* row);
