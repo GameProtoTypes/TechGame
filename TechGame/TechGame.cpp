@@ -372,7 +372,8 @@ void TechGame::CreateScene()
 			singlePiece.push_back(piece->GetComponent<Piece>());
 			PieceSolidificationGroup* group = scene_->GetComponent<PieceManager>()->AddPiecesToNewSolidGroup(singlePiece);
 			group->SetSolidified(true);
-
+			group = scene_->GetComponent<PieceManager>()->CreateSolidGroupAroundGroup(group);
+			group->SetSolidified(true);
 
 
 			pieces.push_back(piece);

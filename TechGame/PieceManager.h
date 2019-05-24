@@ -50,6 +50,15 @@ public:
 	///Creates a new common group surrounding all pieces. 
 	PieceSolidificationGroup* AddPiecesToNewSolidGroup(ea::vector<Piece*> pieces);
 
+	///creates a new group around the piece (inside outer existing groups)
+	PieceSolidificationGroup* CreateSolidGroupAroundPiece(Piece* piece);
+
+	///create a new group around an existing group (inside outer existing groups)
+	PieceSolidificationGroup* CreateSolidGroupAroundGroup(PieceSolidificationGroup* group);
+
+	///create a new node with group component
+	Node* CreateGroupNode(Node* parent);
+
 	///move a piece to an existing group potentially changing its position in the group tree.
 	void MovePieceToSolidGroup(Piece* piece, PieceSolidificationGroup* group);
 

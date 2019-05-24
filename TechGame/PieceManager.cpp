@@ -125,7 +125,6 @@ void PieceManager::GetPointsAroundPoints(ea::vector<PiecePoint*>& inPieces, ea::
 	}
 
 	//remove duplicates
-
 	eastl::sort(finalList.begin(), finalList.end());
 	finalList.erase(ea::unique(finalList.begin(), finalList.end()), finalList.end());
 
@@ -141,26 +140,35 @@ void PieceManager::GetPointsAroundPoints(ea::vector<PiecePoint*>& inPieces, ea::
 
 
 
+PieceSolidificationGroup* PieceManager::CreateSolidGroupAroundPiece(Piece* piece)
+{
+	Node* parent = piece->GetNode()->GetParent();
+	Node* newGroupNode = CreateGroupNode(parent);
+	piece->GetNode()->SetParent(newGroupNode);
 
+	return newGroupNode->GetComponent<PieceSolidificationGroup>();
+}
 
+PieceSolidificationGroup* PieceManager::CreateSolidGroupAroundGroup(PieceSolidificationGroup* group)
+{
+	Node* parent = group->GetNode()->GetParent();
+	Node* newGroupNode = CreateGroupNode(parent);
+	group->GetNode()->SetParent(newGroupNode);
 
+	RebuildSolidifies();
+	return newGroupNode->GetComponent<PieceSolidificationGroup>();
+}
 
+Urho3D::Node* PieceManager::CreateGroupNode(Node* parent)
+{
+	Node* node = parent->CreateChild();
+	node->SetWorldPosition(parent->GetWorldPosition());
+	node->CreateComponent<PieceSolidificationGroup>();
 
+	RebuildSolidifies();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	return node;
+}
 
 
 PieceSolidificationGroup* PieceManager::AddPiecesToNewSolidGroup(ea::vector<Piece*> pieces)
@@ -171,13 +179,12 @@ PieceSolidificationGroup* PieceManager::AddPiecesToNewSolidGroup(ea::vector<Piec
 		nodes.push_back(pc->GetNode());
 	}
 
-	Node* commonParent = GetCommonParentWithComponent(nodes);
+	Node* commonParent = GetCommonParentWithComponent(nodes, PieceSolidificationGroup::GetTypeNameStatic());
 
 	// create new group as child of scene
-	if (commonParent == GetScene())
+	if (commonParent == GetScene() || commonParent == nullptr)
 	{
-		Node* newGroupNode = commonParent->CreateChild();
-
+		Node* newGroupNode = GetScene()->CreateChild();
 		newGroupNode->SetWorldPosition(GetNodePositionAverage(nodes));
 
 
@@ -194,14 +201,10 @@ PieceSolidificationGroup* PieceManager::AddPiecesToNewSolidGroup(ea::vector<Piec
 	}
 	else
 	{
-
-
 		//group the common group.
 		URHO3D_LOGINFO("Grouping common group.");
-		Node* newGroupNode = commonParent->GetParent()->CreateChild();
-		PieceSolidificationGroup* newGroup = newGroupNode->CreateComponent<PieceSolidificationGroup>();
-		commonParent->SetParent(newGroupNode);
 
+		PieceSolidificationGroup* newGroup = CreateSolidGroupAroundGroup(commonParent->GetComponent<PieceSolidificationGroup>());
 		RebuildSolidifies();
 
 		return newGroup;

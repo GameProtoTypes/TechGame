@@ -15,7 +15,7 @@ PieceSolidificationGroup::PieceSolidificationGroup(Context* context) : Component
 	//SubscribeToEvent(E_NODEADDED, URHO3D_HANDLER(PieceGroup, HandleNodeAdded));
 	//SubscribeToEvent(E_NODEREMOVED, URHO3D_HANDLER(PieceGroup, HandleNodeRemoved));
 
-	debugColor_.FromHSL(Random(1.0f), 1.0f, 0.5f, 0.2);
+	debugColor_.FromHSL(Random(1.0f), Random(1.0f), Random(1.0f), 0.2);
 }
 
 void PieceSolidificationGroup::RegisterObject(Context* context)
@@ -65,6 +65,20 @@ void PieceSolidificationGroup::GetPieces(ea::vector<Piece*>& pieces, int levels 
 
 void PieceSolidificationGroup::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
+	debug->AddSphere(Sphere(node_->GetWorldPosition(), 0.2f), debugColor_, depthTest);
+	
+	
+	ea::vector<Node*> childrenGroupNodes;
+	node_->GetChildrenWithComponent<PieceSolidificationGroup>(childrenGroupNodes, false);
+	for (Node* node : childrenGroupNodes)
+	{
+		debug->AddLine(node_->GetWorldPosition(), node->GetWorldPosition(), debugColor_, depthTest);
+	}
+
+
+
+
+
 	ea::vector<Piece*> pieces;
 	GetPieces(pieces);
 	for (Piece* piece : pieces) {
