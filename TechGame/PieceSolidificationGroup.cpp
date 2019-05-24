@@ -69,7 +69,7 @@ void PieceSolidificationGroup::DrawDebugGeometry(DebugRenderer* debug, bool dept
 	GetPieces(pieces);
 	for (Piece* piece : pieces) {
 
-		debug->AddLine(node_->GetWorldPosition() + Vector3(1,1,1)*0.1f, piece->GetNode()->GetWorldPosition(), debugColor_, depthTest);
+		debug->AddLine(node_->GetWorldPosition() + Vector3(debugColor_.r_, debugColor_.g_, debugColor_.b_)*0.2f, piece->GetNode()->GetWorldPosition(), debugColor_, depthTest);
 	}
 }
 

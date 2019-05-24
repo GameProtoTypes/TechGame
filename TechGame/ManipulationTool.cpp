@@ -37,13 +37,7 @@ void ManipulationTool::Gather(bool grabOne)
 		pieceVector.push_back(piece);
 		pieceManager_->StripSolidGroups(pieceVector);
 
-		//{//needed?
-		//	ea::vector<Piece*> attachedPieces;
-		//	piece->GetAttachedPieces(attachedPieces, false);
-		//	for (Piece* attachedPiece : attachedPieces) {
-		//		pieceManager_->RemoveUnnecesaryGroup(attachedPiece);
-		//	}
-		//}
+
 
 		piece->DetachAll();
 	}
@@ -51,17 +45,10 @@ void ManipulationTool::Gather(bool grabOne)
 	NewtonRigidBody* rigBody;
 	URHO3D_LOGINFO("num gather pieces: " + ea::to_string(allGatherPieces_.size()));
 	//re parent contraption to single body
-	PieceSolidificationGroup* group = (pieceManager_->GetCommonSolidGroup(allGatherPieces_));
-	if (!group) {
-		
-		gatheredPieceGroup_ = pieceManager_->AddPiecesToNewSolidGroup(allGatherPieces_);
-		URHO3D_LOGINFO("common group created.");
-	}
-	else
-	{
-		URHO3D_LOGINFO("common group found.");
-		gatheredPieceGroup_ = group;
-	}
+
+	gatheredPieceGroup_ = pieceManager_->AddPiecesToNewSolidGroup(allGatherPieces_);
+	URHO3D_LOGINFO("gatheredPieceGroup_ group created.");
+	
 
 
 

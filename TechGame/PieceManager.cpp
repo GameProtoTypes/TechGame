@@ -194,7 +194,10 @@ PieceSolidificationGroup* PieceManager::AddPiecesToNewSolidGroup(ea::vector<Piec
 	}
 	else
 	{
+
+
 		//group the common group.
+		URHO3D_LOGINFO("Grouping common group.");
 		Node* newGroupNode = commonParent->GetParent()->CreateChild();
 		PieceSolidificationGroup* newGroup = newGroupNode->CreateComponent<PieceSolidificationGroup>();
 		commonParent->SetParent(newGroupNode);
