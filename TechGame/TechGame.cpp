@@ -41,7 +41,7 @@ void TechGame::Setup()
 	PieceAttachmentStager::RegisterObject(context_);
 	ContraptionAttachmentMonitor::RegisterObject(context_);
 	Piece::RegisterObject(context_);
-	PieceGroup::RegisterObject(context_);
+	PieceSolidificationGroup::RegisterObject(context_);
 	PiecePoint::RegisterObject(context_);
 	PiecePointRow::RegisterObject(context_);
 
@@ -347,7 +347,7 @@ void TechGame::CreateScene()
 
 		ea::vector<Node*> pieces;
 		int numDiffPieces = 7;
-		for (int y = 0; y < numDiffPieces; y += 1) {
+		for (int y = 0; y < numDiffPieces*10; y += 1) {
 
 			Node* piece;
 
@@ -515,10 +515,10 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 
 		ui::Checkbox("PieceGroups", &drawDebugPieceGroups);
 		if (drawDebugPieceGroups) {
-			ea::vector<PieceGroup*> groups;
-			scene_->GetDerivedComponents<PieceGroup>(groups, true);
+			ea::vector<PieceSolidificationGroup*> groups;
+			scene_->GetDerivedComponents<PieceSolidificationGroup>(groups, true);
 
-			for (PieceGroup* comp : groups)
+			for (PieceSolidificationGroup* comp : groups)
 			{
 				comp->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), false);
 			}

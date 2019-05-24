@@ -163,7 +163,7 @@ void PieceManager::GetPointsAroundPoints(ea::vector<PiecePoint*>& inPieces, ea::
 
 
 
-PieceGroup* PieceManager::AddPiecesToNewGroup(ea::vector<Piece*> pieces)
+PieceSolidificationGroup* PieceManager::AddPiecesToNewGroup(ea::vector<Piece*> pieces)
 {
 	ea::vector<Node*> nodes;
 	for (Piece* pc : pieces)
@@ -181,7 +181,7 @@ PieceGroup* PieceManager::AddPiecesToNewGroup(ea::vector<Piece*> pieces)
 		newGroupNode->SetWorldPosition(GetNodePositionAverage(nodes));
 
 
-		PieceGroup* newGroup = newGroupNode->CreateComponent<PieceGroup>();
+		PieceSolidificationGroup* newGroup = newGroupNode->CreateComponent<PieceSolidificationGroup>();
 
 		for (Piece* pc : pieces)
 		{
@@ -196,7 +196,7 @@ PieceGroup* PieceManager::AddPiecesToNewGroup(ea::vector<Piece*> pieces)
 	{
 		//group the common group.
 		Node* newGroupNode = commonParent->GetParent()->CreateChild();
-		PieceGroup* newGroup = newGroupNode->CreateComponent<PieceGroup>();
+		PieceSolidificationGroup* newGroup = newGroupNode->CreateComponent<PieceSolidificationGroup>();
 		commonParent->SetParent(newGroupNode);
 
 		RebuildSolidifies();
@@ -205,7 +205,7 @@ PieceGroup* PieceManager::AddPiecesToNewGroup(ea::vector<Piece*> pieces)
 	}
 }
 
-void PieceManager::MovePieceToGroup(Piece* piece, PieceGroup* group)
+void PieceManager::MovePieceToGroup(Piece* piece, PieceSolidificationGroup* group)
 {
 	ea::vector<Piece*> list;
 	list.push_back(piece);
@@ -225,7 +225,7 @@ void PieceManager::MovePieceToGroup(Piece* piece, PieceGroup* group)
 	RebuildSolidifies();
 }
 
-PieceGroup* PieceManager::GetCommonGroup(ea::vector<Piece*> pieces)
+PieceSolidificationGroup* PieceManager::GetCommonGroup(ea::vector<Piece*> pieces)
 {
 	ea::vector<Node*> nodes;
 	for (Piece* piece : pieces)
@@ -233,9 +233,9 @@ PieceGroup* PieceManager::GetCommonGroup(ea::vector<Piece*> pieces)
 		nodes.push_back(piece->GetNode());
 	}
 
-	Node* commonGroupNode = GetCommonParentWithComponent(nodes, PieceGroup::GetTypeStatic());
+	Node* commonGroupNode = GetCommonParentWithComponent(nodes, PieceSolidificationGroup::GetTypeStatic());
 	if (commonGroupNode) {
-		return commonGroupNode->GetComponent<PieceGroup>();
+		return commonGroupNode->GetComponent<PieceSolidificationGroup>();
 	}
 	return nullptr;
 }
@@ -247,7 +247,7 @@ void PieceManager::RemovePiecesFromFirstCommonGroup(ea::vector<Piece*> pieces)
 	{
 		nodes.push_back(pc->GetNode());
 	}
-	Node* commonParent = GetCommonParentWithComponent(nodes, PieceGroup::GetTypeStatic());
+	Node* commonParent = GetCommonParentWithComponent(nodes, PieceSolidificationGroup::GetTypeStatic());
 
 	if (commonParent)
 	{
@@ -288,7 +288,7 @@ void PieceManager::StripGroups(const ea::vector<Piece*>& pieces)
 
 void PieceManager::RemoveUnnecesaryGroup(Piece* piece)
 {
-	PieceGroup* group = piece->GetNearestPieceGroup();
+	PieceSolidificationGroup* group = piece->GetNearestPieceGroup();
 
 	if (group)
 	{
@@ -303,7 +303,7 @@ void PieceManager::RemoveUnnecesaryGroup(Piece* piece)
 
 }
 
-void PieceManager::RemoveGroup(PieceGroup* group)
+void PieceManager::RemoveGroup(PieceSolidificationGroup* group)
 {
 	ea::vector<Node*> children;
 	group->GetNode()->GetChildren(children);
@@ -323,19 +323,19 @@ void PieceManager::RemoveGroup(PieceGroup* group)
 void PieceManager::RebuildSolidifiesSub(Node* startNode, bool branchSolidified)
 {
 
-	if (startNode->HasComponent<PieceGroup>()) 
+	if (startNode->HasComponent<PieceSolidificationGroup>()) 
 	{
-		if (!branchSolidified && startNode->GetComponent<PieceGroup>()->GetSolidified())
+		if (!branchSolidified && startNode->GetComponent<PieceSolidificationGroup>()->GetSolidified())
 		{
 
 			branchSolidified = true;
-			startNode->GetComponent<PieceGroup>()->isEffectivelySolidified_ = true;
+			startNode->GetComponent<PieceSolidificationGroup>()->isEffectivelySolidified_ = true;
 			NewtonRigidBody* body = startNode->GetOrCreateComponent<NewtonRigidBody>();
 			body->SetEnabled(true);
 		}
 		else
 		{
-			startNode->GetComponent<PieceGroup>()->isEffectivelySolidified_ = false;
+			startNode->GetComponent<PieceSolidificationGroup>()->isEffectivelySolidified_ = false;
 			startNode->RemoveComponent<NewtonRigidBody>();
 		}
 	}
@@ -439,7 +439,7 @@ void PieceManager::HandleNodeAdded(StringHash event, VariantMap& eventData)
 	Node* parentNode = (Node*)eventData[NodeAdded::P_PARENT].GetPtr();
 	Scene* scene = (Scene*)eventData[NodeAdded::P_SCENE].GetPtr();
 
-	if (scene == GetScene() && parentNode->HasComponent<PieceGroup>())
+	if (scene == GetScene() && parentNode->HasComponent<PieceSolidificationGroup>())
 	{
 		RebuildSolidifies();
 	}
@@ -452,7 +452,7 @@ void PieceManager::HandleNodeRemoved(StringHash event, VariantMap& eventData)
 	Node* parentNode = (Node*)eventData[NodeRemoved::P_PARENT].GetPtr();
 	Scene* scene = (Scene*)eventData[NodeRemoved::P_SCENE].GetPtr();
 
-	if (scene == GetScene() && parentNode->HasComponent<PieceGroup>())
+	if (scene == GetScene() && parentNode->HasComponent<PieceSolidificationGroup>())
 	{
 		RebuildSolidifies();
 	}

@@ -109,19 +109,19 @@ void Piece::DetachAll()
 
 bool Piece::IsEffectivelySolidified()
 {
-	if (node_->GetParent()->HasComponent<PieceGroup>())
+	if (node_->GetParent()->HasComponent<PieceSolidificationGroup>())
 	{
-		return node_->GetParent()->GetComponent<PieceGroup>()->GetEffectivelySolidified();
+		return node_->GetParent()->GetComponent<PieceSolidificationGroup>()->GetEffectivelySolidified();
 	}
 	else
 		return false;
 }
 
-void Piece::GetPieceGroups(ea::vector<PieceGroup*>& pieceGroups)
+void Piece::GetPieceGroups(ea::vector<PieceSolidificationGroup*>& pieceGroups)
 {
 	Node* curNode = node_->GetParent();
 	while (curNode && (curNode != GetScene())) {
-		PieceGroup* group = curNode->GetComponent<PieceGroup>();
+		PieceSolidificationGroup* group = curNode->GetComponent<PieceSolidificationGroup>();
 		if (group)
 		{
 			pieceGroups.push_back(group);
@@ -131,9 +131,9 @@ void Piece::GetPieceGroups(ea::vector<PieceGroup*>& pieceGroups)
 	}
 }
 
-bool Piece::IsPartOfPieceGroup(PieceGroup* group)
+bool Piece::IsPartOfPieceGroup(PieceSolidificationGroup* group)
 {
-	ea::vector<PieceGroup*> groups;
+	ea::vector<PieceSolidificationGroup*> groups;
 	GetPieceGroups(groups);
 	return (groups.contains(group));
 }

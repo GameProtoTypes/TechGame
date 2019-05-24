@@ -1,7 +1,7 @@
 #pragma once
 #include <Urho3D/Urho3DAll.h>
 #include "Piece.h"
-#include "PieceGroup.h"
+#include "PieceSolidificationGroup.h"
 #include "PiecePoint.h"
 #include "PieceManager.h"
 
@@ -84,7 +84,7 @@ protected:
 	}
 
 	WeakPtr<Node> gatherNode_;
-	WeakPtr<PieceGroup> gatheredPieceGroup_;
+	WeakPtr<PieceSolidificationGroup> gatheredPieceGroup_;
 	WeakPtr<Node> gatheredContraptionNode_;
 	WeakPtr<Piece> gatheredPiece_;
 	WeakPtr<PiecePoint> gatherPiecePoint_;

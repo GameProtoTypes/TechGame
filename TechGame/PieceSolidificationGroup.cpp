@@ -1,5 +1,5 @@
 #include "Piece.h"
-#include "PieceGroup.h"
+#include "PieceSolidificationGroup.h"
 #include "PieceManager.h"
 #include "Urho3D/Core/Context.h"
 #include "Urho3D/Scene/Component.h"
@@ -9,25 +9,25 @@
 
 
 
-PieceGroup::PieceGroup(Context* context) : Component(context)
+PieceSolidificationGroup::PieceSolidificationGroup(Context* context) : Component(context)
 {
-	SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(PieceGroup, HandleUpdate));
+	SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(PieceSolidificationGroup, HandleUpdate));
 	//SubscribeToEvent(E_NODEADDED, URHO3D_HANDLER(PieceGroup, HandleNodeAdded));
 	//SubscribeToEvent(E_NODEREMOVED, URHO3D_HANDLER(PieceGroup, HandleNodeRemoved));
 
 	debugColor_.FromHSL(Random(1.0f), 1.0f, 0.5f, 0.2);
 }
 
-void PieceGroup::RegisterObject(Context* context)
+void PieceSolidificationGroup::RegisterObject(Context* context)
 {
-	context->RegisterFactory<PieceGroup>();
+	context->RegisterFactory<PieceSolidificationGroup>();
 }
 
 
 
 
 
-void PieceGroup::SetSolidified(bool solid)
+void PieceSolidificationGroup::SetSolidified(bool solid)
 {
 	if (solid != solidify_) {
 		solidify_ = solid;
@@ -35,7 +35,7 @@ void PieceGroup::SetSolidified(bool solid)
 	}
 }
 
-void PieceGroup::GetPieces(ea::vector<Piece*>& pieces, int levels /*= 1*/, bool singleLevel /*= false*/)
+void PieceSolidificationGroup::GetPieces(ea::vector<Piece*>& pieces, int levels /*= 1*/, bool singleLevel /*= false*/)
 {
 	if (levels < 1)
 		return;
@@ -54,16 +54,16 @@ void PieceGroup::GetPieces(ea::vector<Piece*>& pieces, int levels /*= 1*/, bool 
 
 	
 	if (levels > 1) {
-		node_->GetChildrenWithComponent<PieceGroup>(nodes, false);
+		node_->GetChildrenWithComponent<PieceSolidificationGroup>(nodes, false);
 		for (Node* node : nodes) {
-			node->GetComponent<PieceGroup>()->GetPieces(pieces, levels - 1, singleLevel);
+			node->GetComponent<PieceSolidificationGroup>()->GetPieces(pieces, levels - 1, singleLevel);
 		}
 	}
 
 }
 
 
-void PieceGroup::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
+void PieceSolidificationGroup::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
 	ea::vector<Piece*> pieces;
 	GetPieces(pieces);
@@ -73,11 +73,11 @@ void PieceGroup::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 	}
 }
 
-void PieceGroup::Update()
+void PieceSolidificationGroup::Update()
 {
 }
 
-void PieceGroup::OnNodeSet(Node* node)
+void PieceSolidificationGroup::OnNodeSet(Node* node)
 {
 	if (node)
 	{
@@ -90,17 +90,17 @@ void PieceGroup::OnNodeSet(Node* node)
 }
 
 
-void PieceGroup::HandleUpdate(StringHash event, VariantMap& eventData)
+void PieceSolidificationGroup::HandleUpdate(StringHash event, VariantMap& eventData)
 {
 
 }
 
-void PieceGroup::HandleNodeAdded(StringHash event, VariantMap& eventData)
+void PieceSolidificationGroup::HandleNodeAdded(StringHash event, VariantMap& eventData)
 {
 
 }
 
-void PieceGroup::HandleNodeRemoved(StringHash event, VariantMap& eventData)
+void PieceSolidificationGroup::HandleNodeRemoved(StringHash event, VariantMap& eventData)
 {
 
 }

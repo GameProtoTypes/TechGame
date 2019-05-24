@@ -1,6 +1,6 @@
 #include "ManipulationTool.h"
 #include "PieceManager.h"
-#include "PieceGroup.h"
+#include "PieceSolidificationGroup.h"
 #include <vector>
 #include <algorithm>
 #include "PieceAttachmentStager.h"
@@ -51,7 +51,7 @@ void ManipulationTool::Gather(bool grabOne)
 	NewtonRigidBody* rigBody;
 	URHO3D_LOGINFO("num gather pieces: " + ea::to_string(allGatherPieces_.size()));
 	//re parent contraption to single body
-	PieceGroup* group = (pieceManager_->GetCommonGroup(allGatherPieces_));
+	PieceSolidificationGroup* group = (pieceManager_->GetCommonGroup(allGatherPieces_));
 	if (!group) {
 		
 		gatheredPieceGroup_ = pieceManager_->AddPiecesToNewGroup(allGatherPieces_);

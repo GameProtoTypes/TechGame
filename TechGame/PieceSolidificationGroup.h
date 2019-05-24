@@ -4,10 +4,10 @@
 
 //component that represents a group of pieces.  component is on a root node common to all pieces in the group.
 class Piece;
-class PieceGroup : public Component {
-	URHO3D_OBJECT(PieceGroup, Component);
+class PieceSolidificationGroup : public Component {
+	URHO3D_OBJECT(PieceSolidificationGroup, Component);
 public:
-	PieceGroup(Context* context);
+	PieceSolidificationGroup(Context* context);
 
 	friend class PieceManager;
 

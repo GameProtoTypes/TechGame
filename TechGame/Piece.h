@@ -6,18 +6,18 @@
 #include "NewtonRigidBody.h"
 
 
-#include "PieceGroup.h"
+#include "PieceSolidificationGroup.h"
 #include "NodeTools.h"
 
 
 
 class PiecePoint;
 class PiecePointRow;
-class PieceGroup;
+class PieceSolidificationGroup;
 class Piece : public Component {
 	URHO3D_OBJECT(Piece, Component);
 public:
-	friend class PieceGroup;
+	friend class PieceSolidificationGroup;
 
 	Piece(Context* context);
 
@@ -49,11 +49,11 @@ public:
 	///return the piece groups the piece is part of.  the first PieceGroup in vector is the parent node's PieceGroup,
 	///Followed by ancestors further and further up the tree.
 	///The Last PieceGroup is the most root Group.
-	void GetPieceGroups(ea::vector<PieceGroup*>& pieceGroups);
+	void GetPieceGroups(ea::vector<PieceSolidificationGroup*>& pieceGroups);
 
-	PieceGroup* GetNearestPieceGroup()
+	PieceSolidificationGroup* GetNearestPieceGroup()
 	{
-		ea::vector<PieceGroup*> pieceGroups;
+		ea::vector<PieceSolidificationGroup*> pieceGroups;
 		GetPieceGroups(pieceGroups);
 		if (pieceGroups.size())
 			return pieceGroups.front();
@@ -61,7 +61,7 @@ public:
 		return nullptr;
 	}
 
-	bool IsPartOfPieceGroup(PieceGroup* group);
+	bool IsPartOfPieceGroup(PieceSolidificationGroup* group);
 
 	Color primaryColor_;
 

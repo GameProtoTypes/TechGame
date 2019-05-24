@@ -4,7 +4,7 @@
 
 //class to manage pieces on a scene level. (attach to scene node)
 class Piece;
-class PieceGroup;
+class PieceSolidificationGroup;
 class PiecePoint;
 class PieceManager : public Component
 {
@@ -48,13 +48,13 @@ public:
 
 
 	///Creates a new common group surrounding all pieces. 
-	PieceGroup* AddPiecesToNewGroup(ea::vector<Piece*> pieces);
+	PieceSolidificationGroup* AddPiecesToNewGroup(ea::vector<Piece*> pieces);
 
 	///move a piece to an existing group potentially changing its position in the group tree.
-	void MovePieceToGroup(Piece* piece, PieceGroup* group);
+	void MovePieceToGroup(Piece* piece, PieceSolidificationGroup* group);
 
 	///return the first common group for the given pieces.
-	PieceGroup* GetCommonGroup(ea::vector<Piece*> pieces);
+	PieceSolidificationGroup* GetCommonGroup(ea::vector<Piece*> pieces);
 
 	///finds the most child-like common group and removes all pieces from it.
 	void RemovePiecesFromFirstCommonGroup(ea::vector<Piece*> pieces);
@@ -65,7 +65,7 @@ public:
 	///removes the group if the piece is the only member of the group.
 	void RemoveUnnecesaryGroup(Piece* piece);
 	///
-	void RemoveGroup(PieceGroup* group);
+	void RemoveGroup(PieceSolidificationGroup* group);
 
 	///Resolves solidification state for group trees starting at startNode. (Best if scene is used as startNode)
 	void RebuildSolidifiesSub(Node* startNode, bool branchSolidified = false);

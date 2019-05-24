@@ -222,7 +222,7 @@ bool PieceAttachmentStager::AttachAll()
 
 	//un solididify pieces involved in attachement
 	for (Piece* piece : allPieces) {
-		PieceGroup* group = piece->GetNearestPieceGroup();
+		PieceSolidificationGroup* group = piece->GetNearestPieceGroup();
 		if (group)
 		{
 			if (group->GetSolidified()) {
@@ -248,8 +248,8 @@ bool PieceAttachmentStager::AttachAll()
 		if (!pair->rowA->AttachedToRow(pair->rowB) && !pair->rowB->AttachedToRow(pair->rowA)) {
 
 			//get closest existing groups from both sides.
-			PieceGroup* groupA = pair->pieceA->GetNearestPieceGroup();
-			PieceGroup* groupB = pair->pieceB->GetNearestPieceGroup();
+			PieceSolidificationGroup* groupA = pair->pieceA->GetNearestPieceGroup();
+			PieceSolidificationGroup* groupB = pair->pieceB->GetNearestPieceGroup();
 
 			
 
@@ -272,7 +272,7 @@ bool PieceAttachmentStager::AttachAll()
 
 	
 	for (Piece* piece : allPieces) {
-		PieceGroup* group = piece->GetNearestPieceGroup();
+		PieceSolidificationGroup* group = piece->GetNearestPieceGroup();
 		if (group)
 		{
 			group->PopSolidState();
