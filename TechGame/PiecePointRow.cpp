@@ -160,8 +160,8 @@ Urho3D::Vector3 PiecePointRow::GetWorldCenter()
 
 bool PiecePointRow::AttachedToRow(PiecePointRow* row)
 {
-	for (int i = 0; i < attachedRows_.size(); i++) {
-		if (attachedRows_[i].rowA_ == row)
+	for (int i = 0; i < rowAttachements_.size(); i++) {
+		if (rowAttachements_[i].rowA_ == row)
 			return true;
 	}
 	return false;
@@ -169,34 +169,44 @@ bool PiecePointRow::AttachedToRow(PiecePointRow* row)
 
 bool PiecePointRow::DetachFrom(PiecePointRow* otherRow)
 {
-	for (int i = 0; i < attachedRows_.size(); i++) {
+
+	bool detached = false;
+	for (int i = 0; i < rowAttachements_.size(); i++) {
 		
-		if (attachedRows_[i].rowA_ == otherRow)
+		if (rowAttachements_[i].rowA_ == otherRow)
 		{
-			if (!attachedRows_[i].constraint_.Expired())
+			if (!rowAttachements_[i].constraint_.Expired())
 			{
-				attachedRows_[i].constraint_->Remove();
+				rowAttachements_[i].constraint_->Remove();
 			}
 
-			attachedRows_.erase(i);
-			return true;
+			rowAttachements_.erase(i);
+			detached = true;
 		}
-
 	}
+	for (int i = 0; i < otherRow->rowAttachements_.size(); i++) {
+
+		if (otherRow->rowAttachements_[i].rowA_ == this)
+		{
+			otherRow->rowAttachements_.erase(i);
+			detached = true;
+		}
+	}
+
+
+
 	
-	return false;
+	return detached;
 }
 
 bool PiecePointRow::DetachAll()
 {
-	for (int i = 0; i < attachedRows_.size(); i++) {
-		if (!attachedRows_[i].constraint_.Expired())
-		{
-			attachedRows_[i].constraint_->Remove();
-		}
+	ea::vector<RowAttachement> rowAttachementsCopy = rowAttachements_;
+	for (int i = 0; i < rowAttachementsCopy.size(); i++) {
+		DetachFrom(rowAttachementsCopy[i].rowA_);
 	}
 
-	attachedRows_.clear();
+	rowAttachements_.clear();
 
 	return true;
 }
@@ -208,7 +218,6 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 		URHO3D_LOGWARNING("PiecePointRow::AttachRows: Rows Not Compatable");
 		return false;
 	}
-
 
 	if (rowA->AttachedToRow(rowB) || rowB->AttachedToRow(rowA)){
 		URHO3D_LOGWARNING("PiecePointRow::AttachRows: rows already attached");
@@ -283,11 +292,11 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 			if (!diff.IsNaN() && Abs(diff.Axis().x_) <= 1.0f)
 			{
-				URHO3D_LOGINFO("non nan");
+				//URHO3D_LOGINFO("non nan");
 				diffSnap90 = Quaternion(RoundToNearestMultiple(diff.Angle(), 45.0f), diff.Axis());
 			}
 			else {
-				URHO3D_LOGINFO("nan");
+				//URHO3D_LOGINFO("nan");
 				diffSnap90 = Quaternion::IDENTITY;
 			}
 
@@ -459,12 +468,12 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 		attachment.rowB_ = theRodRow;
 		attachment.constraint_ = constraint;
 
-		theRodRow->attachedRows_.push_back(attachment);
+		theRodRow->rowAttachements_.push_back(attachment);
 		attachment.rowA_ = theRodRow;
 		attachment.rowB_ = theHoleRow;
 		attachment.pointA_ = pointB;
 		attachment.pointB = pointA;
-		theHoleRow->attachedRows_.push_back(attachment);
+		theHoleRow->rowAttachements_.push_back(attachment);
 
 		rowA->UpdatePointOccupancies();
 		rowB->UpdatePointOccupancies();
@@ -489,7 +498,7 @@ bool PiecePointRow::OptimizeFullRow(PiecePointRow* row)
 		if (fullyOccupied && !row->isOccupiedOptimized_)
 		{
 			URHO3D_LOGINFO("Optimizing Rod..");
-			for (RowAttachement attachment : row->attachedRows_)
+			for (RowAttachement attachment : row->rowAttachements_)
 			{
 
 				if (attachment.rowB_->GetGeneralRowType() != RowTypeGeneral_Hole)
@@ -504,14 +513,14 @@ bool PiecePointRow::OptimizeFullRow(PiecePointRow* row)
 
 
 				bool allPlaner = true;
-				for (RowAttachement attachment2 : row->attachedRows_)
+				for (RowAttachement attachment2 : row->rowAttachements_)
 				{
 					allPlaner &= attachment2.rowA_->GetIsPiecePlaner();
 				}
 
 				//if all pieces are planer - dissable collisions between them.
 				if (allPlaner) {
-					for (RowAttachement attachment2 : row->attachedRows_)
+					for (RowAttachement attachment2 : row->rowAttachements_)
 					{
 						attachment.rowA_->GetPiece()->GetRigidBody()->SetCollisionOverride(attachment2.rowA_->GetPiece()->GetRigidBody(), false);
 					}
@@ -524,13 +533,13 @@ bool PiecePointRow::OptimizeFullRow(PiecePointRow* row)
 		else if (!fullyOccupied && row->isOccupiedOptimized_)
 		{
 			URHO3D_LOGINFO("Un Optimizing Rod..");
-			for (RowAttachement attachment : row->attachedRows_)
+			for (RowAttachement attachment : row->rowAttachements_)
 			{
 				if (attachment.rowA_->GetGeneralRowType() != RowTypeGeneral_Hole)
 					continue;
 
 
-				for (RowAttachement attachment2 : row->attachedRows_)
+				for (RowAttachement attachment2 : row->rowAttachements_)
 				{
 					if (attachment.rowA_->GetGeneralRowType() != RowTypeGeneral_Hole)
 						continue;
@@ -565,7 +574,7 @@ void PiecePointRow::HandleUpdate(StringHash event, VariantMap& eventData)
 
 void PiecePointRow::UpdatePointOccupancies()
 {
-	if (!attachedRows_.size())
+	if (!rowAttachements_.size())
 		return;
 
 	if (rowType_ == RowType_RodHard || rowType_ == RowType_HoleTight)
@@ -581,7 +590,7 @@ void PiecePointRow::UpdatePointOccupancies()
 
 	ea::vector<PiecePoint*> otherPoints;
 
-	for (RowAttachement& row : attachedRows_)
+	for (RowAttachement& row : rowAttachements_)
 	{
 		otherPoints.push_back(row.rowA_->points_);	
 	}

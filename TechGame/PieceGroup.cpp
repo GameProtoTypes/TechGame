@@ -69,15 +69,7 @@ void PieceGroup::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 	GetPieces(pieces);
 	for (Piece* piece : pieces) {
 
-		debug->AddLine(node_->GetWorldPosition(), piece->GetNode()->GetWorldPosition(), debugColor_, depthTest);
-	}
-
-
-	ea::vector<Node*> childGroups;
-	node_->GetChildrenWithComponent<PieceGroup>(childGroups);
-	for (Node* childGroupNode : childGroups)
-	{
-		debug->AddLine(node_->GetWorldPosition(), childGroupNode->GetWorldPosition(), debugColor_, depthTest);
+		debug->AddLine(node_->GetWorldPosition() + Vector3(1,1,1)*0.1f, piece->GetNode()->GetWorldPosition(), debugColor_, depthTest);
 	}
 }
 

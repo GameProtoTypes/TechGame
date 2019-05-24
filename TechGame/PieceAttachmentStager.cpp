@@ -210,22 +210,27 @@ bool PieceAttachmentStager::AttachAll()
 		return false;
 
 
-	ea::vector<Piece*> pieces;
-
-	//un solididify pieces involved in attachement
+	ea::vector<Piece*> allPieces;
 	for (AttachmentPair* pair : finalAttachments_)
 	{
-		if(!pieces.contains(pair->pieceA))
-			pieces.push_back(pair->pieceA);
+		if(!allPieces.contains(pair->pieceA))
+			allPieces.push_back(pair->pieceA);
 
-		if(!pieces.contains(pair->pieceB))
-			pieces.push_back(pair->pieceB);
+		if(!allPieces.contains(pair->pieceB))
+			allPieces.push_back(pair->pieceB);
 	}
-	for (Piece* piece : pieces) {
+
+	//un solididify pieces involved in attachement
+	for (Piece* piece : allPieces) {
 		PieceGroup* group = piece->GetNearestPieceGroup();
 		if (group)
 		{
-			group->PushSolidState(false);
+			if (group->GetSolidified()) {
+				URHO3D_LOGINFO("group was solid");
+
+				group->PushSolidState(false);
+				//group->SetSolidified(false);
+			}
 		}
 	}
 
@@ -233,20 +238,40 @@ bool PieceAttachmentStager::AttachAll()
 	//pieces.Front()->GetScene()->GetComponent<PieceManager>()->StripGroups(pieces);
 
 
-	pieces.front()->GetScene()->GetComponent<NewtonPhysicsWorld>()->ForceBuild();
+	allPieces.front()->GetScene()->GetComponent<NewtonPhysicsWorld>()->ForceBuild();
 
 
 
 	bool allAttachSuccess = true;
 	for (AttachmentPair* pair : finalAttachments_)
 	{
-		if(!pair->rowA->AttachedToRow(pair->rowB) && !pair->rowB->AttachedToRow(pair->rowA))
+		if (!pair->rowA->AttachedToRow(pair->rowB) && !pair->rowB->AttachedToRow(pair->rowA)) {
+
+			//get closest existing groups from both sides.
+			PieceGroup* groupA = pair->pieceA->GetNearestPieceGroup();
+			PieceGroup* groupB = pair->pieceB->GetNearestPieceGroup();
+
+			
+
 			allAttachSuccess &= PiecePointRow::AttachRows(pair->rowA, pair->rowB, pair->pointA, pair->pointB);
+
+			if (allAttachSuccess)
+			{
+				if(groupB)
+					scene_->GetComponent<PieceManager>()->MovePieceToGroup(pair->pieceA, groupB);
+
+				if(groupA)
+					scene_->GetComponent<PieceManager>()->MovePieceToGroup(pair->pieceB, groupA);
+			}
+
+
+
+		}
 	}
 
 
 	
-	for (Piece* piece : pieces) {
+	for (Piece* piece : allPieces) {
 		PieceGroup* group = piece->GetNearestPieceGroup();
 		if (group)
 		{

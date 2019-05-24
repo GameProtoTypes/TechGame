@@ -139,7 +139,7 @@ public:
 
 	ea::vector<PiecePoint*> points_;
 
-	ea::vector<RowAttachement> attachedRows_;
+	ea::vector<RowAttachement> rowAttachements_;
 protected:
 
 	void HandleUpdate(StringHash event, VariantMap& eventData);

@@ -203,8 +203,6 @@ PieceGroup* PieceManager::AddPiecesToNewGroup(ea::vector<Piece*> pieces)
 
 		return newGroup;
 	}
-
-
 }
 
 void PieceManager::MovePieceToGroup(Piece* piece, PieceGroup* group)
@@ -263,15 +261,16 @@ void PieceManager::RemovePiecesFromFirstCommonGroup(ea::vector<Piece*> pieces)
 	RebuildSolidifies();
 }
 
-void PieceManager::StripGroups(ea::vector<Piece*> pieces)
+void PieceManager::StripGroups(const ea::vector<Piece*>& pieces)
 {
 	ea::vector<Node*> oldParents;
 	for (Piece* pc : pieces)
 	{
 		oldParents.push_back(pc->GetNode()->GetParent());
 		pc->GetNode()->SetParent(GetScene());
+		URHO3D_LOGINFO("Piece Moved To Scene.");
 	}
-
+	
 	//remove dangling group nodes.
 	for (Node* oldParent : oldParents)
 	{
@@ -280,10 +279,28 @@ void PieceManager::StripGroups(ea::vector<Piece*> pieces)
 			Node* rem = curParent;
 			curParent = curParent->GetParent();
 			rem->Remove();
+			URHO3D_LOGINFO("Old PieceGroup-Node removed.");
 		}
 	}
 
 	RebuildSolidifies();
+}
+
+void PieceManager::RemoveUnnecesaryGroup(Piece* piece)
+{
+	PieceGroup* group = piece->GetNearestPieceGroup();
+
+	if (group)
+	{
+		ea::vector<Piece*> pieces;
+		group->GetPieces(pieces, 99);
+		if (pieces.size() <= 1)
+		{
+			StripGroups(pieces);
+			URHO3D_LOGINFO("removed not necessary group.");
+		}
+	}
+
 }
 
 void PieceManager::RemoveGroup(PieceGroup* group)

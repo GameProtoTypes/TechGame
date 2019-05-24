@@ -28,7 +28,7 @@ void Piece::GetAttachedRows(ea::vector<PiecePointRow*>& rows)
 	GetPointRows(ownRows);
 
 	for (PiecePointRow* row : ownRows) {
-		for (PiecePointRow::RowAttachement& attachedRow : row->attachedRows_) {
+		for (PiecePointRow::RowAttachement& attachedRow : row->rowAttachements_) {
 
 			rows.push_back(attachedRow.rowA_);
 		}
@@ -58,9 +58,9 @@ void Piece::GetAttachedPiecesRec(ea::vector<Piece*>& pieces, bool recursive)
 	{
 		Piece* attachedPiece = nullptr;
 
-		if (row->attachedRows_.size()) {
+		if (row->rowAttachements_.size()) {
 			
-			for (PiecePointRow::RowAttachement& attachedRow : row->attachedRows_) {
+			for (PiecePointRow::RowAttachement& attachedRow : row->rowAttachements_) {
 				
 				attachedPiece = attachedRow.rowA_->GetPiece();
 

@@ -210,7 +210,7 @@ void TechGame::UpdateUIInput(float timestep)
 			cameraNode_->GetComponent<ManipulationTool>()->UnGather(input->GetKeyDown(KEY_SHIFT));
 		}
 		else
-			cameraNode_->GetComponent<ManipulationTool>()->Gather();
+			cameraNode_->GetComponent<ManipulationTool>()->Gather(input->GetKeyDown(KEY_SHIFT));
 
 	}
 
@@ -347,7 +347,7 @@ void TechGame::CreateScene()
 
 		ea::vector<Node*> pieces;
 		int numDiffPieces = 7;
-		for (int y = 0; y < numDiffPieces*10; y += 1) {
+		for (int y = 0; y < numDiffPieces; y += 1) {
 
 			Node* piece;
 
@@ -526,7 +526,33 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 
 		ui::End();
 
+
+
+
+		ui::Begin("Utils");
+
+
+		if (ui::Button("Save Scene..."))
+		{
+			ea::string filePath = "sceneSave.xml";
+
+			GetSubsystem<FileSystem>()->Delete(filePath);
+
+			SharedPtr<File> outFile = SharedPtr<File>(new File(context_, "sceneSave.xml", Urho3D::FILE_WRITE));
+			
+			bool saveSuccess = scene_->SaveXML(*outFile);
+		}
+
+		ui::End();
+
+
+
+
 	}
+
+
+
+	
 }
 
 void TechGame::HandleNodeCollisionStart(StringHash eventType, VariantMap& eventData)

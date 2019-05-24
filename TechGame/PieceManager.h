@@ -60,8 +60,10 @@ public:
 	void RemovePiecesFromFirstCommonGroup(ea::vector<Piece*> pieces);
 
 	///sets all pieces with no grouping. (moves nodes to scene)  cleans up afterwards.
-	void StripGroups(ea::vector<Piece*> pieces);
+	void StripGroups(const ea::vector<Piece*>& pieces);
 
+	///removes the group if the piece is the only member of the group.
+	void RemoveUnnecesaryGroup(Piece* piece);
 	///
 	void RemoveGroup(PieceGroup* group);
 

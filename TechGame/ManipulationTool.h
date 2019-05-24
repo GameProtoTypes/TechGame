@@ -36,7 +36,7 @@ public:
 
 
 
-	void Gather();
+	void Gather(bool grabOne = false);
 	bool IsGathering();
 	void UnGather(bool freeze);
 
@@ -73,7 +73,7 @@ protected:
 
 	void drop(bool freeze);
 
-	void formGatherContraption();
+	void formGatherContraption(bool onlyOne = false);
 
 	void updateKinematicsControllerPos()
 	{

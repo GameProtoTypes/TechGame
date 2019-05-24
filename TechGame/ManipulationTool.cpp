@@ -16,7 +16,7 @@ void ManipulationTool::RegisterObject(Context* context)
 	context->RegisterFactory<ManipulationTool>();
 }
 
-void ManipulationTool::Gather()
+void ManipulationTool::Gather(bool grabOne)
 {
 	PiecePoint* piecePoint = GetClosestAimPiecePoint();
 	if (!piecePoint)
@@ -28,19 +28,42 @@ void ManipulationTool::Gather()
 	gatheredPiece_ = piece;
 	gatherPiecePoint_ = piecePoint;
 
-	formGatherContraption();
+	formGatherContraption(grabOne);
 	
 
+	if (grabOne)
+	{
+		ea::vector<Piece*> pieceVector;
+		pieceVector.push_back(piece);
+		pieceManager_->StripGroups(pieceVector);
+
+		//{//needed?
+		//	ea::vector<Piece*> attachedPieces;
+		//	piece->GetAttachedPieces(attachedPieces, false);
+		//	for (Piece* attachedPiece : attachedPieces) {
+		//		pieceManager_->RemoveUnnecesaryGroup(attachedPiece);
+		//	}
+		//}
+
+		piece->DetachAll();
+	}
+
 	NewtonRigidBody* rigBody;
-
+	URHO3D_LOGINFO("num gather pieces: " + ea::to_string(allGatherPieces_.size()));
 	//re parent contraption to single body
-
 	PieceGroup* group = (pieceManager_->GetCommonGroup(allGatherPieces_));
 	if (!group) {
+		
 		gatheredPieceGroup_ = pieceManager_->AddPiecesToNewGroup(allGatherPieces_);
+		URHO3D_LOGINFO("common group created.");
 	}
 	else
+	{
+		URHO3D_LOGINFO("common group found.");
 		gatheredPieceGroup_ = group;
+	}
+
+
 
 	gatheredPieceGroup_->SetSolidified(true);
 
@@ -82,9 +105,9 @@ bool ManipulationTool::IsGathering()
 
 void ManipulationTool::UnGather(bool freeze)
 {
-	URHO3D_LOGINFO("");
-	URHO3D_LOGINFO("");
-	URHO3D_LOGINFO("");
+	//URHO3D_LOGINFO("");
+	//URHO3D_LOGINFO("");
+	//URHO3D_LOGINFO("");
 
 
 
@@ -96,7 +119,7 @@ void ManipulationTool::UnGather(bool freeze)
 		ea::vector<PiecePoint*> comparisonPoints;
 		pieceManager->GetPointsAroundPoints(allGatherPiecePoints_, comparisonPoints, 0.2f);
 
-		URHO3D_LOGINFO("comparisonPoints Size: " + ea::to_string(comparisonPoints.size()));
+		//URHO3D_LOGINFO("comparisonPoints Size: " + ea::to_string(comparisonPoints.size()));
 
 		//check that all other points are within attach tolerance.
 		bool attachmentPotential = false;
@@ -107,7 +130,7 @@ void ManipulationTool::UnGather(bool freeze)
 
 		for(int i = 0; i < allGatherPiecePoints_.size(); i++) 
 		{
-			URHO3D_LOGINFO("looking at allGatherPiecePoints[" + ea::to_string(i) + "]");
+			//URHO3D_LOGINFO("looking at allGatherPiecePoints[" + ea::to_string(i) + "]");
 			
 			PiecePoint* point = allGatherPiecePoints_[i];
 
@@ -138,7 +161,7 @@ void ManipulationTool::UnGather(bool freeze)
 			if (closest && closestDist <= pieceManager->GetAttachPointThreshold()) {
 				closestPoints[i] = closest;
 				attachmentPotential = true;
-				URHO3D_LOGINFO("closest updated");
+				//URHO3D_LOGINFO("closest updated");
 			}
 		}
 
@@ -354,13 +377,25 @@ void ManipulationTool::drop(bool freeze)
 
 	if (!freeze) {
 		
-		GetScene()->GetComponent<PieceManager>()->RemoveGroup(gatheredPieceGroup_);
-
+		if (!gatheredPieceGroup_.Expired()) {
+			GetScene()->GetComponent<PieceManager>()->RemoveGroup(gatheredPieceGroup_);
+		}
+		else
+		{
+			GetScene()->GetComponent<PieceManager>()->RemoveGroup(gatheredPiece_->GetNearestPieceGroup());
+		}
 	}
 	else
 	{
-		gatheredContraptionNode_->GetComponent<NewtonRigidBody>()->SetMassScale(0);
-
+		//if (!gatheredContraptionNode_.Expired()) {
+		//	gatheredContraptionNode_->GetComponent<NewtonRigidBody>()->SetMassScale(0);
+		//	gatheredContraptionNode_->GetComponent<NewtonRigidBody>()->SetNoCollideOverride(false);
+		//}
+		//else
+		//{
+			gatheredPiece_->GetNearestPieceGroup()->GetNode()->GetComponent<NewtonRigidBody>()->SetMassScale(0);
+			gatheredPiece_->GetNearestPieceGroup()->GetNode()->GetComponent<NewtonRigidBody>()->SetNoCollideOverride(false);
+//		}
 	}
 	
 	gatheredPieceGroup_ = nullptr;
@@ -384,20 +419,23 @@ void ManipulationTool::drop(bool freeze)
 	gatherPiecePoint_ = nullptr;
 }
 
-void ManipulationTool::formGatherContraption()
+void ManipulationTool::formGatherContraption(bool onlyOne)
 {
 	allGatherPieces_.clear();
 	allGatherPiecePoints_.clear();
 
-	gatheredPiece_->GetNode()->GetDerivedComponents<PiecePoint>(allGatherPiecePoints_, true);
+
+	gatheredPiece_->GetNode()->GetDerivedComponents<PiecePoint>(allGatherPiecePoints_, !onlyOne);
 	allGatherPieces_.push_back( gatheredPiece_ );
 
-	ea::vector<Piece*> attachedPieces;
-	gatheredPiece_->GetAttachedPieces(attachedPieces, true);
+	if (!onlyOne) {
+		ea::vector<Piece*> attachedPieces;
+		gatheredPiece_->GetAttachedPieces(attachedPieces, true);
 
-	for (Piece* piece : attachedPieces)
-	{
-		allGatherPieces_.push_back( piece );
-		piece->GetNode()->GetDerivedComponents<PiecePoint>(allGatherPiecePoints_, true, false);
+		for (Piece* piece : attachedPieces)
+		{
+			allGatherPieces_.push_back(piece);
+			piece->GetNode()->GetDerivedComponents<PiecePoint>(allGatherPiecePoints_, true, false);
+		}
 	}
 }
