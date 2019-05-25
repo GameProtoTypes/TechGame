@@ -65,9 +65,10 @@ void PieceSolidificationGroup::GetPieces(ea::vector<Piece*>& pieces, int levels 
 
 void PieceSolidificationGroup::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
+	//draw sphere at the group node.
 	debug->AddSphere(Sphere(node_->GetWorldPosition(), 0.2f), debugColor_, depthTest);
 	
-	
+	//draw lines to subgroups.
 	ea::vector<Node*> childrenGroupNodes;
 	node_->GetChildrenWithComponent<PieceSolidificationGroup>(childrenGroupNodes, false);
 	for (Node* node : childrenGroupNodes)
@@ -75,15 +76,16 @@ void PieceSolidificationGroup::DrawDebugGeometry(DebugRenderer* debug, bool dept
 		debug->AddLine(node_->GetWorldPosition(), node->GetWorldPosition(), debugColor_, depthTest);
 	}
 
-
-
-
+	//draw lines to sub-pieces.
 	ea::vector<Piece*> pieces;
 	GetPieces(pieces);
 	for (Piece* piece : pieces) {
 
 		debug->AddLine(node_->GetWorldPosition(), piece->GetNode()->GetWorldPosition(), debugColor_, depthTest);
 	}
+
+
+
 }
 
 void PieceSolidificationGroup::Update()
