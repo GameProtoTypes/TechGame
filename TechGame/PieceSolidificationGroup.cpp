@@ -25,16 +25,6 @@ void PieceSolidificationGroup::RegisterObject(Context* context)
 
 
 
-
-
-void PieceSolidificationGroup::SetSolidified(bool solid)
-{
-	if (solid != solidify_) {
-		solidify_ = solid;
-		GetScene()->GetComponent<PieceManager>()->RebuildSolidifies();
-	}
-}
-
 void PieceSolidificationGroup::GetPieces(ea::vector<Piece*>& pieces, int levels /*= 1*/, bool singleLevel /*= false*/)
 {
 	if (levels < 1)

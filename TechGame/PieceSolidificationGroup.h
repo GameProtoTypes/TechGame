@@ -13,32 +13,6 @@ public:
 
 	static void RegisterObject(Context* context);
 
-	///Set this group as being solidified or not.  if not - the pieces may still be solidified if a parent group is still solid.
-	void SetSolidified(bool solid);
-
-	bool GetSolidified() const { return solidify_; }
-
-	void PushSolidState(bool solid)
-	{
-		if (isSolidStatePushed_)
-			return;
-
-		solidifyPrev_ = solidify_;
-		SetSolidified(solid);
-		isSolidStatePushed_ = true;
-	}
-
-	void PopSolidState()
-	{
-		if (!isSolidStatePushed_)
-			return;
-
-		SetSolidified(solidifyPrev_);
-		isSolidStatePushed_ = false;
-	}
-
-
-
 	bool GetEffectivelySolidified() const { return isEffectivelySolidified_; }
 
 
@@ -64,10 +38,6 @@ protected:
 
 	virtual void OnNodeSet(Node* node) override;
 
-
-	bool solidify_ = false;
-	bool solidifyPrev_ = false;
-	bool isSolidStatePushed_ = false;
 
 	bool isEffectivelySolidified_ = false;
 

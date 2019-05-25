@@ -326,10 +326,9 @@ void PieceManager::RemoveSolidGroup(PieceSolidificationGroup* group)
 
 void PieceManager::RebuildSolidifiesSub(Node* startNode, bool branchSolidified)
 {
-
 	if (startNode->HasComponent<PieceSolidificationGroup>()) 
 	{
-		if (!branchSolidified && startNode->GetComponent<PieceSolidificationGroup>()->GetSolidified())
+		if (!branchSolidified)
 		{
 
 			branchSolidified = true;

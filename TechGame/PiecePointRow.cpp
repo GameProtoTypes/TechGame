@@ -224,10 +224,10 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 		return false;
 	}
 
-	if (rowA->GetPiece()->IsEffectivelySolidified() || rowB->GetPiece()->IsEffectivelySolidified()) {
-		URHO3D_LOGWARNING("PiecePointRow::AttachRows: Cannot AttachRows while pieces are solidified.");
-		return false;
-	}
+	//if (rowA->GetPiece()->IsEffectivelySolidified() || rowB->GetPiece()->IsEffectivelySolidified()) {
+	//	URHO3D_LOGWARNING("PiecePointRow::AttachRows: Cannot AttachRows while pieces are solidified.");
+	//	return false;
+	//}
 
 
 	PiecePointRow* theHoleRow = nullptr;
@@ -262,7 +262,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 	NewtonRigidBody* holeBody = theHolePiece->GetComponent<NewtonRigidBody>();
 	NewtonRigidBody* rodBody = theRodPiece->GetComponent<NewtonRigidBody>();
 
-
+	
 
 		//wait for update finished because we need to do some manual rigidbody moving and hacking.
 		holeBody->GetScene()->GetComponent<NewtonPhysicsWorld>()->WaitForUpdateFinished();

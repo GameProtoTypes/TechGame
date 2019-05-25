@@ -50,10 +50,6 @@ void ManipulationTool::Gather(bool grabOne)
 	URHO3D_LOGINFO("gatheredPieceGroup_ group created.");
 	
 
-
-
-	gatheredPieceGroup_->SetSolidified(true);
-
 	gatheredContraptionNode_ = gatheredPieceGroup_->GetNode();
 
 	rigBody = gatheredContraptionNode_->GetComponent<NewtonRigidBody>();

@@ -217,19 +217,6 @@ bool PieceAttachmentStager::AttachAll()
 			allPieces.push_back(pair->pieceB);
 	}
 
-	//un solididify pieces involved in attachement
-	for (Piece* piece : allPieces) {
-		PieceSolidificationGroup* group = piece->GetNearestPieceGroup();
-		if (group)
-		{
-			if (group->GetSolidified()) {
-				URHO3D_LOGINFO("group was solid");
-
-				group->PushSolidState(false);
-				//group->SetSolidified(false);
-			}
-		}
-	}
 
 	
 	//pieces.Front()->GetScene()->GetComponent<PieceManager>()->StripGroups(pieces);
@@ -269,20 +256,6 @@ bool PieceAttachmentStager::AttachAll()
 			}
 		}
 	}
-
-
-	
-	for (Piece* piece : allPieces) {
-		PieceSolidificationGroup* group = piece->GetNearestPieceGroup();
-		if (group)
-		{
-			group->PopSolidState();
-		}
-	}
-
-
-
-
 
 
 
