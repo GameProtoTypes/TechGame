@@ -162,11 +162,9 @@ PieceSolidificationGroup* PieceManager::CreateSolidGroupAroundGroup(PieceSolidif
 Urho3D::Node* PieceManager::CreateGroupNode(Node* parent)
 {
 	Node* node = parent->CreateChild();
-	node->SetWorldPosition(parent->GetWorldPosition());
 	node->CreateComponent<PieceSolidificationGroup>();
 
 	RebuildSolidifies();
-
 	return node;
 }
 

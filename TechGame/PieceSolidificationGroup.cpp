@@ -78,12 +78,11 @@ void PieceSolidificationGroup::DrawDebugGeometry(DebugRenderer* debug, bool dept
 
 
 
-
 	ea::vector<Piece*> pieces;
 	GetPieces(pieces);
 	for (Piece* piece : pieces) {
 
-		debug->AddLine(node_->GetWorldPosition() + Vector3(debugColor_.r_, debugColor_.g_, debugColor_.b_)*0.2f, piece->GetNode()->GetWorldPosition(), debugColor_, depthTest);
+		debug->AddLine(node_->GetWorldPosition(), piece->GetNode()->GetWorldPosition(), debugColor_, depthTest);
 	}
 }
 
