@@ -1,6 +1,8 @@
 [submodule "rbfx"]
 	path = rbfx
 	url = https://github.com/rokups/rbfx
+	update = merge
 [submodule "rbfx-newton"]
 	path = rbfx-newton
 	url = https://github.com/TrevorCash/rbfx-newton
+	update = merge
