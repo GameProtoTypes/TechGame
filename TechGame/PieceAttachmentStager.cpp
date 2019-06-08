@@ -53,7 +53,7 @@ bool PieceAttachmentStager::RemovePotentialAttachment(PiecePoint* pointA, PieceP
 		potentialAttachmentMapA_.erase(pointA);
 		potentialAttachmentMapB_.erase(pointB);
 
-		potentialAttachments_.erase(potentialAttachments_.index_of(pair));
+		potentialAttachments_.erase_at(potentialAttachments_.index_of(pair));
 
 		needsAnalyzed_ = true;
 

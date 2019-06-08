@@ -46,7 +46,7 @@ void Piece::GetPoints(ea::vector<PiecePoint*>& points)
 void Piece::GetAttachedPieces(ea::vector<Piece*>& pieces, bool recursive)
 {
 	GetAttachedPiecesRec(pieces, recursive);
-	pieces.erase(pieces.index_of(this));
+	pieces.erase_at(pieces.index_of(this));
 }
 
 void Piece::GetAttachedPiecesRec(ea::vector<Piece*>& pieces, bool recursive)

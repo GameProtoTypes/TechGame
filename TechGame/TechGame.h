@@ -62,6 +62,9 @@ protected:
 	/// Mouse mode option to use 
 	MouseMode useMouseMode_;
 
+	/// Create console and debug HUD.
+	void CreateConsoleAndDebugHud();
+
 
 
 	bool drawDebug_ = false;
@@ -77,6 +80,24 @@ protected:
 	bool drawDebugPiecePointsDepthTest = false;
 
 	bool drawDebugPieceGroups = false;
+
+	bool drawDebugHud = false;
+
+
+	void CreateGameUI();
+
+	//updates all game ui
+	void UpdateGameUI();
+
+	BorderImage* crossHairElement_ = nullptr;
+	BorderImage* crossHairElementOuter_ = nullptr;
+	enum CrossHairMode {
+		CrossHairMode_Free = 0,
+		CrossHairMode_Busy
+	};
+
+
+
 
 private:
 

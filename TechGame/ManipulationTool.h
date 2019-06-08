@@ -36,7 +36,7 @@ public:
 
 
 
-	void Gather(bool grabOne = false);
+	bool Gather(bool grabOne = false);
 	bool IsGathering();
 	void UnGather(bool freeze);
 

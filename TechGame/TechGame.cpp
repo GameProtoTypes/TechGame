@@ -17,6 +17,8 @@
 
 #include "VisualDebugger.h"
 #include "ContraptionAttachmentMonitor.h"
+#include "Urho3D/SystemUI/Console.h"
+#include "Urho3D/SystemUI/DebugHud.h"
 
 void TechGame::Setup()
 {
@@ -55,6 +57,10 @@ void TechGame::Start()
 
 
 	CreateCharacter();
+
+	CreateGameUI();
+
+	CreateConsoleAndDebugHud();
 
 	// Setup the viewport for displaying the scene
 	SetupViewport();
@@ -155,6 +161,80 @@ void TechGame::CreateCharacter()
 }
 
 
+void TechGame::CreateConsoleAndDebugHud()
+{
+	// Create console
+	Console* console = engine_->CreateConsole();
+
+	// Create debug HUD.
+	DebugHud* debugHud = engine_->CreateDebugHud();
+
+}
+
+void TechGame::CreateGameUI()
+{
+	UI* ui = GetSubsystem<UI>();
+	Graphics* graphics = GetSubsystem<Graphics>();
+
+	crossHairElement_ = new BorderImage(context_);
+	crossHairElement_->SetTexture(GetSubsystem<ResourceCache>()->GetResource<Texture2D>("Textures/UI_Crosshairs.png")); // Set texture
+	
+	crossHairElement_->SetBlendMode(BLEND_ADD);
+	crossHairElement_->SetSize(64, 64);
+	crossHairElement_->SetImageRect(IntRect(128, 0, 64, 64));
+	crossHairElement_->SetPosition((graphics->GetWidth() - crossHairElement_->GetWidth()) / 2, (graphics->GetHeight() - crossHairElement_->GetHeight()) / 2);
+	crossHairElement_->SetName("crossHair");
+	crossHairElement_->SetVar("curMode", CrossHairMode_Free);
+    ui->GetRoot()->AddChild(crossHairElement_);
+
+
+
+	crossHairElementOuter_ = new BorderImage(context_);
+	crossHairElementOuter_->SetTexture(GetSubsystem<ResourceCache>()->GetResource<Texture2D>("Textures/UI_Crosshairs.png")); // Set texture
+	crossHairElementOuter_->SetBlendMode(BLEND_ADD);
+	crossHairElementOuter_->SetSize(64, 64);
+	crossHairElementOuter_->SetImageRect(IntRect(0, 3* 64, 64, 64));
+	crossHairElementOuter_->SetPosition((graphics->GetWidth() - crossHairElementOuter_->GetWidth()) / 2, (graphics->GetHeight() - crossHairElementOuter_->GetHeight()) / 2);
+	crossHairElementOuter_->SetName("crossHair");
+	crossHairElementOuter_->SetVar("curMode", CrossHairMode_Free);
+	ui->GetRoot()->AddChild(crossHairElementOuter_);
+
+
+
+}
+
+void TechGame::UpdateGameUI()
+{
+	//update main crosshair
+	CrossHairMode curCrossHairMode = (CrossHairMode)crossHairElement_->GetVar("curMode").GetInt();
+	int xOffset = 0;
+	if (curCrossHairMode == CrossHairMode_Free)
+	{
+		xOffset = 128;
+	}
+	else if (curCrossHairMode == CrossHairMode_Busy)
+	{
+		xOffset = 128 + 64;
+	}
+	crossHairElement_->SetImageRect(IntRect(xOffset, 0, 64, 64));
+
+	//update outer crosshair
+	CrossHairMode curCrossHairModeOuter = (CrossHairMode)crossHairElementOuter_->GetVar("curMode").GetInt();
+	xOffset = 0;
+	if (curCrossHairModeOuter == CrossHairMode_Free)
+	{
+		crossHairElementOuter_->SetVisible(false);
+	}
+	else if (curCrossHairModeOuter == CrossHairMode_Busy)
+	{
+		crossHairElementOuter_->SetVisible(true);
+	}
+	crossHairElementOuter_->SetImageRect(IntRect(xOffset, 3 * 64, 64, 64));
+
+
+
+}
+
 void TechGame::SubscribeToEvents()
 {
 	// Subscribe HandleUpdate() function for processing update events
@@ -206,10 +286,25 @@ void TechGame::UpdateUIInput(float timestep)
 		if (cameraNode_->GetComponent<ManipulationTool>()->IsGathering())
 		{
 			cameraNode_->GetComponent<ManipulationTool>()->UnGather(input->GetKeyDown(KEY_SHIFT));
+			crossHairElement_->SetVar("curMode", (int)CrossHairMode::CrossHairMode_Free);
 		}
 		else
-			cameraNode_->GetComponent<ManipulationTool>()->Gather(input->GetKeyDown(KEY_SHIFT));
+		{
+			bool gatherSuccess = cameraNode_->GetComponent<ManipulationTool>()->Gather(input->GetKeyDown(KEY_SHIFT));
+			
+			if(gatherSuccess)
+				crossHairElement_->SetVar("curMode", (int)CrossHairMode::CrossHairMode_Busy);
 
+		}
+	}
+
+	if (input->GetKeyDown(KEY_SHIFT))
+	{
+		crossHairElementOuter_->SetVar("curMode", (int)CrossHairMode::CrossHairMode_Busy);
+	}
+	else
+	{
+		crossHairElementOuter_->SetVar("curMode", (int)CrossHairMode::CrossHairMode_Free);
 	}
 
 
@@ -240,6 +335,16 @@ void TechGame::UpdateUIInput(float timestep)
 
 
 
+
+	if (GetSubsystem<Input>()->GetKeyPress(KEY_TAB))
+	{
+		GetSubsystem<Input>()->SetMouseGrabbed(!GetSubsystem<Input>()->IsMouseGrabbed());
+		GetSubsystem<Input>()->SetMouseVisible(!GetSubsystem<Input>()->IsMouseVisible());
+		GetSubsystem<Input>()->SetMouseMode(MM_ABSOLUTE);
+	}
+	if (GetSubsystem<Input>()->GetKeyPress(KEY_F1)) {
+		drawDebug_ = !drawDebug_;
+	}
 
 
 }
@@ -418,15 +523,8 @@ void TechGame::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 	UpdateUIInput(timeStep);
 
-	if (GetSubsystem<Input>()->GetKeyPress(KEY_TAB))
-	{
-		GetSubsystem<Input>()->SetMouseGrabbed(!GetSubsystem<Input>()->IsMouseGrabbed());
-		GetSubsystem<Input>()->SetMouseVisible(!GetSubsystem<Input>()->IsMouseVisible());
-		GetSubsystem<Input>()->SetMouseMode(MM_ABSOLUTE);
-	}
-	if (GetSubsystem<Input>()->GetKeyPress(KEY_F1)) {
-		drawDebug_ = !drawDebug_;
-	}
+	UpdateGameUI();
+
 }
 
 
@@ -492,9 +590,6 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 			ui::Checkbox("PiecePointRows", &drawDebugPiecePointRows);
 			if (drawDebugPiecePointRows) {
 
-
-
-
 				ea::vector<PiecePointRow*> components;
 				scene_->GetDerivedComponents<PiecePointRow>(components, true);
 
@@ -543,6 +638,15 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 			SharedPtr<File> outFile = SharedPtr<File>(new File(context_, "sceneSave.xml", Urho3D::FILE_WRITE));
 			
 			bool saveSuccess = scene_->SaveXML(*outFile);
+		}
+		ui::Checkbox("DebugHud", &drawDebugHud);
+		if (drawDebugHud)
+		{
+			GetSubsystem<DebugHud>()->SetMode(DebugHudMode::DEBUGHUD_SHOW_ALL);
+		}
+		else
+		{
+			GetSubsystem<DebugHud>()->SetMode(DebugHudMode::DEBUGHUD_SHOW_NONE);
 		}
 
 		ui::End();

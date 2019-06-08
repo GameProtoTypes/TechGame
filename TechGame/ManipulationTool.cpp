@@ -16,11 +16,11 @@ void ManipulationTool::RegisterObject(Context* context)
 	context->RegisterFactory<ManipulationTool>();
 }
 
-void ManipulationTool::Gather(bool grabOne)
+bool ManipulationTool::Gather(bool grabOne)
 {
 	PiecePoint* piecePoint = GetClosestAimPiecePoint();
 	if (!piecePoint)
-		return;
+		return false;
 
 
 	Piece* piece = piecePoint->GetPiece();
@@ -78,7 +78,7 @@ void ManipulationTool::Gather(bool grabOne)
 	{
 		gatheredPiece->GetNode()->GetComponent<NewtonRigidBody>()->SetNoCollideOverride(true);
 	}
-
+	return true;
 }
 
 

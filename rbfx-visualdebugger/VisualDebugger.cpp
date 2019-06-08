@@ -214,7 +214,7 @@ void VisualDebugger::DrawDebugGeometry(DebugRenderer* debugRenderer, unsigned in
 		//check if the object has exceeded its lifetime and if so remove.
 		if ((debObject->creationTimeMS_ + debObject->lifetimeMS_) <= mTimer.GetMSec(false)) {
 			debObject->TearDown();
-			mDebuggerObjects.erase(i);
+			mDebuggerObjects.erase_at(i);
 		}
 
 		i++;

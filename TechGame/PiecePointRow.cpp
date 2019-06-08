@@ -180,7 +180,7 @@ bool PiecePointRow::DetachFrom(PiecePointRow* otherRow)
 				rowAttachements_[i].constraint_->Remove();
 			}
 
-			rowAttachements_.erase(i);
+			rowAttachements_.erase_at(i);
 			detached = true;
 		}
 	}
@@ -188,7 +188,7 @@ bool PiecePointRow::DetachFrom(PiecePointRow* otherRow)
 
 		if (otherRow->rowAttachements_[i].rowA_ == this)
 		{
-			otherRow->rowAttachements_.erase(i);
+			otherRow->rowAttachements_.erase_at(i);
 			detached = true;
 		}
 	}
