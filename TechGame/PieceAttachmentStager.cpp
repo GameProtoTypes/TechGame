@@ -217,22 +217,19 @@ bool PieceAttachmentStager::AttachAll()
 			allPieces.push_back(pair->pieceB);
 	}
 
-	//un solididify pieces involved in attachement
+	//un solidifying pieces involved in attachment
+	ea::vector<PieceSolidificationGroup*> allGroups;
 	for (Piece* piece : allPieces) {
-		PieceSolidificationGroup* group = piece->GetNearestPieceGroup();
-		if (group)
-		{
-			if (group->GetSolidified()) {
-				URHO3D_LOGINFO("group was solid");
+		piece->GetPieceGroups(allGroups);
 
-				group->PushSolidState(false);
-				//group->SetSolidified(false);
-			}
-		}
 	}
-
+	for (PieceSolidificationGroup* group : allGroups)
+	{
+		group->PushSolidState(false);
+		//URHO3D_LOGINFO(ea::to_string(group->GetEffectivelySolidified()));
+	}
 	
-	//pieces.Front()->GetScene()->GetComponent<PieceManager>()->StripGroups(pieces);
+	allPieces.front()->GetScene()->GetComponent<PieceManager>()->RebuildSolidifies();
 
 
 	allPieces.front()->GetScene()->GetComponent<NewtonPhysicsWorld>()->ForceBuild();
@@ -272,16 +269,9 @@ bool PieceAttachmentStager::AttachAll()
 
 
 	
-	for (Piece* piece : allPieces) {
-		PieceSolidificationGroup* group = piece->GetNearestPieceGroup();
-		if (group)
-		{
+	for (PieceSolidificationGroup* group : allGroups) {
 			group->PopSolidState();
-		}
 	}
-
-
-
 
 
 

@@ -35,9 +35,8 @@ bool ManipulationTool::Gather(bool grabOne)
 	{
 		ea::vector<Piece*> pieceVector;
 		pieceVector.push_back(piece);
+		URHO3D_LOGINFO("stripping groups...");
 		pieceManager_->StripSolidGroups(pieceVector);
-
-
 
 		piece->DetachAll();
 	}
@@ -46,6 +45,7 @@ bool ManipulationTool::Gather(bool grabOne)
 	URHO3D_LOGINFO("num gather pieces: " + ea::to_string(allGatherPieces_.size()));
 	//re parent contraption to single body
 
+	//pieceManager_->StripSolidGroups(allGatherPieces_);
 	gatheredPieceGroup_ = pieceManager_->AddPiecesToNewSolidGroup(allGatherPieces_);
 	URHO3D_LOGINFO("gatheredPieceGroup_ group created.");
 	

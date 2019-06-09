@@ -109,20 +109,23 @@ void Piece::DetachAll()
 
 bool Piece::IsEffectivelySolidified()
 {
-	if (node_->GetParent()->HasComponent<PieceSolidificationGroup>())
-	{
-		return node_->GetParent()->GetComponent<PieceSolidificationGroup>()->GetEffectivelySolidified();
-	}
-	else
-		return false;
+	PieceSolidificationGroup* nearestGroup = GetNearestPieceGroup();
+	
+	if(nearestGroup)
+		return nearestGroup->GetEffectivelySolidified();
+
+
+	return false;
 }
 
 void Piece::GetPieceGroups(ea::vector<PieceSolidificationGroup*>& pieceGroups)
 {
+	//adds piece groups to the vector. the vector is not cleared, if a group already exists in the vector it is not added.
+
 	Node* curNode = node_->GetParent();
 	while (curNode && (curNode != GetScene())) {
 		PieceSolidificationGroup* group = curNode->GetComponent<PieceSolidificationGroup>();
-		if (group)
+		if (group && !pieceGroups.contains(group))
 		{
 			pieceGroups.push_back(group);
 		}

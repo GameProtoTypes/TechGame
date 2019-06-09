@@ -267,23 +267,27 @@ void PieceManager::RemovePiecesFromFirstCommonSolidGroup(ea::vector<Piece*> piec
 
 void PieceManager::StripSolidGroups(const ea::vector<Piece*>& pieces)
 {
+	//URHO3D_LOGINFO("Stripping Solid Groups...");
 	ea::vector<Node*> oldParents;
 	for (Piece* pc : pieces)
 	{
 		oldParents.push_back(pc->GetNode()->GetParent());
 		pc->GetNode()->SetParent(GetScene());
-		URHO3D_LOGINFO("Piece Moved To Scene.");
+		//URHO3D_LOGINFO("Piece Moved To Scene.");
 	}
 	
 	//remove dangling group nodes.
 	for (Node* oldParent : oldParents)
 	{
+		//URHO3D_LOGINFO("looking at old parent." + ea::to_string((int)(void*)oldParent));
 		Node* curParent = oldParent;
-		while (!curParent->GetNumChildren()) {
+		//URHO3D_LOGINFO("num children: " + ea::to_string(curParent->GetNumChildren()));
+		int numPieceChildren = curParent->GetChildrenWithComponent(Piece::GetTypeStatic(), false).size();
+		while (curParent && !numPieceChildren && curParent != GetScene()) {
 			Node* rem = curParent;
 			curParent = curParent->GetParent();
 			rem->Remove();
-			URHO3D_LOGINFO("Old PieceGroup-Node removed.");
+			//URHO3D_LOGINFO("Old PieceGroup-Node removed.");
 		}
 	}
 
@@ -331,18 +335,16 @@ void PieceManager::RebuildSolidifiesSub(Node* startNode, bool branchSolidified)
 	{
 		if (!branchSolidified && startNode->GetComponent<PieceSolidificationGroup>()->GetSolidified())
 		{
-
 			branchSolidified = true;
-			startNode->GetComponent<PieceSolidificationGroup>()->isEffectivelySolidified_ = true;
 			NewtonRigidBody* body = startNode->GetOrCreateComponent<NewtonRigidBody>();
 			body->SetEnabled(true);
 		}
 		else
 		{
-			startNode->GetComponent<PieceSolidificationGroup>()->isEffectivelySolidified_ = false;
 			startNode->RemoveComponent<NewtonRigidBody>();
 		}
 	}
+
 
 
 	ea::vector<Node*> children;
@@ -351,8 +353,8 @@ void PieceManager::RebuildSolidifiesSub(Node* startNode, bool branchSolidified)
 	for (Node* child : children)
 	{
 		if (child->GetComponent<Piece>()) {
+
 			child->GetComponent<NewtonRigidBody>()->SetEnabled(!branchSolidified);
-			
 		}
 		else
 		{

@@ -16,30 +16,30 @@ public:
 	///Set this group as being solidified or not.  if not - the pieces may still be solidified if a parent group is still solid.
 	void SetSolidified(bool solid);
 
-	bool GetSolidified() const { return solidify_; }
+
+	bool GetSolidified() const { return solidStateStack_.back(); }
 
 	void PushSolidState(bool solid)
 	{
-		if (isSolidStatePushed_)
-			return;
-
-		solidifyPrev_ = solidify_;
-		SetSolidified(solid);
-		isSolidStatePushed_ = true;
+		solidStateStack_.push_back(solid);
+		SetSolidified(solidStateStack_.back());
 	}
 
-	void PopSolidState()
+	bool PopSolidState()
 	{
-		if (!isSolidStatePushed_)
-			return;
+		if (solidStateStack_.size() > 1) {
+			solidStateStack_.pop_back();
 
-		SetSolidified(solidifyPrev_);
-		isSolidStatePushed_ = false;
+			SetSolidified(solidStateStack_.back());
+			return true;
+		}
+		else
+			return false;
 	}
 
 
 
-	bool GetEffectivelySolidified() const { return isEffectivelySolidified_; }
+	bool GetEffectivelySolidified() const;
 
 
 
@@ -64,13 +64,7 @@ protected:
 
 	virtual void OnNodeSet(Node* node) override;
 
-
-	bool solidify_ = false;
-	bool solidifyPrev_ = false;
-	bool isSolidStatePushed_ = false;
-
-	bool isEffectivelySolidified_ = false;
-
+	ea::vector<bool> solidStateStack_;
 
 
 	void HandleUpdate(StringHash event, VariantMap& eventData);

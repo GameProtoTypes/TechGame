@@ -277,6 +277,18 @@ void TechGame::UpdateUIInput(float timestep)
 	
 	Input* input = GetSubsystem<Input>();
 
+	if (GetSubsystem<Input>()->GetKeyPress(KEY_TAB))
+	{
+		URHO3D_LOGINFO("TAB PRESSED");
+		GetSubsystem<Input>()->SetMouseGrabbed(!GetSubsystem<Input>()->IsMouseGrabbed());
+		GetSubsystem<Input>()->SetMouseVisible(!GetSubsystem<Input>()->IsMouseVisible());
+		GetSubsystem<Input>()->SetMouseMode(MM_ABSOLUTE);
+	}
+	if (GetSubsystem<Input>()->GetKeyPress(KEY_F1)) {
+		drawDebug_ = !drawDebug_;
+	}
+
+
 	if (!input->IsMouseGrabbed() || input->IsMouseVisible())
 		return;
 
@@ -294,7 +306,6 @@ void TechGame::UpdateUIInput(float timestep)
 			
 			if(gatherSuccess)
 				crossHairElement_->SetVar("curMode", (int)CrossHairMode::CrossHairMode_Busy);
-
 		}
 	}
 
@@ -336,15 +347,7 @@ void TechGame::UpdateUIInput(float timestep)
 
 
 
-	if (GetSubsystem<Input>()->GetKeyPress(KEY_TAB))
-	{
-		GetSubsystem<Input>()->SetMouseGrabbed(!GetSubsystem<Input>()->IsMouseGrabbed());
-		GetSubsystem<Input>()->SetMouseVisible(!GetSubsystem<Input>()->IsMouseVisible());
-		GetSubsystem<Input>()->SetMouseMode(MM_ABSOLUTE);
-	}
-	if (GetSubsystem<Input>()->GetKeyPress(KEY_F1)) {
-		drawDebug_ = !drawDebug_;
-	}
+
 
 
 }
@@ -439,18 +442,15 @@ void TechGame::CreateScene()
 	// rendering and physics representation sizes should match (the box model is also 1 x 1 x 1.)
 	auto* shape = floorNode->CreateComponent<NewtonCollisionShape_Box>();
 
-
-
-
 	{
 		CreatePiece(scene_, "rod_round_4", false)->SetWorldPosition(Vector3(-1,0,0));
 		CreatePiece(scene_, "2_sleeve", false)->SetWorldPosition(Vector3(1, 0, 0));
 
 		Node* prevPiece = nullptr;
 
-		ea::vector<Node*> pieces;
-		int numDiffPieces = 7;
-		for (int y = 0; y < numDiffPieces*10; y += 1) {
+		ea::vector<Piece*> pieces;
+		int numDiffPieces = 2;
+		for (int y = 0; y < numDiffPieces*1; y += 1) {
 
 			Node* piece;
 
@@ -476,11 +476,16 @@ void TechGame::CreateScene()
 			ea::vector<Piece*> singlePiece;
 			singlePiece.push_back(piece->GetComponent<Piece>());
 
-			pieces.push_back(piece);
+
+
+			pieces.push_back(piece->GetComponent<Piece>());
 
 
 			prevPiece = piece;
 		}
+
+		PieceSolidificationGroup* group = scene_->GetComponent<PieceManager>()->AddPiecesToNewSolidGroup(pieces);
+		//group->PushSolidState(false);
 
 	}
 
@@ -655,8 +660,6 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 
 
 	}
-
-
 
 	
 }

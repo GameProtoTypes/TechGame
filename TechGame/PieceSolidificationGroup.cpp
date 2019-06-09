@@ -11,6 +11,8 @@
 
 PieceSolidificationGroup::PieceSolidificationGroup(Context* context) : Component(context)
 {
+	solidStateStack_.push_back(true);
+
 	SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(PieceSolidificationGroup, HandleUpdate));
 	//SubscribeToEvent(E_NODEADDED, URHO3D_HANDLER(PieceGroup, HandleNodeAdded));
 	//SubscribeToEvent(E_NODEREMOVED, URHO3D_HANDLER(PieceGroup, HandleNodeRemoved));
@@ -29,10 +31,30 @@ void PieceSolidificationGroup::RegisterObject(Context* context)
 
 void PieceSolidificationGroup::SetSolidified(bool solid)
 {
-	if (solid != solidify_) {
-		solidify_ = solid;
+	if (solidStateStack_.back() != solid) {
+		solidStateStack_.back() = solid;
 		GetScene()->GetComponent<PieceManager>()->RebuildSolidifies();
 	}
+}
+
+bool PieceSolidificationGroup::GetEffectivelySolidified() const
+{
+	//walk down the tree
+	bool solid = solidStateStack_.back();
+	bool hasSolid = solid;
+	Node* curNode = node_;
+	while (curNode)
+	{
+		if (curNode->GetComponent<PieceSolidificationGroup>())
+		{
+			solid = curNode->GetComponent<PieceSolidificationGroup>()->solidStateStack_.back();
+			if (solid)
+				hasSolid = true;
+		}
+		curNode = curNode->GetParent();
+	}
+
+	return hasSolid;
 }
 
 void PieceSolidificationGroup::GetPieces(ea::vector<Piece*>& pieces, int levels /*= 1*/, bool singleLevel /*= false*/)
@@ -65,15 +87,28 @@ void PieceSolidificationGroup::GetPieces(ea::vector<Piece*>& pieces, int levels 
 
 void PieceSolidificationGroup::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
+	Vector3 colorHSV = debugColor_.ToHSV();
+
+	if (GetEffectivelySolidified())
+		colorHSV.z_ = 1.0f;
+	else
+		colorHSV.z_ = 0.1f;
+
+	Color c;
+	c.FromHSV(colorHSV.x_, colorHSV.y_, colorHSV.z_);
+
 	//draw sphere at the group node.
-	debug->AddSphere(Sphere(node_->GetWorldPosition(), 0.2f), debugColor_, depthTest);
+	debug->AddSphere(Sphere(node_->GetWorldPosition(), 0.2f),c, depthTest);
 	
 	//draw lines to subgroups.
 	ea::vector<Node*> childrenGroupNodes;
-	node_->GetChildrenWithComponent<PieceSolidificationGroup>(childrenGroupNodes, false);
+	node_->GetChildren(childrenGroupNodes, false);
 	for (Node* node : childrenGroupNodes)
 	{
-		debug->AddLine(node_->GetWorldPosition(), node->GetWorldPosition(), debugColor_, depthTest);
+
+		Vector3 occlusionOffset = Vector3(0.01, 0.01, 0.01);
+
+		debug->AddLine(node_->GetWorldPosition(), node->GetWorldPosition() + occlusionOffset, c, depthTest);
 	}
 
 	//draw lines to sub-pieces.
@@ -81,7 +116,7 @@ void PieceSolidificationGroup::DrawDebugGeometry(DebugRenderer* debug, bool dept
 	GetPieces(pieces);
 	for (Piece* piece : pieces) {
 
-		debug->AddLine(node_->GetWorldPosition(), piece->GetNode()->GetWorldPosition(), debugColor_, depthTest);
+		debug->AddLine(node_->GetWorldPosition(), piece->GetNode()->GetWorldPosition(), c, depthTest);
 	}
 
 

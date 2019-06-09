@@ -262,6 +262,8 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 	NewtonRigidBody* holeBody = theHolePiece->GetComponent<NewtonRigidBody>();
 	NewtonRigidBody* rodBody = theRodPiece->GetComponent<NewtonRigidBody>();
 
+	URHO3D_LOGINFO("holebody enabled: " + ea::to_string(holeBody->IsEnabledEffective()));
+	URHO3D_LOGINFO("rodbody enabled: " + ea::to_string(rodBody->IsEnabledEffective()));
 
 
 		//wait for update finished because we need to do some manual rigidbody moving and hacking.
@@ -269,8 +271,6 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 		Matrix3x4 origHoldBodyTransform = holeBody->GetWorldTransform();
 		Matrix3x4 origRodBodyTransform = rodBody->GetWorldTransform();
-
-
 
 
 		PieceManager* pieceManager = holeBody->GetScene()->GetComponent<PieceManager>();
@@ -553,7 +553,7 @@ bool PiecePointRow::OptimizeFullRow(PiecePointRow* row)
 					allPlaner &= attachment2.rowA_->GetIsPiecePlaner();
 				}
 
-				//if all pieces are planer - dissable collisions between them.
+				//if all pieces are planer - disable collisions between them.
 				if (allPlaner) {
 					for (RowAttachement attachment2 : row->rowAttachements_)
 					{
@@ -609,6 +609,7 @@ void PiecePointRow::HandleUpdate(StringHash event, VariantMap& eventData)
 
 void PiecePointRow::UpdatePointOccupancies()
 {
+
 	if (!rowAttachements_.size())
 		return;
 
