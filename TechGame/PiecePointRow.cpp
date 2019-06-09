@@ -280,6 +280,8 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 		if (theRodRow->GetRowType() == PiecePointRow::RowType_RodHard || theHoleRow->GetRowType() == PiecePointRow::RowType_HoleTight)
 		{
 
+			URHO3D_LOGINFO("running hard attachment case.");
+
 			holeBody->SetWorldPosition(-theHolePoint->GetNode()->GetPosition());
 			//holeBody->SetWorldRotation(Quaternion::IDENTITY);
 
@@ -603,7 +605,8 @@ Piece* PiecePointRow::GetPiece()
 
 void PiecePointRow::HandleUpdate(StringHash event, VariantMap& eventData)
 {
-	UpdatePointOccupancies();
+	//#todo restore.
+	//UpdatePointOccupancies();
 	return;
 }
 
