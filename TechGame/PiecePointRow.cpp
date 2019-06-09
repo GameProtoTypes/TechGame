@@ -258,9 +258,10 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 	Piece* theHolePiece = theHoleRow->GetPiece();
 	Piece* theRodPiece = theRodRow->GetPiece();
 
+	
+	NewtonRigidBody* holeBody = theHolePiece->GetEffectiveRigidBody();
+	NewtonRigidBody* rodBody = theRodPiece->GetEffectiveRigidBody();
 
-	NewtonRigidBody* holeBody = theHolePiece->GetComponent<NewtonRigidBody>();
-	NewtonRigidBody* rodBody = theRodPiece->GetComponent<NewtonRigidBody>();
 
 	URHO3D_LOGINFO("holebody enabled: " + ea::to_string(holeBody->IsEnabledEffective()));
 	URHO3D_LOGINFO("rodbody enabled: " + ea::to_string(rodBody->IsEnabledEffective()));
@@ -282,10 +283,9 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 			URHO3D_LOGINFO("running hard attachment case.");
 
-			holeBody->SetWorldPosition(-theHolePoint->GetNode()->GetPosition());
-			//holeBody->SetWorldRotation(Quaternion::IDENTITY);
 
-			rodBody->SetWorldPosition(-theRodPoint->GetNode()->GetPosition());
+			holeBody->SetWorldPosition(-theHolePoint->GetNode()->GetPosition() );
+			rodBody->SetWorldPosition(-theRodPoint->GetNode()->GetPosition() );
 
 
 			Quaternion diff = (holeBody->GetWorldRotation().Inverse() * rodBody->GetWorldRotation()).Normalized();
@@ -297,7 +297,8 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 				//URHO3D_LOGINFO("non nan");
 				diffSnap90 = Quaternion(RoundToNearestMultiple(diff.Angle(), 45.0f), diff.Axis());
 			}
-			else {
+			else 
+			{
 				//URHO3D_LOGINFO("nan");
 				diffSnap90 = Quaternion::IDENTITY;
 			}
@@ -456,10 +457,10 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 
 		//restore transforms
-		rodBody->SetWorldTransform(origRodBodyTransform);
-		rodBody->ApplyTransformToNode();
-		holeBody->SetWorldTransform(origHoldBodyTransform);
-		holeBody->ApplyTransformToNode();
+		//rodBody->SetWorldTransform(origRodBodyTransform);
+		//rodBody->ApplyTransformToNode();
+		//holeBody->SetWorldTransform(origHoldBodyTransform);
+		//holeBody->ApplyTransformToNode();
 
 
 

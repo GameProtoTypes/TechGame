@@ -3,6 +3,7 @@
 #include <Urho3D/Urho3DAll.h>
 #include "Urho3D/IO/Log.h"
 
+#include "NewtonPhysicsWorld.h"
 #include "NewtonRigidBody.h"
 
 
@@ -23,6 +24,7 @@ public:
 
 	static void RegisterObject(Context* context);
 
+	//returns the rigid body that is attached to the same node.
 	NewtonRigidBody* GetRigidBody() {
 		return node_->GetComponent<NewtonRigidBody>();
 	}
@@ -60,6 +62,19 @@ public:
 		if (pieceGroups.size())
 			return pieceGroups.front();
 
+		return nullptr;
+	}
+
+	//returns the rigid body that is enabled and is actually controlling this rigid body
+	NewtonRigidBody* GetEffectiveRigidBody()
+	{
+		ea::vector<NewtonRigidBody*> bodies;
+		GetRootRigidBodies(bodies, node_, false);
+		for (int i = 0; i < bodies.size(); i++)
+		{
+			if (bodies[i]->IsEnabledEffective())
+				return bodies[i];
+		}
 		return nullptr;
 	}
 

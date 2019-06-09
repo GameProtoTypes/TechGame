@@ -209,6 +209,7 @@ PieceSolidificationGroup* PieceManager::AddPiecesToNewSolidGroup(ea::vector<Piec
 	}
 }
 
+//moves piece to the specified group - removing it from it's existing group.
 void PieceManager::MovePieceToSolidGroup(Piece* piece, PieceSolidificationGroup* group)
 {
 	ea::vector<Piece*> list;
@@ -218,13 +219,8 @@ void PieceManager::MovePieceToSolidGroup(Piece* piece, PieceSolidificationGroup*
 	piece->GetNode()->SetParent(group->GetNode());
 
 
-	//clean old tree.
-	Node* curParent = oldParent;
-	while (!curParent->GetNumChildren()) {
-		Node* rem = curParent;
-		curParent = curParent->GetParent();
-		rem->Remove();
-	}
+	CleanGroups(oldParent);
+
 
 	RebuildSolidifies();
 }
@@ -279,16 +275,9 @@ void PieceManager::StripSolidGroups(const ea::vector<Piece*>& pieces)
 	//remove dangling group nodes.
 	for (Node* oldParent : oldParents)
 	{
-		//URHO3D_LOGINFO("looking at old parent." + ea::to_string((int)(void*)oldParent));
-		Node* curParent = oldParent;
-		//URHO3D_LOGINFO("num children: " + ea::to_string(curParent->GetNumChildren()));
-		int numPieceChildren = curParent->GetChildrenWithComponent(Piece::GetTypeStatic(), false).size();
-		while (curParent && !numPieceChildren && curParent != GetScene()) {
-			Node* rem = curParent;
-			curParent = curParent->GetParent();
-			rem->Remove();
-			//URHO3D_LOGINFO("Old PieceGroup-Node removed.");
-		}
+
+		CleanGroups(oldParent);
+		
 	}
 
 	RebuildSolidifies();
@@ -366,6 +355,20 @@ void PieceManager::RebuildSolidifiesSub(Node* startNode, bool branchSolidified)
 void PieceManager::RebuildSolidifies()
 {
 	RebuildSolidifiesSub(GetScene(), false);
+}
+
+void PieceManager::CleanGroups(Node* node)
+{
+	//URHO3D_LOGINFO("looking at old parent." + ea::to_string((int)(void*)oldParent));
+	Node* curNode = node;
+	//URHO3D_LOGINFO("num children: " + ea::to_string(curParent->GetNumChildren()));
+	int numPieceChildren = curNode->GetChildrenWithComponent(Piece::GetTypeStatic(), false).size();
+	while (curNode && !numPieceChildren && curNode != GetScene()) {
+		Node* rem = curNode;
+		curNode = curNode->GetParent();
+		rem->Remove();
+		//URHO3D_LOGINFO("Old PieceGroup-Node removed.");
+	}
 }
 
 void PieceManager::FormGroups(Piece* startingPiece)

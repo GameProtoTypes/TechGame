@@ -102,7 +102,7 @@ void PieceSolidificationGroup::DrawDebugGeometry(DebugRenderer* debug, bool dept
 	
 	//draw lines to subgroups.
 	ea::vector<Node*> childrenGroupNodes;
-	node_->GetChildren(childrenGroupNodes, false);
+	node_->GetChildrenWithComponent<PieceSolidificationGroup>(childrenGroupNodes, false);
 	for (Node* node : childrenGroupNodes)
 	{
 

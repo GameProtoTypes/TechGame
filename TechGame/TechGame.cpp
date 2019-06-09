@@ -443,7 +443,7 @@ void TechGame::CreateScene()
 	auto* shape = floorNode->CreateComponent<NewtonCollisionShape_Box>();
 
 	{
-		CreatePiece(scene_, "rod_round_4", false)->SetWorldPosition(Vector3(-1,0,0));
+		CreatePiece(scene_, "rod_hard_4", false)->SetWorldPosition(Vector3(-1,0,0));
 		CreatePiece(scene_, "2_sleeve", false)->SetWorldPosition(Vector3(1, 0, 0));
 
 		Node* prevPiece = nullptr;
@@ -454,7 +454,7 @@ void TechGame::CreateScene()
 
 			Node* piece;
 
-			int rnd = Random(0, numDiffPieces);
+			int rnd = y % numDiffPieces;// Random(0, numDiffPieces);
 			if (rnd == 0)
 				piece = CreatePiece(scene_, "8_piece_Cshape", false);
 			else if (rnd == 1)

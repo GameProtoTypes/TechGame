@@ -80,7 +80,8 @@ public:
 	void RebuildSolidifiesSub(Node* startNode, bool branchSolidified = false);
 	void RebuildSolidifies();
 
-
+	//removes groups if the node has no piece's on children nodes.
+	void CleanGroups(Node* node);
 
 
 	void FormGroups(Piece* startingPiece);

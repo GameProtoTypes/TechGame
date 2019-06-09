@@ -64,8 +64,6 @@ bool ManipulationTool::Gather(bool grabOne)
 
 
 
-
-
 	kinamaticConstriant_ = rigBody->GetNode()->CreateComponent<NewtonKinematicsControllerConstraint>();
 
 

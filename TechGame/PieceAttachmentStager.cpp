@@ -225,6 +225,7 @@ bool PieceAttachmentStager::AttachAll()
 	}
 	for (PieceSolidificationGroup* group : allGroups)
 	{
+		URHO3D_LOGINFO("pushing non solid..");
 		group->PushSolidState(false);
 		//URHO3D_LOGINFO(ea::to_string(group->GetEffectivelySolidified()));
 	}
@@ -253,10 +254,11 @@ bool PieceAttachmentStager::AttachAll()
 			{
 				if (!PiecePointRow::RowsHaveDegreeOfFreedom(pair->rowA, pair->rowB))
 				{
+					URHO3D_LOGINFO("rows have no degree of freedom - merging solid groups..");
+					
 					if (groupB)
 						scene_->GetComponent<PieceManager>()->MovePieceToSolidGroup(pair->pieceA, groupB);
-
-					if (groupA)
+					else if (groupA)
 						scene_->GetComponent<PieceManager>()->MovePieceToSolidGroup(pair->pieceB, groupA);
 				}
 				else
@@ -267,13 +269,12 @@ bool PieceAttachmentStager::AttachAll()
 		}
 	}
 
-
 	
 	for (PieceSolidificationGroup* group : allGroups) {
 			group->PopSolidState();
 	}
 
-
+	scene_->GetComponent<PieceManager>()->RebuildSolidifies();
 
 
 
