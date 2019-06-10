@@ -57,31 +57,16 @@ bool PieceSolidificationGroup::GetEffectivelySolidified() const
 	return hasSolid;
 }
 
-void PieceSolidificationGroup::GetPieces(ea::vector<Piece*>& pieces, int levels /*= 1*/, bool singleLevel /*= false*/)
+void PieceSolidificationGroup::GetPieces(ea::vector<Piece*>& pieces)
 {
-	if (levels < 1)
-		return;
-
 	//resolve which root nodes to consider.
 	ea::vector<Node*> nodes;
-	if (!singleLevel || (singleLevel && levels == 1))
+
+	node_->GetChildrenWithComponent<Piece>(nodes, false);
+	for (Node* nd : nodes)
 	{
-		//add immediate children.
-		node_->GetChildrenWithComponent<Piece>(nodes, false);
-		for (Node* node : nodes) {
-			pieces.push_back( node->GetComponent<Piece>() );
-		}
-		nodes.clear();
+		pieces.push_back(nd->GetComponent<Piece>());
 	}
-
-	
-	if (levels > 1) {
-		node_->GetChildrenWithComponent<PieceSolidificationGroup>(nodes, false);
-		for (Node* node : nodes) {
-			node->GetComponent<PieceSolidificationGroup>()->GetPieces(pieces, levels - 1, singleLevel);
-		}
-	}
-
 }
 
 

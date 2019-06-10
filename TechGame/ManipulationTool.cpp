@@ -46,17 +46,28 @@ bool ManipulationTool::Gather(bool grabOne)
 	//re parent contraption to single body
 
 	//pieceManager_->StripSolidGroups(allGatherPieces_);
-	gatheredPieceGroup_ = pieceManager_->AddPiecesToNewSolidGroup(allGatherPieces_);
-	URHO3D_LOGINFO("gatheredPieceGroup_ group created.");
+	if (pieceManager_->GetCommonSolidGroup(allGatherPieces_)) {
+		gatheredPieceGroup_ = pieceManager_->GetCommonSolidGroup(allGatherPieces_);
+		gatheredPieceGroupFromExisting = true;
+		URHO3D_LOGINFO("gatheredPieceGroup_ assigned to existing common group");
+	}
+	else {
+
+		PieceSolidificationGroup* newGroup = pieceManager_->CreateGroupNode(GetScene())->GetComponent<PieceSolidificationGroup>();
+
+		pieceManager_->MovePiecesToSolidGroup(allGatherPieces_, newGroup);
+		gatheredPieceGroup_ = newGroup;
+		URHO3D_LOGINFO("gatheredPieceGroup_ group created.");
+		gatheredPieceGroupFromExisting = false;
+	}
 	
 
 
 
 	gatheredPieceGroup_->SetSolidified(true);
 
-	gatheredContraptionNode_ = gatheredPieceGroup_->GetNode();
 
-	rigBody = gatheredContraptionNode_->GetComponent<NewtonRigidBody>();
+	rigBody = gatheredPieceGroup_->GetNode()->GetComponent<NewtonRigidBody>();
 	rigBody->SetIsKinematic(false);
 	rigBody->SetNoCollideOverride(true);
 	rigBody->SetMassScale(1.0f);
@@ -321,8 +332,6 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 				
 				kinamaticConstriant_->SetOtherWorldPosition(finalTransform.Translation());
 				kinamaticConstriant_->SetOtherWorldRotation(finalTransform.Rotation());
-
-		
 			}
 			else
 			{
@@ -363,46 +372,69 @@ void ManipulationTool::OnNodeSet(Node* node)
 void ManipulationTool::drop(bool freeze)
 {
 
-	if (!freeze) {
-		
-		ea::vector<Piece*> currentlyGroupedPieces;
-		gatheredPieceGroup_->GetPieces(currentlyGroupedPieces, 999);
-		if (allGatherPieces_.size() == currentlyGroupedPieces.size())
-		{
-			if (!gatheredPieceGroup_.Expired()) {
-				GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPieceGroup_);
-			}
-			else
-			{
-				URHO3D_LOGINFO("when does this happen?");
-				GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPiece_->GetNearestPieceGroup());
-			}
-		}
+	if (freeze)
+	{
+
+
+
+
 	}
 	else
 	{
-		//if (!gatheredContraptionNode_.Expired()) {
-		//	gatheredContraptionNode_->GetComponent<NewtonRigidBody>()->SetMassScale(0);
-		//	gatheredContraptionNode_->GetComponent<NewtonRigidBody>()->SetNoCollideOverride(false);
-		//}
-		//else
-		//{
-			gatheredPiece_->GetEffectiveRigidBody()->SetMassScale(0);
-			gatheredPiece_->GetEffectiveRigidBody()->SetNoCollideOverride(false);
-//		}
+		if (!gatheredPieceGroup_.Expired())
+		{
+			GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPieceGroup_);
+		}
 	}
-	
+
+
+
+
+//	if (!freeze) {
+//		
+//		//if the gatheredPieceGroup size has grown, don't discard the group but keep it after the drop.
+//		ea::vector<Piece*> currentlyGroupedPieces;
+//		gatheredPieceGroup_->GetPieces(currentlyGroupedPieces);
+//		if (allGatherPieces_.size() >= currentlyGroupedPieces.size() && !gatheredPieceGroupFromExisting)
+//		{
+//
+//			if (!gatheredPieceGroup_.Expired()) {
+//				GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPieceGroup_);
+//			}
+//			else
+//			{
+//				URHO3D_LOGINFO("when does this happen?");
+//				GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPiece_->GetNearestPieceGroup());
+//			}
+//		}
+//		else
+//		{
+//
+//			gatheredPieceGroup_->GetRigidBody()->SetNoCollideOverride(false);
+//
+//		}
+//	}
+//	else//freeze
+//	{
+//		//if (!gatheredContraptionNode_.Expired()) {
+//		//	gatheredContraptionNode_->GetComponent<NewtonRigidBody>()->SetMassScale(0);
+//		//	gatheredContraptionNode_->GetComponent<NewtonRigidBody>()->SetNoCollideOverride(false);
+//		//}
+//		//else
+//		//{
+//			//gatheredPieceGroup_->GetRigidBody()->SetMassScale(0);
+//			//gatheredPieceGroup_->GetRigidBody()->SetNoCollideOverride(false);
+////		}
+//	}
+//
+
+
 	gatheredPieceGroup_ = nullptr;
-
-
-
-
 
 	for (Piece* gatheredPiece : allGatherPieces_)
 	{
 		gatheredPiece->GetNode()->GetComponent<NewtonRigidBody>()->SetNoCollideOverride(false);
 	}
-	gatheredContraptionNode_ = nullptr;
 
 	if (!kinamaticConstriant_.Expired()) {
 		kinamaticConstriant_->Remove();
@@ -411,6 +443,9 @@ void ManipulationTool::drop(bool freeze)
 
 	gatheredPiece_ = nullptr;
 	gatherPiecePoint_ = nullptr;
+
+	GetScene()->GetComponent<PieceManager>()->CleanAll();
+	GetScene()->GetComponent<PieceManager>()->RebuildSolidifies();
 }
 
 void ManipulationTool::formGatherContraption(bool onlyOne)

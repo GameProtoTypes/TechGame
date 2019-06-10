@@ -41,18 +41,14 @@ public:
 
 	bool GetEffectivelySolidified() const;
 
+	//returns the rigid body associated with the group (could be null depending on current state)
+	NewtonRigidBody* GetRigidBody() { return node_->GetComponent<NewtonRigidBody>(); }
 
 
 
+	///Get all pieces part of this group. 
+	void GetPieces(ea::vector<Piece*>& pieces);
 
-	///Get all pieces part of this group.  only pieces up to "levels" away from the PieceGroup Node are included.  
-	///levels == 1 would include only Pieces that are immediate children of the group node.
-	///levels == 2 would include immediate children + children from groups that are a child of this group (grandchildren)
-	///etc..
-	///if singleLevel == true, levels indiates a single level to include pieces from.  so levels == 2 would only return pieces that grandchildren.
-	void GetPieces(ea::vector<Piece*>& pieces, int levels = 1, bool singleLevel = false);
-	
-	
 
 	virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
 

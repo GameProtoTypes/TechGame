@@ -457,10 +457,10 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 
 		//restore transforms
-		//rodBody->SetWorldTransform(origRodBodyTransform);
-		//rodBody->ApplyTransformToNode();
-		//holeBody->SetWorldTransform(origHoldBodyTransform);
-		//holeBody->ApplyTransformToNode();
+		rodBody->SetWorldTransform(origRodBodyTransform);
+		rodBody->ApplyTransformToNode();
+		holeBody->SetWorldTransform(origHoldBodyTransform);
+		holeBody->ApplyTransformToNode();
 
 
 

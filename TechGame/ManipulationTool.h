@@ -85,7 +85,7 @@ protected:
 
 	WeakPtr<Node> gatherNode_;
 	WeakPtr<PieceSolidificationGroup> gatheredPieceGroup_;
-	WeakPtr<Node> gatheredContraptionNode_;
+	bool gatheredPieceGroupFromExisting = false;
 	WeakPtr<Piece> gatheredPiece_;
 	WeakPtr<PiecePoint> gatherPiecePoint_;
 	ea::vector<PiecePoint*> allGatherPiecePoints_;

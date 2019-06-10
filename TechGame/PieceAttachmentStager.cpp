@@ -219,16 +219,8 @@ bool PieceAttachmentStager::AttachAll()
 
 	//un solidifying pieces involved in attachment
 	ea::vector<PieceSolidificationGroup*> allGroups;
-	for (Piece* piece : allPieces) {
-		piece->GetPieceGroups(allGroups);
+	scene_->GetComponent<PieceManager>()->RemovePiecesFromGroups(allPieces);
 
-	}
-	for (PieceSolidificationGroup* group : allGroups)
-	{
-		URHO3D_LOGINFO("pushing non solid..");
-		group->PushSolidState(false);
-		//URHO3D_LOGINFO(ea::to_string(group->GetEffectivelySolidified()));
-	}
 	
 	allPieces.front()->GetScene()->GetComponent<PieceManager>()->RebuildSolidifies();
 
@@ -247,41 +239,14 @@ bool PieceAttachmentStager::AttachAll()
 			PieceSolidificationGroup* groupB = pair->pieceB->GetNearestPieceGroup();
 
 			
-
 			allAttachSuccess &= PiecePointRow::AttachRows(pair->rowA, pair->rowB, pair->pointA, pair->pointB);
 
-			if (allAttachSuccess)
-			{
-				if (!PiecePointRow::RowsHaveDegreeOfFreedom(pair->rowA, pair->rowB))
-				{
-					URHO3D_LOGINFO("rows have no degree of freedom - merging solid groups..");
-					
-					if (groupB)
-						scene_->GetComponent<PieceManager>()->MovePieceToSolidGroup(pair->pieceA, groupB, false);
-					else if (groupA)
-						scene_->GetComponent<PieceManager>()->MovePieceToSolidGroup(pair->pieceB, groupA, false);
-					else {
-						
-						URHO3D_LOGINFO("making new group");
-						//no existing groups - lets make a new one right now.
-						PieceSolidificationGroup* newGroup = scene_->GetComponent<PieceManager>()->CreateSolidGroupAroundPiece(pair->pieceA);
-						scene_->GetComponent<PieceManager>()->MovePieceToSolidGroup(pair->pieceB, newGroup);
-
-					}
-				}
-				else
-				{
-					URHO3D_LOGINFO("rows have degree of freedom - solid group therefore not joined.");
-				}
-			}
+			
 		}
 	}
 
-	
-	for (PieceSolidificationGroup* group : allGroups) {
-			group->PopSolidState();
-	}
 
+	scene_->GetComponent<PieceManager>()->CleanAll();
 	scene_->GetComponent<PieceManager>()->RebuildSolidifies();
 
 

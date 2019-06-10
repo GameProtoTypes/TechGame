@@ -137,28 +137,6 @@ void PieceManager::GetPointsAroundPoints(ea::vector<PiecePoint*>& inPieces, ea::
 
 
 
-
-
-
-PieceSolidificationGroup* PieceManager::CreateSolidGroupAroundPiece(Piece* piece)
-{
-	Node* parent = piece->GetNode()->GetParent();
-	Node* newGroupNode = CreateGroupNode(parent);
-	piece->GetNode()->SetParent(newGroupNode);
-
-	return newGroupNode->GetComponent<PieceSolidificationGroup>();
-}
-
-PieceSolidificationGroup* PieceManager::CreateSolidGroupAroundGroup(PieceSolidificationGroup* group)
-{
-	Node* parent = group->GetNode()->GetParent();
-	Node* newGroupNode = CreateGroupNode(parent);
-	group->GetNode()->SetParent(newGroupNode);
-
-	RebuildSolidifies();
-	return newGroupNode->GetComponent<PieceSolidificationGroup>();
-}
-
 Urho3D::Node* PieceManager::CreateGroupNode(Node* parent)
 {
 	Node* node = parent->CreateChild();
@@ -168,46 +146,6 @@ Urho3D::Node* PieceManager::CreateGroupNode(Node* parent)
 	return node;
 }
 
-
-PieceSolidificationGroup* PieceManager::AddPiecesToNewSolidGroup(ea::vector<Piece*> pieces)
-{
-	ea::vector<Node*> nodes;
-	for (Piece* pc : pieces)
-	{
-		nodes.push_back(pc->GetNode());
-	}
-
-	Node* commonParent = GetCommonParentWithComponent(nodes, PieceSolidificationGroup::GetTypeNameStatic());
-
-	// create new group as child of scene
-	if (commonParent == GetScene() || commonParent == nullptr)
-	{
-		Node* newGroupNode = GetScene()->CreateChild();
-		newGroupNode->SetWorldPosition(GetNodePositionAverage(nodes));
-
-
-		PieceSolidificationGroup* newGroup = newGroupNode->CreateComponent<PieceSolidificationGroup>();
-
-		for (Piece* pc : pieces)
-		{
-			pc->GetNode()->SetParent(newGroupNode);
-		}
-
-		RebuildSolidifies();
-
-		return newGroup;
-	}
-	else
-	{
-		//group the common group.
-		URHO3D_LOGINFO("Grouping common group.");
-
-		PieceSolidificationGroup* newGroup = CreateSolidGroupAroundGroup(commonParent->GetComponent<PieceSolidificationGroup>());
-		RebuildSolidifies();
-
-		return newGroup;
-	}
-}
 
 
 //moves piece to the specified group - potentially removing it from it's existing group.
@@ -221,7 +159,15 @@ void PieceManager::MovePieceToSolidGroup(Piece* piece, PieceSolidificationGroup*
 }
 
 
-/*
+
+void PieceManager::MovePiecesToSolidGroup(ea::vector<Piece*>& pieces, PieceSolidificationGroup* group, bool clean /*= true*/)
+{
+	for (Piece* pc : pieces)
+	{
+		MovePieceToSolidGroup(pc, group, clean);
+	}
+}
+
 PieceSolidificationGroup* PieceManager::GetCommonSolidGroup(ea::vector<Piece*> pieces)
 {
 	ea::vector<Node*> nodes;
@@ -236,7 +182,7 @@ PieceSolidificationGroup* PieceManager::GetCommonSolidGroup(ea::vector<Piece*> p
 	}
 	return nullptr;
 }
-*/
+
 
 /*
 void PieceManager::RemovePiecesFromFirstCommonSolidGroup(ea::vector<Piece*> pieces)
@@ -323,8 +269,6 @@ void PieceManager::RebuildSolidifiesSub(Node* startNode, bool branchSolidified)
 		}
 	}
 
-
-
 	ea::vector<Node*> children;
 	startNode->GetChildren(children);
 
@@ -357,6 +301,19 @@ void PieceManager::CleanGroups(Node* node)
 		rem->Remove();
 	}
 }
+
+void PieceManager::CleanAll()
+{
+	ea::vector<Node*> allChildren;
+	GetScene()->GetChildrenWithComponent<PieceSolidificationGroup>(allChildren, true);
+
+
+	for (Node* node : allChildren)
+	{
+		CleanGroups(node);//kind-of redundant code here.
+	}
+}
+
 //
 //void PieceManager::FormGroups(Piece* startingPiece)
 //{

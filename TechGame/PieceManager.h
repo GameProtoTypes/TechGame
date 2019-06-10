@@ -42,27 +42,18 @@ public:
 	void GetPointsAroundPoints(ea::vector<PiecePoint*>& inPieces, ea::vector<PiecePoint*>& outPieces, float radius);
 
 
-	
-
 
 	///create a new node with group component
 	Node* CreateGroupNode(Node* parent);
 
-	///Creates a new common group surrounding all pieces. 
-	PieceSolidificationGroup* AddPiecesToNewSolidGroup(ea::vector<Piece*> pieces);
-
-	///creates a new group around the piece (inside outer existing groups)
-	PieceSolidificationGroup* CreateSolidGroupAroundPiece(Piece* piece);
-
-	///create a new group around an existing group (inside outer existing groups)
-	PieceSolidificationGroup* CreateSolidGroupAroundGroup(PieceSolidificationGroup* group);
 
 
 	///move a piece to an existing group potentially changing its position in the group tree. optionally clean the old group.
 	void MovePieceToSolidGroup(Piece* piece, PieceSolidificationGroup* group, bool clean = true);
+	void MovePiecesToSolidGroup(ea::vector<Piece*>& pieces, PieceSolidificationGroup* group, bool clean = true);
 
 	///return the first common group for the given pieces.
-	//PieceSolidificationGroup* GetCommonSolidGroup(ea::vector<Piece*> pieces);
+	PieceSolidificationGroup* GetCommonSolidGroup(ea::vector<Piece*> pieces);
 
 	///finds the most child-like common group and removes all pieces from it.
 	//void RemovePiecesFromFirstCommonSolidGroup(ea::vector<Piece*> pieces);
@@ -88,11 +79,9 @@ public:
 	///removes groups if the node has no piece's on children nodes. continues down the tree.
 	void CleanGroups(Node* node);
 
+	void CleanAll();
 
 	//void FormGroups(Piece* startingPiece);
-
-
-
 
 
 
