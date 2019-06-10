@@ -36,7 +36,7 @@ bool ManipulationTool::Gather(bool grabOne)
 		ea::vector<Piece*> pieceVector;
 		pieceVector.push_back(piece);
 		URHO3D_LOGINFO("stripping groups...");
-		pieceManager_->StripSolidGroups(pieceVector);
+		pieceManager_->RemovePiecesFromGroups(pieceVector);
 
 		piece->DetachAll();
 	}
@@ -365,12 +365,18 @@ void ManipulationTool::drop(bool freeze)
 
 	if (!freeze) {
 		
-		if (!gatheredPieceGroup_.Expired()) {
-			GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPieceGroup_);
-		}
-		else
+		ea::vector<Piece*> currentlyGroupedPieces;
+		gatheredPieceGroup_->GetPieces(currentlyGroupedPieces, 999);
+		if (allGatherPieces_.size() == currentlyGroupedPieces.size())
 		{
-			GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPiece_->GetNearestPieceGroup());
+			if (!gatheredPieceGroup_.Expired()) {
+				GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPieceGroup_);
+			}
+			else
+			{
+				URHO3D_LOGINFO("when does this happen?");
+				GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPiece_->GetNearestPieceGroup());
+			}
 		}
 	}
 	else
@@ -381,8 +387,8 @@ void ManipulationTool::drop(bool freeze)
 		//}
 		//else
 		//{
-			gatheredPiece_->GetNearestPieceGroup()->GetNode()->GetComponent<NewtonRigidBody>()->SetMassScale(0);
-			gatheredPiece_->GetNearestPieceGroup()->GetNode()->GetComponent<NewtonRigidBody>()->SetNoCollideOverride(false);
+			gatheredPiece_->GetEffectiveRigidBody()->SetMassScale(0);
+			gatheredPiece_->GetEffectiveRigidBody()->SetNoCollideOverride(false);
 //		}
 	}
 	

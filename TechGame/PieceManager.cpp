@@ -209,22 +209,19 @@ PieceSolidificationGroup* PieceManager::AddPiecesToNewSolidGroup(ea::vector<Piec
 	}
 }
 
-//moves piece to the specified group - removing it from it's existing group.
-void PieceManager::MovePieceToSolidGroup(Piece* piece, PieceSolidificationGroup* group)
+
+//moves piece to the specified group - potentially removing it from it's existing group.
+void PieceManager::MovePieceToSolidGroup(Piece* piece, PieceSolidificationGroup* group, bool clean/* = true*/)
 {
-	ea::vector<Piece*> list;
-	list.push_back(piece);
-
-	Node* oldParent = piece->GetNode()->GetParent();
+	RemovePieceFromGroups(piece, clean);
+	
 	piece->GetNode()->SetParent(group->GetNode());
-
-
-	CleanGroups(oldParent);
-
 
 	RebuildSolidifies();
 }
 
+
+/*
 PieceSolidificationGroup* PieceManager::GetCommonSolidGroup(ea::vector<Piece*> pieces)
 {
 	ea::vector<Node*> nodes;
@@ -239,7 +236,9 @@ PieceSolidificationGroup* PieceManager::GetCommonSolidGroup(ea::vector<Piece*> p
 	}
 	return nullptr;
 }
+*/
 
+/*
 void PieceManager::RemovePiecesFromFirstCommonSolidGroup(ea::vector<Piece*> pieces)
 {
 	ea::vector<Node*> nodes;
@@ -260,45 +259,36 @@ void PieceManager::RemovePiecesFromFirstCommonSolidGroup(ea::vector<Piece*> piec
 
 	RebuildSolidifies();
 }
+*/
 
-void PieceManager::StripSolidGroups(const ea::vector<Piece*>& pieces)
+void PieceManager::RemovePieceFromGroups(Piece* piece, bool postClean /*= true*/)
 {
-	//URHO3D_LOGINFO("Stripping Solid Groups...");
-	ea::vector<Node*> oldParents;
-	for (Piece* pc : pieces)
-	{
-		oldParents.push_back(pc->GetNode()->GetParent());
-		pc->GetNode()->SetParent(GetScene());
-		//URHO3D_LOGINFO("Piece Moved To Scene.");
-	}
-	
-	//remove dangling group nodes.
-	for (Node* oldParent : oldParents)
-	{
+	Node* oldParent = piece->GetNode()->GetParent();
+	piece->GetNode()->SetParent(GetScene());
 
+	if (postClean)
+	{
 		CleanGroups(oldParent);
-		
 	}
 
 	RebuildSolidifies();
 }
 
-void PieceManager::RemoveUnnecesarySolidGroup(Piece* piece)
-{
-	PieceSolidificationGroup* group = piece->GetNearestPieceGroup();
 
-	if (group)
+void PieceManager::RemovePiecesFromGroups(const ea::vector<Piece*>& pieces, bool postClean /*= true*/)
+{
+
+	for (Piece* pc : pieces)
 	{
-		ea::vector<Piece*> pieces;
-		group->GetPieces(pieces, 99);
-		if (pieces.size() <= 1)
-		{
-			StripSolidGroups(pieces);
-			URHO3D_LOGINFO("removed not necessary group.");
-		}
+		RemovePieceFromGroups(pc, postClean);
 	}
 
+	RebuildSolidifies();
 }
+
+
+
+
 
 void PieceManager::RemoveSolidGroup(PieceSolidificationGroup* group)
 {
@@ -312,7 +302,6 @@ void PieceManager::RemoveSolidGroup(PieceSolidificationGroup* group)
 	}
 
 	group->GetNode()->Remove();
-
 
 	RebuildSolidifies();
 }
@@ -359,51 +348,49 @@ void PieceManager::RebuildSolidifies()
 
 void PieceManager::CleanGroups(Node* node)
 {
-	//URHO3D_LOGINFO("looking at old parent." + ea::to_string((int)(void*)oldParent));
 	Node* curNode = node;
-	//URHO3D_LOGINFO("num children: " + ea::to_string(curParent->GetNumChildren()));
+	
 	int numPieceChildren = curNode->GetChildrenWithComponent(Piece::GetTypeStatic(), false).size();
 	while (curNode && !numPieceChildren && curNode != GetScene()) {
 		Node* rem = curNode;
 		curNode = curNode->GetParent();
 		rem->Remove();
-		//URHO3D_LOGINFO("Old PieceGroup-Node removed.");
 	}
 }
-
-void PieceManager::FormGroups(Piece* startingPiece)
-{
-	//Vector<Vector<Piece*>> loops;
-	//FindLoops(startingPiece, loops);
-
-	//for (int l = 0; l < loops.Size(); l++)
-	//{
-
-	//	PieceGroup* newGroup = GetScene()->CreateComponent<PieceGroup>();
-	//	for (int p = 0; p < loops[l].Size(); p++)
-	//	{
-
-	//		PODVector<PieceGroup*> existingGroups;
-	//		loops[l][p]->GetPieceGroups(existingGroups);
-	//		if (existingGroups.Size()) {
-	//			//already part of a piece group.
-	//		}
-	//		else
-	//		{
-	//			newGroup->AddPiece(loops[l][p]);
-	//		}
-	//	}
-
-	//	if (newGroup->AllPieces().Size())
-	//	{
-	//		newGroup->Solidify();
-	//	}
-	//	else
-	//	{
-	//		newGroup->Remove();
-	//	}
-	//}
-}
+//
+//void PieceManager::FormGroups(Piece* startingPiece)
+//{
+//	//Vector<Vector<Piece*>> loops;
+//	//FindLoops(startingPiece, loops);
+//
+//	//for (int l = 0; l < loops.Size(); l++)
+//	//{
+//
+//	//	PieceGroup* newGroup = GetScene()->CreateComponent<PieceGroup>();
+//	//	for (int p = 0; p < loops[l].Size(); p++)
+//	//	{
+//
+//	//		PODVector<PieceGroup*> existingGroups;
+//	//		loops[l][p]->GetPieceGroups(existingGroups);
+//	//		if (existingGroups.Size()) {
+//	//			//already part of a piece group.
+//	//		}
+//	//		else
+//	//		{
+//	//			newGroup->AddPiece(loops[l][p]);
+//	//		}
+//	//	}
+//
+//	//	if (newGroup->AllPieces().Size())
+//	//	{
+//	//		newGroup->Solidify();
+//	//	}
+//	//	else
+//	//	{
+//	//		newGroup->Remove();
+//	//	}
+//	//}
+//}
 
 void PieceManager::FindLoops(Piece* piece, ea::vector<ea::vector<Piece*>>& loops) {
 	ea::vector<Piece*> traverseList;

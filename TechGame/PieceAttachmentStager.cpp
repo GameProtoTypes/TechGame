@@ -257,9 +257,17 @@ bool PieceAttachmentStager::AttachAll()
 					URHO3D_LOGINFO("rows have no degree of freedom - merging solid groups..");
 					
 					if (groupB)
-						scene_->GetComponent<PieceManager>()->MovePieceToSolidGroup(pair->pieceA, groupB);
+						scene_->GetComponent<PieceManager>()->MovePieceToSolidGroup(pair->pieceA, groupB, false);
 					else if (groupA)
-						scene_->GetComponent<PieceManager>()->MovePieceToSolidGroup(pair->pieceB, groupA);
+						scene_->GetComponent<PieceManager>()->MovePieceToSolidGroup(pair->pieceB, groupA, false);
+					else {
+						
+						URHO3D_LOGINFO("making new group");
+						//no existing groups - lets make a new one right now.
+						PieceSolidificationGroup* newGroup = scene_->GetComponent<PieceManager>()->CreateSolidGroupAroundPiece(pair->pieceA);
+						scene_->GetComponent<PieceManager>()->MovePieceToSolidGroup(pair->pieceB, newGroup);
+
+					}
 				}
 				else
 				{

@@ -450,7 +450,7 @@ void TechGame::CreateScene()
 
 		ea::vector<Piece*> pieces;
 		int numDiffPieces = 2;
-		for (int y = 0; y < numDiffPieces*1; y += 1) {
+		for (int y = 0; y < numDiffPieces*100; y += 1) {
 
 			Node* piece;
 
@@ -458,9 +458,9 @@ void TechGame::CreateScene()
 			if (rnd == 0)
 				piece = CreatePiece(scene_, "8_piece_Cshape", false);
 			else if (rnd == 1)
-				piece = CreatePiece(scene_, "rod_round_4", false);
-			else if (rnd == 2)
 				piece = CreatePiece(scene_, "rod_hard_4", false);
+			else if (rnd == 2)
+				piece = CreatePiece(scene_, "rod_round_4", false);
 			else if (rnd == 3)
 				piece = CreatePiece(scene_, "6_piece_thin", false);
 			else if (rnd == 4)
@@ -484,7 +484,7 @@ void TechGame::CreateScene()
 			prevPiece = piece;
 		}
 
-		PieceSolidificationGroup* group = scene_->GetComponent<PieceManager>()->AddPiecesToNewSolidGroup(pieces);
+		//PieceSolidificationGroup* group = scene_->GetComponent<PieceManager>()->AddPiecesToNewSolidGroup(pieces);
 		//group->PushSolidState(false);
 
 	}
