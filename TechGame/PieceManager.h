@@ -82,7 +82,9 @@ public:
 	///form the largest solid group starting at the given piece.
 	PieceSolidificationGroup*  FormSolidGroup(Piece* startingPiece);
 
+	void ClearAllGroups();
 
+	void AutoFormAllGroups();
 
 
 

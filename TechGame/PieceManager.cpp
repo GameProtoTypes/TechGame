@@ -339,6 +339,30 @@ PieceSolidificationGroup* PieceManager::FormSolidGroup(Piece* startingPiece)
 	return nullptr;
 }
 
+void PieceManager::ClearAllGroups()
+{
+	ea::vector<PieceSolidificationGroup*> groups;
+	GetScene()->GetComponents<PieceSolidificationGroup>(groups, true);
+	for (auto* gp : groups) {
+		RemoveSolidGroup(gp);
+	}
+
+	CleanAll();
+	RebuildSolidifies();
+}
+
+void PieceManager::AutoFormAllGroups()
+{
+	ClearAllGroups();
+
+	ea::vector<Piece*> allPieces;
+	GetScene()->GetComponents<Piece>(allPieces, true);
+	for (Piece* pc : allPieces) {
+		FormSolidGroup(pc);
+	}
+
+}
+
 //
 //void PieceManager::FormGroups(Piece* startingPiece)
 //{
