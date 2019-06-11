@@ -71,7 +71,7 @@ protected:
 
 	virtual void OnNodeSet(Node* node) override;
 
-	void drop(bool freeze);
+	void drop(bool freeze, bool hadAttachement);
 
 	void formGatherContraption(bool onlyOne = false);
 

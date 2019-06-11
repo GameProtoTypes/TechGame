@@ -108,6 +108,7 @@ void ManipulationTool::UnGather(bool freeze)
 
 
 	bool goodToDrop = true;
+	bool hadAttachement = false;
 	if (otherPiece_ && otherPiecePoint_) {
 
 		PieceManager* pieceManager = GetScene()->GetComponent<PieceManager>();
@@ -119,6 +120,7 @@ void ManipulationTool::UnGather(bool freeze)
 
 		//check that all other points are within attach tolerance.
 		bool attachmentPotential = false;
+		
 		ea::vector<PiecePoint*> goodPoints;
 		ea::vector<PiecePoint*> closestPoints;//corresponds the allGatherPiecePoints
 		closestPoints.resize(allGatherPiecePoints_.size());
@@ -163,7 +165,7 @@ void ManipulationTool::UnGather(bool freeze)
 
 		
 
-
+		
 		if (attachmentPotential)
 		{
 			SharedPtr<PieceAttachmentStager> attachStager = context_->CreateObject<PieceAttachmentStager>();
@@ -180,7 +182,7 @@ void ManipulationTool::UnGather(bool freeze)
 			if (attachStager->IsValid()) {
 			
 				//attach
-				attachStager->AttachAll();
+				hadAttachement = attachStager->AttachAll();
 			}
 			else
 				goodToDrop = false;
@@ -192,7 +194,7 @@ void ManipulationTool::UnGather(bool freeze)
 	if (goodToDrop) {
 
 		//check collisions
-		drop(freeze);
+		drop(freeze, hadAttachement);
 	}
 }
 
@@ -369,13 +371,19 @@ void ManipulationTool::OnNodeSet(Node* node)
 	}
 }
 
-void ManipulationTool::drop(bool freeze)
+void ManipulationTool::drop(bool freeze, bool hadAttachement)
 {
+	if (!gatheredPieceGroup_.Expired() && hadAttachement) {
+		GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPieceGroup_);
+	}
 
 	if (freeze)
 	{
 
-
+		if (!gatheredPieceGroup_.Expired())
+		{
+			gatheredPieceGroup_->GetRigidBody()->SetMassScale(0);
+		}
 
 
 	}
@@ -383,62 +391,37 @@ void ManipulationTool::drop(bool freeze)
 	{
 		if (!gatheredPieceGroup_.Expired())
 		{
-			GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPieceGroup_);
+			if (!gatheredPieceGroupFromExisting) {
+				GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPieceGroup_);
+			}
+			else
+			{
+				gatheredPieceGroup_->GetRigidBody()->SetNoCollideOverride(false);
+			}
 		}
 	}
-
-
-
-
-//	if (!freeze) {
-//		
-//		//if the gatheredPieceGroup size has grown, don't discard the group but keep it after the drop.
-//		ea::vector<Piece*> currentlyGroupedPieces;
-//		gatheredPieceGroup_->GetPieces(currentlyGroupedPieces);
-//		if (allGatherPieces_.size() >= currentlyGroupedPieces.size() && !gatheredPieceGroupFromExisting)
-//		{
-//
-//			if (!gatheredPieceGroup_.Expired()) {
-//				GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPieceGroup_);
-//			}
-//			else
-//			{
-//				URHO3D_LOGINFO("when does this happen?");
-//				GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPiece_->GetNearestPieceGroup());
-//			}
-//		}
-//		else
-//		{
-//
-//			gatheredPieceGroup_->GetRigidBody()->SetNoCollideOverride(false);
-//
-//		}
-//	}
-//	else//freeze
-//	{
-//		//if (!gatheredContraptionNode_.Expired()) {
-//		//	gatheredContraptionNode_->GetComponent<NewtonRigidBody>()->SetMassScale(0);
-//		//	gatheredContraptionNode_->GetComponent<NewtonRigidBody>()->SetNoCollideOverride(false);
-//		//}
-//		//else
-//		//{
-//			//gatheredPieceGroup_->GetRigidBody()->SetMassScale(0);
-//			//gatheredPieceGroup_->GetRigidBody()->SetNoCollideOverride(false);
-////		}
-//	}
-//
 
 
 	gatheredPieceGroup_ = nullptr;
 
 	for (Piece* gatheredPiece : allGatherPieces_)
 	{
-		gatheredPiece->GetNode()->GetComponent<NewtonRigidBody>()->SetNoCollideOverride(false);
+		gatheredPiece->GetEffectiveRigidBody()->SetNoCollideOverride(false);
 	}
 
 	if (!kinamaticConstriant_.Expired()) {
 		kinamaticConstriant_->Remove();
 		kinamaticConstriant_ = nullptr;
+	}
+
+	if (hadAttachement) {
+		//form a new grouping
+		PieceSolidificationGroup* newGroup = GetScene()->GetComponent<PieceManager>()->FormSolidGroup(gatheredPiece_);
+		
+		if (freeze)
+		{
+			newGroup->GetRigidBody()->SetMassScale(0);
+		}
 	}
 
 	gatheredPiece_ = nullptr;

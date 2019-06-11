@@ -449,7 +449,7 @@ void TechGame::CreateScene()
 		Node* prevPiece = nullptr;
 
 		ea::vector<Piece*> pieces;
-		int numDiffPieces = 2;
+		int numDiffPieces = 7;
 		for (int y = 0; y < numDiffPieces*10; y += 1) {
 
 			Node* piece;

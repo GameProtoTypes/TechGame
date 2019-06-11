@@ -219,8 +219,14 @@ bool PieceAttachmentStager::AttachAll()
 
 	//un solidifying pieces involved in attachment
 	ea::vector<PieceSolidificationGroup*> allGroups;
-	scene_->GetComponent<PieceManager>()->RemovePiecesFromGroups(allPieces);
+	for (Piece* pc : allPieces) {
+		if (!allGroups.contains(pc->GetNearestPieceGroup()) && (pc->GetNearestPieceGroup() != nullptr))
+			allGroups.push_back(pc->GetNearestPieceGroup());
+	}
 
+	for (PieceSolidificationGroup* gp : allGroups) {
+		scene_->GetComponent<PieceManager>()->RemoveSolidGroup(gp);
+	}
 	
 	allPieces.front()->GetScene()->GetComponent<PieceManager>()->RebuildSolidifies();
 
@@ -235,8 +241,8 @@ bool PieceAttachmentStager::AttachAll()
 		if (!pair->rowA->AttachedToRow(pair->rowB) && !pair->rowB->AttachedToRow(pair->rowA)) {
 
 			//get closest existing groups from both sides.
-			PieceSolidificationGroup* groupA = pair->pieceA->GetNearestPieceGroup();
-			PieceSolidificationGroup* groupB = pair->pieceB->GetNearestPieceGroup();
+			//PieceSolidificationGroup* groupA = pair->pieceA->GetNearestPieceGroup();
+			//PieceSolidificationGroup* groupB = pair->pieceB->GetNearestPieceGroup();
 
 			
 			allAttachSuccess &= PiecePointRow::AttachRows(pair->rowA, pair->rowB, pair->pointA, pair->pointB);

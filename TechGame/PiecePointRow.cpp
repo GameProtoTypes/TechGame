@@ -167,6 +167,13 @@ bool PiecePointRow::AttachedToRow(PiecePointRow* row)
 	return false;
 }
 
+void PiecePointRow::GetAttachedRows(ea::vector<PiecePointRow*>& rows)
+{
+	for (int i = 0; i < rowAttachements_.size(); i++) {
+		rows.push_back(rowAttachements_[i].rowA_);
+	}
+}
+
 bool PiecePointRow::DetachFrom(PiecePointRow* otherRow)
 {
 

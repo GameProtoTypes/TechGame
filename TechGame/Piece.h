@@ -37,11 +37,11 @@ public:
 
 	void GetAttachedRows(ea::vector<PiecePointRow*>& rows);
 
-
 	void GetPoints(ea::vector<PiecePoint*>& points);
 
 	void GetAttachedPieces(ea::vector<Piece*>& pieces, bool recursive);
 
+	
 
 	void DetachAll();
 

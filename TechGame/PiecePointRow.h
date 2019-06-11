@@ -131,6 +131,9 @@ public:
 
 	bool AttachedToRow(PiecePointRow* row);
 
+	///get all rows that are attached to this row.
+	void GetAttachedRows(ea::vector<PiecePointRow*>& rows);
+
 	bool DetachFrom(PiecePointRow* otherRow);
 
 	bool DetachAll();

@@ -55,18 +55,13 @@ public:
 	///return the first common group for the given pieces.
 	PieceSolidificationGroup* GetCommonSolidGroup(ea::vector<Piece*> pieces);
 
-	///finds the most child-like common group and removes all pieces from it.
-	//void RemovePiecesFromFirstCommonSolidGroup(ea::vector<Piece*> pieces);
-
 	///sets a piece with no grouping. optionally clean
 	void RemovePieceFromGroups(Piece* piece, bool postClean = true);
 
 	///sets all pieces with no grouping. (moves nodes to scene)  cleans up afterwards.
 	void RemovePiecesFromGroups(const ea::vector<Piece*>& pieces, bool postClean = true);
 
-	///removes the group if the piece is the only member of the group.
-	//void RemoveUnnecesarySolidGroup(Piece* piece);
-	
+
 	///Removes the group from the group tree, all children are re-parented to the parent of the given group.
 	void RemoveSolidGroup(PieceSolidificationGroup* group);
 
@@ -81,9 +76,11 @@ public:
 
 	void CleanAll();
 
-	//void FormGroups(Piece* startingPiece);
-
-
+	///find all pieces that are rigidly connected starting at the startingPiece.
+	void GetRigidlyConnectedPieces(Piece* startingPiece, ea::vector<Piece*>& pieces);
+	
+	///form the largest solid group starting at the given piece.
+	PieceSolidificationGroup*  FormSolidGroup(Piece* startingPiece);
 
 
 

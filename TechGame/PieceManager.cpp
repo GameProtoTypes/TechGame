@@ -184,28 +184,7 @@ PieceSolidificationGroup* PieceManager::GetCommonSolidGroup(ea::vector<Piece*> p
 }
 
 
-/*
-void PieceManager::RemovePiecesFromFirstCommonSolidGroup(ea::vector<Piece*> pieces)
-{
-	ea::vector<Node*> nodes;
-	for (Piece* pc : pieces)
-	{
-		nodes.push_back(pc->GetNode());
-	}
-	Node* commonParent = GetCommonParentWithComponent(nodes, PieceSolidificationGroup::GetTypeStatic());
 
-	if (commonParent)
-	{
-		for (Node* node : nodes)
-		{
-			node->SetParent(commonParent->GetParent());
-		}
-		commonParent->Remove();
-	}
-
-	RebuildSolidifies();
-}
-*/
 
 void PieceManager::RemovePieceFromGroups(Piece* piece, bool postClean /*= true*/)
 {
@@ -312,6 +291,52 @@ void PieceManager::CleanAll()
 	{
 		CleanGroups(node);//kind-of redundant code here.
 	}
+}
+
+
+void PieceManager::GetRigidlyConnectedPieces(Piece* startingPiece, ea::vector<Piece*>& pieces)
+{
+	if (!pieces.contains(startingPiece))
+		pieces.push_back(startingPiece);
+	else
+		return;
+
+	ea::vector<Piece*> attachedPieces;
+	startingPiece->GetAttachedPieces(attachedPieces, false);
+
+	ea::vector<PiecePointRow*> rows;
+	startingPiece->GetPointRows(rows);
+
+
+	for (PiecePointRow* row : rows) {
+		bool isRigid = false;
+		ea::vector<PiecePointRow*> attachedRows;
+		row->GetAttachedRows(attachedRows);
+		for (PiecePointRow* attachedRow : attachedRows) {
+			bool hasDOF = PiecePointRow::RowsHaveDegreeOfFreedom(row, attachedRow);
+			if (!hasDOF)
+			{
+				isRigid = true;
+				GetRigidlyConnectedPieces(attachedRow->GetPiece(), pieces);
+			}
+		}
+	}
+
+}
+
+PieceSolidificationGroup* PieceManager::FormSolidGroup(Piece* startingPiece)
+{
+	ea::vector<Piece*> pieces;
+	GetRigidlyConnectedPieces(startingPiece, pieces);
+
+	if (pieces.size() > 1) {
+		PieceSolidificationGroup* newGroup = CreateGroupNode(GetScene())->GetComponent<PieceSolidificationGroup>();
+		for (Piece* pc : pieces) {
+			MovePieceToSolidGroup(pc, newGroup);
+		}
+		return newGroup;
+	}
+	return nullptr;
 }
 
 //
