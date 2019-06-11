@@ -102,8 +102,44 @@ void PieceManager::GetPointsInRadius(ea::vector<PiecePoint*>& points, Vector3 wo
 }
 
 
+Piece* PieceManager::GetClosestAimPiece(Vector3& worldPos, Camera* camera)
+{
+
+	//Camera* camera = node_->GetComponent<Camera>();
+	Node* node = camera->GetNode();
+
+	Octree* octree = GetScene()->GetComponent<Octree>();
+	RayOctreeQuery querry(Ray(node->GetWorldPosition(), node->GetDirection()));
+	octree->Raycast(querry);
+
+	if (querry.result_.size() > 1)
+	{
+		if (querry.result_[1].node_->GetName() == "visualNode")
+		{
+			Piece* piece = querry.result_[1].node_->GetParent()->GetComponent<Piece>();
+			if (piece) {
+				worldPos = querry.result_[1].position_;
+				return piece;
+			}
+		}
+	}
+
+	return nullptr;
+}
 
 
+
+PiecePoint* PieceManager::GetClosestAimPiecePoint(Camera* camera)
+{
+
+	Vector3 worldPos;
+	Piece* piece = GetClosestAimPiece(worldPos, camera);
+	if (!piece)
+		return nullptr;
+
+
+	return GetClosestPiecePoint(worldPos, piece);
+}
 
 
 
@@ -217,6 +253,9 @@ void PieceManager::RemovePiecesFromGroups(const ea::vector<Piece*>& pieces, bool
 
 void PieceManager::RemoveSolidGroup(PieceSolidificationGroup* group)
 {
+	if (group == nullptr)
+		return;
+
 	ea::vector<Node*> children;
 	group->GetNode()->GetChildren(children);
 
@@ -331,6 +370,7 @@ PieceSolidificationGroup* PieceManager::FormSolidGroup(Piece* startingPiece)
 
 	if (pieces.size() > 1) {
 		PieceSolidificationGroup* newGroup = CreateGroupNode(GetScene())->GetComponent<PieceSolidificationGroup>();
+		newGroup->GetNode()->SetWorldPosition(startingPiece->GetNode()->GetWorldPosition());
 		for (Piece* pc : pieces) {
 			MovePieceToSolidGroup(pc, newGroup);
 		}

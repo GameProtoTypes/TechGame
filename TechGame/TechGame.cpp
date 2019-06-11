@@ -654,6 +654,27 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 			GetSubsystem<DebugHud>()->SetMode(DebugHudMode::DEBUGHUD_SHOW_NONE);
 		}
 
+
+		if (ui::Button("Form PieceSolidificationGroup"))
+		{
+			Vector3 worldPos;
+			Piece* piece = scene_->GetComponent<PieceManager>()->GetClosestAimPiece(worldPos, cameraNode_->GetComponent<Camera>());
+			if (piece) {
+
+				URHO3D_LOGINFO("FORMING MANUAL GROUP");
+				scene_->GetComponent<PieceManager>()->FormSolidGroup(piece);
+			}
+		}
+		if (ui::Button("Remove PieceSolidificationGroup"))
+		{
+			Vector3 worldPos;
+			Piece* piece = scene_->GetComponent<PieceManager>()->GetClosestAimPiece(worldPos, cameraNode_->GetComponent<Camera>());
+			if (piece) {
+				scene_->GetComponent<PieceManager>()->RemoveSolidGroup(piece->GetPieceGroup());
+			}
+		}
+
+
 		ui::End();
 
 

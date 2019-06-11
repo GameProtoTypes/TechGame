@@ -18,93 +18,78 @@ void ManipulationTool::RegisterObject(Context* context)
 
 bool ManipulationTool::Gather(bool grabOne)
 {
-	PiecePoint* piecePoint = GetClosestAimPiecePoint();
+	URHO3D_LOGINFO("Gathering:");
+
+	//Get the PiecePoint we are aiming at, else return.
+	PiecePoint* piecePoint = pieceManager_->GetClosestAimPiecePoint(node_->GetComponent<Camera>());
+
 	if (!piecePoint)
 		return false;
 
-
+	//resolve piece and store both at currently gathered.
 	Piece* piece = piecePoint->GetPiece();
 
 	gatheredPiece_ = piece;
 	gatherPiecePoint_ = piecePoint;
 
-	formGatherContraption(grabOne);
-	
+
 
 	if (grabOne)
 	{
-		ea::vector<Piece*> pieceVector;
-		pieceVector.push_back(piece);
-		URHO3D_LOGINFO("stripping groups...");
-		pieceManager_->RemovePiecesFromGroups(pieceVector);
-
-		piece->DetachAll();
+		//if we are grabbing one from the contraption, remove the gathered piece from its group if it is part of one.
+		pieceManager_->RemovePieceFromGroups(gatheredPiece_);
+		
+		//and finally detach from its contraption.
+		gatheredPiece_->DetachAll();
+	}
+	else
+	{
+		//form list of all connected pieces to the gathered piece and store in allGatherPieces_
+		formGatherContraption(grabOne);
 	}
 
-	NewtonRigidBody* rigBody;
-	URHO3D_LOGINFO("num gather pieces: " + ea::to_string(allGatherPieces_.size()));
 	//re parent contraption to single body
+	{
+		//see if there is a common group already existing for all gatheredPieces
+		PieceSolidificationGroup* commonGroup = pieceManager_->GetCommonSolidGroup(allGatherPieces_);
 
-	//pieceManager_->StripSolidGroups(allGatherPieces_);
-	if (pieceManager_->GetCommonSolidGroup(allGatherPieces_)) {
-		gatheredPieceGroup_ = pieceManager_->GetCommonSolidGroup(allGatherPieces_);
-		gatheredPieceGroupFromExisting = true;
-		URHO3D_LOGINFO("gatheredPieceGroup_ assigned to existing common group");
+		if (commonGroup) {
+
+			//assign gatheredPieceGroup to the existing common grouping and flag.
+			gatheredPieceGroup_ = commonGroup;
+			gatheredPieceGroupFromExisting = true;
+			URHO3D_LOGINFO("gatheredPieceGroup_ assigned to existing common group");
+		}
+		else
+		{
+			//create a new group and move all pieces to the newGroup.
+			PieceSolidificationGroup* newGroup = pieceManager_->CreateGroupNode(GetScene())->GetComponent<PieceSolidificationGroup>();
+
+			pieceManager_->MovePiecesToSolidGroup(allGatherPieces_, newGroup);
+			gatheredPieceGroup_ = newGroup;
+			gatheredPieceGroupFromExisting = false;
+			URHO3D_LOGINFO("gatheredPieceGroup_ group created.");
+		}
 	}
-	else {
-
-		PieceSolidificationGroup* newGroup = pieceManager_->CreateGroupNode(GetScene())->GetComponent<PieceSolidificationGroup>();
-
-		pieceManager_->MovePiecesToSolidGroup(allGatherPieces_, newGroup);
-		gatheredPieceGroup_ = newGroup;
-		URHO3D_LOGINFO("gatheredPieceGroup_ group created.");
-		gatheredPieceGroupFromExisting = false;
-	}
-	
 
 
-
-	gatheredPieceGroup_->SetSolidified(true);
-
-
-	rigBody = gatheredPieceGroup_->GetNode()->GetComponent<NewtonRigidBody>();
-	rigBody->SetIsKinematic(false);
+	//set the rigid body of the group to have no collide and attach kinematics constroller.
+	NewtonRigidBody* rigBody = gatheredPieceGroup_->GetRigidBody();
 	rigBody->SetNoCollideOverride(true);
 	rigBody->SetMassScale(1.0f);
 
-
-
-
 	kinamaticConstriant_ = rigBody->GetNode()->CreateComponent<NewtonKinematicsControllerConstraint>();
 
-
-
-
+	//update the kinematic constraint's position on the body.
 	updateKinematicsControllerPos();
 	
 
-	for (Piece* gatheredPiece : allGatherPieces_)
-	{
-		gatheredPiece->GetNode()->GetComponent<NewtonRigidBody>()->SetNoCollideOverride(true);
-	}
 	return true;
 }
 
 
-bool ManipulationTool::IsGathering()
-{
-	if (gatheredPiece_)
-		return true;
-	else
-		return false;
-}
-
 void ManipulationTool::UnGather(bool freeze)
 {
-	//URHO3D_LOGINFO("");
-	//URHO3D_LOGINFO("");
-	//URHO3D_LOGINFO("");
-
 
 
 	bool goodToDrop = true;
@@ -198,6 +183,72 @@ void ManipulationTool::UnGather(bool freeze)
 	}
 }
 
+void ManipulationTool::drop(bool freeze, bool hadAttachement)
+{
+	if (!gatheredPieceGroup_.Expired() && hadAttachement) {
+		GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPieceGroup_);
+	}
+
+	if (freeze)
+	{
+
+		if (!gatheredPieceGroup_.Expired())
+		{
+			gatheredPieceGroup_->GetRigidBody()->SetMassScale(0);
+		}
+	}
+	else
+	{
+		if (!gatheredPieceGroup_.Expired())
+		{
+			if (!gatheredPieceGroupFromExisting) {
+				GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPieceGroup_);
+			}
+			else
+			{
+				gatheredPieceGroup_->GetRigidBody()->SetNoCollideOverride(false);
+			}
+		}
+	}
+
+
+	gatheredPieceGroup_ = nullptr;
+
+	for (Piece* gatheredPiece : allGatherPieces_)
+	{
+		gatheredPiece->GetEffectiveRigidBody()->SetNoCollideOverride(false);
+	}
+
+	if (!kinamaticConstriant_.Expired()) {
+		kinamaticConstriant_->Remove();
+		kinamaticConstriant_ = nullptr;
+	}
+
+	if (hadAttachement) {
+		//form a new grouping
+		PieceSolidificationGroup* newGroup = GetScene()->GetComponent<PieceManager>()->FormSolidGroup(gatheredPiece_);
+		
+		if (freeze)
+		{
+			newGroup->GetRigidBody()->SetMassScale(0);
+		}
+	}
+
+	gatheredPiece_ = nullptr;
+	gatherPiecePoint_ = nullptr;
+
+	GetScene()->GetComponent<PieceManager>()->CleanAll();
+	GetScene()->GetComponent<PieceManager>()->RebuildSolidifies();
+}
+
+bool ManipulationTool::IsGathering()
+{
+	if (gatheredPiece_)
+		return true;
+	else
+		return false;
+}
+
 void ManipulationTool::AdvanceGatherPoint(bool forward /*= true*/)
 {
 	for (int i = 0; i < allGatherPiecePoints_.size(); i++) {
@@ -255,47 +306,8 @@ void ManipulationTool::RotateNextNearest()
 
 
 
-PiecePoint* ManipulationTool::GetClosestAimPiecePoint()
-{
-
-	PieceManager* pieceManager = GetScene()->GetComponent<PieceManager>();
-
-	Vector3 worldPos;
-	Piece* piece = GetClosestAimPiece(worldPos);
-	if (!piece)
-		return nullptr;
 
 
-	return pieceManager->GetClosestPiecePoint(worldPos, piece);
-}
-
-
-
-Piece* ManipulationTool::GetClosestAimPiece(Vector3& worldPos)
-{
-
-	Camera* camera = node_->GetComponent<Camera>();
-
-	
-	Octree* octree = GetScene()->GetComponent<Octree>();
-	RayOctreeQuery querry(Ray(node_->GetWorldPosition(), node_->GetDirection()));
-	octree->Raycast(querry);
-	
-	if (querry.result_.size() > 1)
-	{
-		if (querry.result_[1].node_->GetName() == "visualNode")
-		{
-			Piece* piece = querry.result_[1].node_->GetParent()->GetComponent<Piece>();
-			if (piece) {
-				worldPos = querry.result_[1].position_;
-				return piece;
-			}
-		}
-	}
-
-
-	return nullptr;
-}
 
 
 void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
@@ -355,82 +367,6 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 }
 
-void ManipulationTool::OnNodeSet(Node* node)
-{
-	if (node) {
-		pieceManager_ = GetScene()->GetComponent<PieceManager>();
-
-
-		gatherNode_ = node_->CreateChild();
-		gatherNode_->Translate(Vector3(0, 0, 2));
-
-	}
-	else
-	{
-		//UnGather(false);
-	}
-}
-
-void ManipulationTool::drop(bool freeze, bool hadAttachement)
-{
-	if (!gatheredPieceGroup_.Expired() && hadAttachement) {
-		GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPieceGroup_);
-	}
-
-	if (freeze)
-	{
-
-		if (!gatheredPieceGroup_.Expired())
-		{
-			gatheredPieceGroup_->GetRigidBody()->SetMassScale(0);
-		}
-
-
-	}
-	else
-	{
-		if (!gatheredPieceGroup_.Expired())
-		{
-			if (!gatheredPieceGroupFromExisting) {
-				GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPieceGroup_);
-			}
-			else
-			{
-				gatheredPieceGroup_->GetRigidBody()->SetNoCollideOverride(false);
-			}
-		}
-	}
-
-
-	gatheredPieceGroup_ = nullptr;
-
-	for (Piece* gatheredPiece : allGatherPieces_)
-	{
-		gatheredPiece->GetEffectiveRigidBody()->SetNoCollideOverride(false);
-	}
-
-	if (!kinamaticConstriant_.Expired()) {
-		kinamaticConstriant_->Remove();
-		kinamaticConstriant_ = nullptr;
-	}
-
-	if (hadAttachement) {
-		//form a new grouping
-		PieceSolidificationGroup* newGroup = GetScene()->GetComponent<PieceManager>()->FormSolidGroup(gatheredPiece_);
-		
-		if (freeze)
-		{
-			newGroup->GetRigidBody()->SetMassScale(0);
-		}
-	}
-
-	gatheredPiece_ = nullptr;
-	gatherPiecePoint_ = nullptr;
-
-	GetScene()->GetComponent<PieceManager>()->CleanAll();
-	GetScene()->GetComponent<PieceManager>()->RebuildSolidifies();
-}
-
 void ManipulationTool::formGatherContraption(bool onlyOne)
 {
 	allGatherPieces_.clear();
@@ -449,5 +385,21 @@ void ManipulationTool::formGatherContraption(bool onlyOne)
 			allGatherPieces_.push_back(piece);
 			piece->GetNode()->GetDerivedComponents<PiecePoint>(allGatherPiecePoints_, true, false);
 		}
+	}
+}
+
+void ManipulationTool::OnNodeSet(Node* node)
+{
+	if (node) {
+		pieceManager_ = GetScene()->GetComponent<PieceManager>();
+
+
+		gatherNode_ = node_->CreateChild();
+		gatherNode_->Translate(Vector3(0, 0, 2));
+
+	}
+	else
+	{
+		//UnGather(false);
 	}
 }

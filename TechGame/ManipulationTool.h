@@ -54,15 +54,6 @@ public:
 
 
 
-
-
-
-
-	PiecePoint* GetClosestAimPiecePoint();
-
-
-	Piece* GetClosestAimPiece(Vector3& worldPos);
-
 protected:
 
 

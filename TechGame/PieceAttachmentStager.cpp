@@ -72,7 +72,7 @@ bool PieceAttachmentStager::checkDistances()
 		float thresh = scene_->GetComponent<PieceManager>()->GetAttachPointThreshold();
 
 		if ((posA - posB).Length() > thresh) {
-			URHO3D_LOGINFO(ea::to_string((posA - posB).Length()));
+			//URHO3D_LOGINFO(ea::to_string((posA - posB).Length()));
 			return false;
 		}
 	}
@@ -220,8 +220,8 @@ bool PieceAttachmentStager::AttachAll()
 	//un solidifying pieces involved in attachment
 	ea::vector<PieceSolidificationGroup*> allGroups;
 	for (Piece* pc : allPieces) {
-		if (!allGroups.contains(pc->GetNearestPieceGroup()) && (pc->GetNearestPieceGroup() != nullptr))
-			allGroups.push_back(pc->GetNearestPieceGroup());
+		if (!allGroups.contains(pc->GetPieceGroup()) && (pc->GetPieceGroup() != nullptr))
+			allGroups.push_back(pc->GetPieceGroup());
 	}
 
 	for (PieceSolidificationGroup* gp : allGroups) {

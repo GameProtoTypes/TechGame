@@ -48,21 +48,9 @@ public:
 	bool IsEffectivelySolidified();
 
 
-	///return the piece groups the piece is part of.  the first PieceGroup in vector is the parent node's PieceGroup,
-	///Followed by ancestors further and further up the tree.
-	///The Last PieceGroup is the most root Group.
-	///the vector is not cleared, if a group already exists in the vector it is not added.
-
-	void GetPieceGroups(ea::vector<PieceSolidificationGroup*>& pieceGroups);
-
-	PieceSolidificationGroup* GetNearestPieceGroup()
+	PieceSolidificationGroup* GetPieceGroup()
 	{
-		ea::vector<PieceSolidificationGroup*> pieceGroups;
-		GetPieceGroups(pieceGroups);
-		if (pieceGroups.size())
-			return pieceGroups.front();
-
-		return nullptr;
+		return node_->GetParent()->GetComponent<PieceSolidificationGroup>();
 	}
 
 	//returns the rigid body that is enabled and is actually controlling this rigid body
