@@ -224,14 +224,20 @@ void ManipulationTool::drop(bool freeze, bool hadAttachement)
 		kinamaticConstriant_ = nullptr;
 	}
 
+	//form new groupings
+	GetScene()->GetComponent<PieceManager>()->FormSolidGroupsOnContraption(gatheredPiece_);
+
+
 	if (hadAttachement) {
-		//form a new grouping
-		PieceSolidificationGroup* newGroup = GetScene()->GetComponent<PieceManager>()->FormSolidGroup(gatheredPiece_);
+
+		PieceSolidificationGroup* group = gatheredPiece_->GetPieceGroup();
 		
-		if (freeze)
+		if (freeze && group)
 		{
-			newGroup->GetRigidBody()->SetMassScale(0);
+			group->GetRigidBody()->SetMassScale(0);
 		}
+
+		
 	}
 
 	gatheredPiece_ = nullptr;
@@ -239,6 +245,8 @@ void ManipulationTool::drop(bool freeze, bool hadAttachement)
 
 	GetScene()->GetComponent<PieceManager>()->CleanAll();
 	GetScene()->GetComponent<PieceManager>()->RebuildSolidifies();
+
+	
 }
 
 bool ManipulationTool::IsGathering()

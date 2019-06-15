@@ -379,6 +379,17 @@ PieceSolidificationGroup* PieceManager::FormSolidGroup(Piece* startingPiece)
 	return nullptr;
 }
 
+void PieceManager::FormSolidGroupsOnContraption(Piece* startingPiece)
+{
+	ea::vector<Piece*> pieces;
+	startingPiece->GetAttachedPieces(pieces, true);
+
+	for (Piece* pc : pieces)
+	{
+		FormSolidGroup(pc);
+	}
+}
+
 void PieceManager::ClearAllGroups()
 {
 	ea::vector<PieceSolidificationGroup*> groups;
