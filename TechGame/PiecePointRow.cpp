@@ -614,7 +614,7 @@ Piece* PiecePointRow::GetPiece()
 void PiecePointRow::HandleUpdate(StringHash event, VariantMap& eventData)
 {
 	//#todo restore.
-	//UpdatePointOccupancies();
+	UpdatePointOccupancies();
 	return;
 }
 
