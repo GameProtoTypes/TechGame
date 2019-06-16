@@ -187,7 +187,7 @@ Urho3D::Node* PieceManager::CreateGroupNode(Node* parent)
 //moves piece to the specified group - potentially removing it from it's existing group.
 void PieceManager::MovePieceToSolidGroup(Piece* piece, PieceSolidificationGroup* group, bool clean/* = true*/)
 {
-	RemovePieceFromGroups(piece, clean);
+	RemovePieceFromGroup(piece, clean);
 	
 	piece->GetNode()->SetParent(group->GetNode());
 
@@ -222,7 +222,7 @@ PieceSolidificationGroup* PieceManager::GetCommonSolidGroup(ea::vector<Piece*> p
 
 
 
-void PieceManager::RemovePieceFromGroups(Piece* piece, bool postClean /*= true*/)
+void PieceManager::RemovePieceFromGroup(Piece* piece, bool postClean /*= true*/)
 {
 	Node* oldParent = piece->GetNode()->GetParent();
 	piece->GetNode()->SetParent(GetScene());
@@ -241,7 +241,7 @@ void PieceManager::RemovePiecesFromGroups(const ea::vector<Piece*>& pieces, bool
 
 	for (Piece* pc : pieces)
 	{
-		RemovePieceFromGroups(pc, postClean);
+		RemovePieceFromGroup(pc, postClean);
 	}
 
 	RebuildSolidifies();
@@ -365,6 +365,9 @@ void PieceManager::GetRigidlyConnectedPieces(Piece* startingPiece, ea::vector<Pi
 
 PieceSolidificationGroup* PieceManager::FormSolidGroup(Piece* startingPiece)
 {
+	if (startingPiece->GetPieceGroup())
+		return startingPiece->GetPieceGroup();
+
 	ea::vector<Piece*> pieces;
 	GetRigidlyConnectedPieces(startingPiece, pieces);
 

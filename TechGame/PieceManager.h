@@ -58,7 +58,7 @@ public:
 	PieceSolidificationGroup* GetCommonSolidGroup(ea::vector<Piece*> pieces);
 
 	///sets a piece with no grouping. optionally clean
-	void RemovePieceFromGroups(Piece* piece, bool postClean = true);
+	void RemovePieceFromGroup(Piece* piece, bool postClean = true);
 
 	///sets all pieces with no grouping. (moves nodes to scene)  cleans up afterwards.
 	void RemovePiecesFromGroups(const ea::vector<Piece*>& pieces, bool postClean = true);

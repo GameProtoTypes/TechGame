@@ -36,11 +36,28 @@ bool ManipulationTool::Gather(bool grabOne)
 
 	if (grabOne)
 	{
-		//if we are grabbing one from the contraption, remove the gathered piece from its group if it is part of one.
-		pieceManager_->RemovePieceFromGroups(gatheredPiece_);
-		
-		//and finally detach from its contraption.
+		allGatherPieces_.clear();
+		allGatherPieces_.push_back(gatheredPiece_);
+		allGatherPiecePoints_.clear();
+		allGatherPiecePoints_.push_back(gatherPiecePoint_);
+
+		PieceSolidificationGroup* existingGroup = gatheredPiece_->GetPieceGroup();
+		ea::vector<Piece*> piecesInGroup;
+		if (existingGroup) {
+			existingGroup->GetPieces(piecesInGroup);
+			piecesInGroup.erase_at(piecesInGroup.index_of(gatheredPiece_));
+			pieceManager_->RemoveSolidGroup(existingGroup);
+		}
+		//detach from its contraption.
 		gatheredPiece_->DetachAll();
+		
+		
+		for (Piece* pc : piecesInGroup) {
+			pieceManager_->FormSolidGroup(pc);
+		}
+		
+		
+		
 	}
 	else
 	{
