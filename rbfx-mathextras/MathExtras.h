@@ -1,3 +1,4 @@
+#pragma once
 
 #define URHOMATHEXTRAS_EXPORT_API __declspec(dllexport)
 
@@ -30,9 +31,7 @@
 
 namespace Urho3D {
 
-	URHOMATHEXTRAS_API void TestFunc() {
-		URHO3D_LOGINFO("Hello From TestFunc");
-	 }
+	URHOMATHEXTRAS_API void TestFunc();
 
 
 	URHOMATHEXTRAS_API void TestEigen();
@@ -40,6 +39,25 @@ namespace Urho3D {
 	URHOMATHEXTRAS_API Plane BestFitPlaneSVD(ea::vector<Vector3> points);
 
 
+	///Given an orientation - converts to Euler angles and rounds each axis independently to a multiple of the given angle. then converts back to quaternion
+	template <typename T>
+	URHOMATHEXTRAS_API Quaternion SnapOrientationEuler(const Quaternion& orientation, T angle)
+	{
+		Vector3 Eulers = orientation.EulerAngles();
+		Vector3 RoundedEulers = Vector3(RoundToNearestMultiple<T>(Eulers.x_, angle), RoundToNearestMultiple<T>(Eulers.y_, angle), RoundToNearestMultiple<T>(Eulers.z_, angle));
 
+		
 
+		Quaternion roundedQuaternion;
+		roundedQuaternion.FromEulerAngles(RoundedEulers.x_, RoundedEulers.y_, RoundedEulers.z_);
+		return roundedQuaternion;
+	}
+
+	///Given an orientation - snaps its current Angle to the nearest multiple of angle.  
+	template <typename T>
+	URHOMATHEXTRAS_API Quaternion SnapOrientationAngle(const Quaternion& orientation, T angle)
+	{
+		Quaternion orientationNormalized = orientation.Normalized();
+		return Quaternion(RoundToNearestMultiple(orientationNormalized.Angle(), angle), orientationNormalized.Axis());
+	}
 }

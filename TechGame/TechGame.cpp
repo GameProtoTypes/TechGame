@@ -318,7 +318,10 @@ void TechGame::UpdateUIInput(float timestep)
 		crossHairElementOuter_->SetVar("curMode", (int)CrossHairMode::CrossHairMode_Free);
 	}
 
-
+	if (input->GetKeyPress(KEY_G))
+	{
+		cameraNode_->GetComponent<ManipulationTool>()->ToggleUseGrid();
+	}
 
 
 	int mouseWheelMove = input->GetMouseMoveWheel();

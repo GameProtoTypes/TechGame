@@ -14,6 +14,12 @@
 using namespace Eigen;
 
 namespace Urho3D {
+
+	URHOMATHEXTRAS_API void TestFunc()
+	{
+		URHO3D_LOGINFO("Hello From TestFunc");
+	}
+
 	void TestEigen()
 	{
 		MatrixXd m(2, 2);
@@ -69,5 +75,9 @@ namespace Urho3D {
 
 		return Plane(Vector3(normal(0), normal(1), normal(2)), centriod);
 	}
+
+
+
+
 
 }

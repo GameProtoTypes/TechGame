@@ -9,6 +9,8 @@
 #include "NewtonFullyFixedConstraint.h"
 #include "NewtonHingeConstraint.h"
 
+#include "MathExtras.h"
+
 bool PiecePointRow::RowsAttachCompatable(PiecePointRow* rowA, PiecePointRow* rowB)
 {
 	if (rowA->rowType_ == RowType_Hole && rowB->rowType_ == RowType_Hole)
@@ -297,18 +299,8 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 			Quaternion diff = (holeBody->GetWorldRotation().Inverse() * rodBody->GetWorldRotation()).Normalized();
 			diff = diff.Inverse();
-			Quaternion diffSnap90;
-
-			if (!diff.IsNaN() && Abs(diff.Axis().x_) <= 1.0f)
-			{
-				//URHO3D_LOGINFO("non nan");
-				diffSnap90 = Quaternion(RoundToNearestMultiple(diff.Angle(), 45.0f), diff.Axis());
-			}
-			else 
-			{
-				//URHO3D_LOGINFO("nan");
-				diffSnap90 = Quaternion::IDENTITY;
-			}
+			diff.Normalize();
+			Quaternion diffSnap90 = SnapOrientationAngle(diff, 45.0f);
 
 			holeBody->SetWorldRotation(Quaternion::IDENTITY);
 			rodBody->SetWorldRotation(diffSnap90);
@@ -338,25 +330,12 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 			Quaternion diff = (holeBody->GetWorldRotation().Inverse() * rodBody->GetWorldRotation()).Normalized();
 			diff = diff.Inverse();
+			diff.Normalize();
 			//URHO3D_LOGINFO("Diff Angle: " + String(diff.Angle()));
 			//URHO3D_LOGINFO("Diff Axis: "  + String(diff.Axis()));
 			
 			
-			Quaternion diffSnap90; 
-
-			if (!diff.IsNaN() && Abs(diff.Axis().x_) <= 1.0f)
-			{
-				//URHO3D_LOGINFO("non nan");
-				diffSnap90 = Quaternion(RoundToNearestMultiple(diff.Angle(), 45.0f), diff.Axis());
-			}
-			else {
-			
-				//URHO3D_LOGINFO("nan");
-				diffSnap90 = Quaternion::IDENTITY;
-
-			}
-
-
+			Quaternion diffSnap90 = SnapOrientationAngle(diff, 45.0f);
 
 			//URHO3D_LOGINFO("DiffSnapped90: " + String(diffSnap90.Angle()));
 

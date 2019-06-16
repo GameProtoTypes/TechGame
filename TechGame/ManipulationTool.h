@@ -47,6 +47,13 @@ public:
 		gatherNode_->Rotate(rotation, TS_PARENT);
 	}
 
+	void SetUseGrid(bool enable)
+	{
+		useGrid_ = enable;
+	}
+	bool GetUseGrid() const { return useGrid_; }
+	void ToggleUseGrid() { useGrid_ = !useGrid_; }
+
 
 	//rotates the gather node to next nearest rotation within the current contraption.
 	void RotateNextNearest();
@@ -87,7 +94,7 @@ protected:
 
 	WeakPtr<NewtonKinematicsControllerConstraint> kinamaticConstriant_;
 
-
+	bool useGrid_ = false;
 
 	WeakPtr<Piece> otherPiece_;
 	WeakPtr<PiecePoint> otherPiecePoint_;

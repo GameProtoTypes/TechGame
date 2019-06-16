@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include "PieceAttachmentStager.h"
+#include "MathExtras.h"
 
 
 ManipulationTool::ManipulationTool(Context* context) : Tool(context)
@@ -55,8 +56,6 @@ bool ManipulationTool::Gather(bool grabOne)
 		for (Piece* pc : piecesInGroup) {
 			pieceManager_->FormSolidGroup(pc);
 		}
-		
-		
 		
 	}
 	else
@@ -341,8 +340,25 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 	if (IsGathering())
 	{
 
-		kinamaticConstriant_->SetOtherWorldPosition(gatherNode_->GetWorldPosition());
-		kinamaticConstriant_->SetOtherWorldRotation(gatherNode_->GetWorldRotation());
+		float gridSeperation = 0.1;
+		Vector3 constraintPosition;
+		Quaternion constraintOrientation;
+		
+		if (useGrid_) {
+			constraintPosition = Vector3(RoundToNearestMultiple(gatherNode_->GetWorldPosition().x_, gridSeperation),
+				RoundToNearestMultiple(gatherNode_->GetWorldPosition().y_, gridSeperation),
+				RoundToNearestMultiple(gatherNode_->GetWorldPosition().z_, gridSeperation));
+			constraintOrientation = SnapOrientationEuler(gatherNode_->GetWorldRotation(), 45.0f);
+		}
+		else
+		{
+			constraintPosition = gatherNode_->GetWorldPosition();
+			constraintOrientation = gatherNode_->GetWorldRotation();
+		}
+
+
+		kinamaticConstriant_->SetOtherWorldPosition(constraintPosition);
+		kinamaticConstriant_->SetOtherWorldRotation(constraintOrientation);
 
 
 

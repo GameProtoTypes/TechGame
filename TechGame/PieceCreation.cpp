@@ -182,7 +182,7 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 
 			staticMdl->SetModel(pieceModel);
 
-			body->SetUseInertiaHack(true);
+			//body->SetUseInertiaHack(true);
 		}
 
 
@@ -220,7 +220,7 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 			pointRow->Finalize();
 			pointRow->SetRowType(PiecePointRow::RowType_RodRound);
 
-			body->SetUseInertiaHack(true);
+			//body->SetUseInertiaHack(true);
 
 			staticMdl->SetModel(pieceModel);
 			
@@ -248,7 +248,7 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 
 				pointRow->PushBack(piecePoint);
 			}
-			body->SetUseInertiaHack(true);
+			//body->SetUseInertiaHack(true);
 			pointRow->Finalize();
 			pointRow->SetRowType(PiecePointRow::RowType_RodRound);
 			staticMdl->SetModel(pieceModel);
@@ -281,7 +281,7 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 				if (p == 0 || p == 7)
 					piecePoint->isEndCap_ = true;
 			}
-			body->SetUseInertiaHack(true);
+			//body->SetUseInertiaHack(true);
 			pointRow->Finalize();
 			pointRow->SetRowType(PiecePointRow::RowType_RodHard);
 
