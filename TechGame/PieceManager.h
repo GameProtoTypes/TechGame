@@ -24,7 +24,7 @@ public:
 	}
 
 
-	float GetScaleFactor() { return 0.025*0.5 / 0.1; }
+	float GetScaleFactor() { return 0.025*0.75 / 0.1; }
 
 	float GetAttachPointThreshold() { return 0.08*GetScaleFactor(); }//return 0.02f; }
 

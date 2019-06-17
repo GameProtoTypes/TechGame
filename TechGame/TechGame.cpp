@@ -360,7 +360,7 @@ void TechGame::CreateScene()
 	auto* cache = GetSubsystem<ResourceCache>();
 
 	scene_ = new Scene(context_);
-
+	//scene_->SetTimeScale(0.1f);
 
 	scene_->CreateComponent<Octree>();
 	NewtonPhysicsWorld* physicsWorld = scene_->CreateComponent<NewtonPhysicsWorld>();
@@ -681,7 +681,11 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 		ui::End();
 
 
+		ui::Begin("Stats");
 
+		ui::Text(("Camera Position: " + cameraNode_->GetWorldPosition().ToString()).c_str());
+
+		ui::End();
 
 	}
 

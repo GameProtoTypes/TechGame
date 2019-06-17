@@ -95,9 +95,10 @@ bool ManipulationTool::Gather(bool grabOne)
 	rigBody->SetMassScale(1.0f);
 
 	kinamaticConstriant_ = rigBody->GetNode()->CreateComponent<NewtonKinematicsControllerConstraint>();
+	kinamaticConstraintUpdateTimer_.Reset();
 
 	//update the kinematic constraint's position on the body.
-	updateKinematicsControllerPos();
+	updateKinematicsControllerPos(true);
 	
 
 	return true;
@@ -300,7 +301,7 @@ void ManipulationTool::AdvanceGatherPoint(bool forward /*= true*/)
 		}
 	}
 
-	updateKinematicsControllerPos();
+	updateKinematicsControllerPos(true);
 }
 
 void ManipulationTool::RotateNextNearest()
@@ -356,6 +357,8 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 			constraintOrientation = gatherNode_->GetWorldRotation();
 		}
 
+		updateKinematicsControllerPos(false);
+		
 
 		kinamaticConstriant_->SetOtherWorldPosition(constraintPosition);
 		kinamaticConstriant_->SetOtherWorldRotation(constraintOrientation);

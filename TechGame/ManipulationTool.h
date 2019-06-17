@@ -73,12 +73,42 @@ protected:
 
 	void formGatherContraption(bool onlyOne = false);
 
-	void updateKinematicsControllerPos()
+	void updateKinematicsControllerPos(bool forceUpdate)
 	{
-		if (gatherPiecePoint_) {
+		if (!gatherPiecePoint_)
+			return;
+
+		if (forceUpdate)
+		{
+			kinamaticConstraintTimerFireCount_ = 10;
+			kinamaticConstraintUpdateTimer_.Reset();
+		}
+
+
+		bool doUpdate = false;
+		if(forceUpdate)
+			doUpdate = true;
+
+		if (kinamaticConstraintUpdateTimer_.GetMSec(false) >= kinamaticConstraintUpdateTimerTimeout_)
+		{
+			if (kinamaticConstraintTimerFireCount_ > 0) {
+				doUpdate = true;
+				kinamaticConstraintUpdateTimer_.Reset();
+				kinamaticConstraintTimerFireCount_--;
+			}
+			else
+				kinamaticConstraintTimerFireCount_ = 0;
+		}
+
+		if (doUpdate) {
+
 			kinamaticConstriant_->SetOwnWorldPosition(gatherPiecePoint_->GetNode()->GetWorldPosition());
 			kinamaticConstriant_->SetOwnWorldRotation(gatherPiecePoint_->GetNode()->GetWorldRotation());
+			
 		}
+
+
+
 	}
 
 	WeakPtr<Node> gatherNode_;
@@ -93,6 +123,9 @@ protected:
 
 
 	WeakPtr<NewtonKinematicsControllerConstraint> kinamaticConstriant_;
+	Timer kinamaticConstraintUpdateTimer_;
+	int kinamaticConstraintUpdateTimerTimeout_ = 300;
+	int kinamaticConstraintTimerFireCount_ = false;
 
 	bool useGrid_ = false;
 
@@ -100,5 +133,7 @@ protected:
 	WeakPtr<PiecePoint> otherPiecePoint_;
 
 	SharedPtr<PieceManager> pieceManager_;
+
+	
 };
 
