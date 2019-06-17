@@ -24,9 +24,9 @@ public:
 	}
 
 
-	float GetScaleFactor() { return 0.025 / 0.1; }
+	float GetScaleFactor() { return 0.025*0.5 / 0.1; }
 
-	float GetAttachPointThreshold() { return 0.02f; }
+	float GetAttachPointThreshold() { return 0.08*GetScaleFactor(); }//return 0.02f; }
 
 
 	Piece* GetClosestGlobalPiece(Vector3 worldPosition, ea::vector<Piece*> blacklist, float radius);

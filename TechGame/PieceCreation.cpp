@@ -4,6 +4,7 @@
 #include "PiecePointRow.h"
 
 #include "NewtonCollisionShapesDerived.h"
+#include "PieceManager.h"
 
 
 Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
@@ -18,17 +19,19 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 	}
 	else {
 		root = parent->CreateChild();
+		
+		float scaleFactor = scene_->GetComponent<PieceManager>()->GetScaleFactor();
 
 		auto* body = root->CreateComponent<NewtonRigidBody>();
 		Node* visualNode = root->CreateChild("visualNode");
 		StaticModel* staticMdl = visualNode->CreateComponent<StaticModel>();
-
+		visualNode->SetScale(scaleFactor/0.25f);
 		Color color;
+
 
 		if (name == "8_piece_Cshape") {
 
 			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/8_piece_Cshape.mdl");
-			float scaleFactor = 0.025 / 0.1;
 			Vector3 offset(0, -0.25, 0);
 
 			//make shapes
@@ -83,7 +86,7 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 		if (name == "2_sleeve") {
 
 			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/2_sleeve.mdl");
-			float scaleFactor = 0.025 / 0.1;
+			
 			Vector3 offset(0, 0, 0);
 
 			
@@ -116,7 +119,6 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 		if (name == "1_cap_small") {
 
 			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/1_cap_small.mdl");
-			float scaleFactor = 0.025 / 0.1;
 			Vector3 offset(0, 0, 0);
 
 
@@ -151,7 +153,6 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 		if (name == "6_piece_thin") {
 
 			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/6_piece_thin.mdl");
-			float scaleFactor = 0.025 / 0.1;
 			Vector3 offset(0, 0, 0);
 
 			const int length = 6;
@@ -189,7 +190,6 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 		if (name == "rod_round_4")
 		{
 			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/rod_round_4.mdl");
-			float scaleFactor = 0.025 / 0.1;
 			Vector3 offset(0, 0, 0);
 
 			//make shapes
@@ -230,7 +230,6 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 		if (name == "rod_round_no_caps_4")
 		{
 			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/rod_round_no_caps_4.mdl");
-			float scaleFactor = 0.025 / 0.1;
 			Vector3 offset(0, 0, 0);
 
 			//make shapes
@@ -257,7 +256,6 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 		if (name == "rod_hard_4")
 		{
 			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/rod_hard_4.mdl");
-			float scaleFactor = 0.025 / 0.1;
 			Vector3 offset(0, 0, 0);
 
 			//make shapes
