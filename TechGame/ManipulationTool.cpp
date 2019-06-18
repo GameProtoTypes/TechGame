@@ -359,6 +359,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 		updateKinematicsControllerPos(false);
 		
+		
 
 		kinamaticConstriant_->SetOtherWorldPosition(constraintPosition);
 		kinamaticConstriant_->SetOtherWorldRotation(constraintOrientation);

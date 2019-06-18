@@ -104,7 +104,8 @@ protected:
 
 			kinamaticConstriant_->SetOwnWorldPosition(gatherPiecePoint_->GetNode()->GetWorldPosition());
 			kinamaticConstriant_->SetOwnWorldRotation(gatherPiecePoint_->GetNode()->GetWorldRotation());
-			
+
+
 		}
 
 
@@ -124,7 +125,7 @@ protected:
 
 	WeakPtr<NewtonKinematicsControllerConstraint> kinamaticConstriant_;
 	Timer kinamaticConstraintUpdateTimer_;
-	int kinamaticConstraintUpdateTimerTimeout_ = 300;
+	int kinamaticConstraintUpdateTimerTimeout_ = 6000;
 	int kinamaticConstraintTimerFireCount_ = false;
 
 	bool useGrid_ = false;
