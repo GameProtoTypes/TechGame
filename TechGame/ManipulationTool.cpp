@@ -253,8 +253,6 @@ void ManipulationTool::drop(bool freeze, bool hadAttachement)
 		{
 			group->GetRigidBody()->SetMassScale(0);
 		}
-
-		
 	}
 
 	gatheredPiece_ = nullptr;

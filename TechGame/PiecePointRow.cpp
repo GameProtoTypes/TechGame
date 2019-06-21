@@ -442,8 +442,11 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 
 
-		//restore transform of the hole body - letting the  rod body transform relative to that for an exact fit to the the constraint.
-		Matrix3x4 rodLocalToHole = holeBody->GetWorldTransform().Inverse() * rodBody->GetWorldTransform();
+		//restore transform of the hole body - letting the rod body transform relative to that for an exact fit to the the constraint.
+		Matrix3x4 rodWorldTReference = Matrix3x4(-theRodPoint->GetNode()->GetPosition(), rodBody->GetWorldTransform().Rotation(), 1.0f);
+		Matrix3x4 holeWorldTReference = Matrix3x4(-theHolePoint->GetNode()->GetPosition(), rodBody->GetWorldTransform().Rotation(), 1.0f);
+
+		Matrix3x4 rodLocalToHole = holeWorldTReference.Inverse() * rodWorldTReference;
 		
 		
 		holeBody->SetWorldTransform(origHoleBodyTransform);
