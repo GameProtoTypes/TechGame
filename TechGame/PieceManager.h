@@ -24,9 +24,18 @@ public:
 	}
 
 
-	float GetScaleFactor() { return 0.025*0.75 / 0.1; }
+	float GetTweekScaleFactor() { return 0.5f; };
 
-	float GetAttachPointThreshold() { return 0.08*GetScaleFactor(); }//return 0.02f; }
+	//global scale factors and distances.
+	float GetScaleFactor() { return 0.25*GetTweekScaleFactor(); }
+
+	float GetAttachPointThreshold() { return 0.08*GetScaleFactor(); }
+	//distance between 2 points in a row.
+	float RowPointDistance() { return GetScaleFactor()*0.5f; }
+
+
+
+
 
 
 	Piece* GetClosestGlobalPiece(Vector3 worldPosition, ea::vector<Piece*> blacklist, float radius);
@@ -39,6 +48,7 @@ public:
 	void GetPointsInRadius(ea::vector<PiecePoint*>& pieces, Vector3 worldPosition, float radius);
 
 	Piece* GetClosestAimPiece(Vector3& worldPos, Camera* camera);
+
 	PiecePoint* GetClosestAimPiecePoint(Camera* camera);
 	///given inPieces - returns a list of possible connection pieces using radius searches around each point.  outPieces should contain no duplicates and contain no points from inPieces.
 	void GetPointsAroundPoints(ea::vector<PiecePoint*>& inPieces, ea::vector<PiecePoint*>& outPieces, float radius);
@@ -57,7 +67,7 @@ public:
 	///return the first common group for the given pieces.
 	PieceSolidificationGroup* GetCommonSolidGroup(ea::vector<Piece*> pieces);
 
-	///sets a piece with no grouping. optionally clean
+	///sets a piece with no grouping. optionally cleanh
 	void RemovePieceFromGroup(Piece* piece, bool postClean = true);
 
 	///sets all pieces with no grouping. (moves nodes to scene)  cleans up afterwards.
@@ -91,8 +101,6 @@ public:
 	void AutoFormAllGroups();
 
 
-
-
 	void FindLoops(Piece* piece, ea::vector<ea::vector<Piece*>>& loops);
 	void FindLoops(Piece* piece, ea::vector<ea::vector<Piece*>>& loops, ea::vector<Piece*>& traverseStack, int depth);
 
@@ -100,6 +108,5 @@ protected:
 
 	void HandleNodeAdded(StringHash event, VariantMap& eventData);
 	void HandleNodeRemoved(StringHash event, VariantMap& eventData);
-
 };
 

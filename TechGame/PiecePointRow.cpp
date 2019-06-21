@@ -268,8 +268,8 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 	Piece* theRodPiece = theRodRow->GetPiece();
 
 	
-	NewtonRigidBody* holeBody = theHolePiece->GetEffectiveRigidBody();
-	NewtonRigidBody* rodBody = theRodPiece->GetEffectiveRigidBody();
+	NewtonRigidBody* holeBody = theHolePiece->GetRigidBody();
+	NewtonRigidBody* rodBody = theRodPiece->GetRigidBody();
 
 
 	URHO3D_LOGINFO("holebody enabled: " + ea::to_string(holeBody->IsEnabledEffective()));
@@ -358,7 +358,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 				//compute slide limits
 				Vector2 slideLimits;
 				
-				float totalSlideAmount = (float(theHoleRow->Count() + theRodRow->Count() - 2))*RowPointDistance();
+				float totalSlideAmount = (float(theHoleRow->Count() + theRodRow->Count() - 2))*pieceManager->RowPointDistance();
 				slideLimits.x_ = -totalSlideAmount * 0.5f;
 				slideLimits.y_ = totalSlideAmount * 0.5f;
 
@@ -375,7 +375,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 				
 				if (rodEndA->isEndCap_)
 				{
-					slideLimits.x_ += (float(theHoleRow->Count() - 1))*RowPointDistance();
+					slideLimits.x_ += (float(theHoleRow->Count() - 1))*pieceManager->RowPointDistance();
 				}
 				else
 				{
@@ -384,7 +384,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 				if (rodEndB->isEndCap_)
 				{
-					slideLimits.y_ -= (float(theHoleRow->Count() - 1))*RowPointDistance();
+					slideLimits.y_ -= (float(theHoleRow->Count() - 1))*pieceManager->RowPointDistance();
 				}
 				else
 				{
@@ -396,13 +396,13 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 				if (holeEndB->isEndCap_)
 				{
-					slideLimits.y_ = (theRodRow->Count() / 2.0f)*RowPointDistance() + 0.5f;
-					slideLimits.x_ = (theRodRow->Count() / 2.0f)*RowPointDistance() - 0.01f;
+					slideLimits.y_ = (theRodRow->Count() / 2.0f)*pieceManager->RowPointDistance() + 0.5f;
+					slideLimits.x_ = (theRodRow->Count() / 2.0f)*pieceManager->RowPointDistance() - 0.01f;
 				}
 				if (holeEndA->isEndCap_)
 				{
-					slideLimits.y_ = -(theRodRow->Count() / 2.0f)*RowPointDistance() + 0.01f;
-					slideLimits.x_ = -(theRodRow->Count() / 2.0f)*RowPointDistance() - 0.5f;
+					slideLimits.y_ = -(theRodRow->Count() / 2.0f)*pieceManager->RowPointDistance() + 0.01f;
+					slideLimits.x_ = -(theRodRow->Count() / 2.0f)*pieceManager->RowPointDistance() - 0.5f;
 				}
 
 
@@ -511,6 +511,7 @@ bool PiecePointRow::RowsHaveDegreeOfFreedom(PiecePointRow* rowA, PiecePointRow* 
 bool PiecePointRow::OptimizeFullRow(PiecePointRow* row)
 {
 	ea::vector<PiecePoint*> points = row->GetPoints();
+	PieceManager* pieceManager = row->GetScene()->GetComponent<PieceManager>();
 
 	bool fullyOccupied = true;
 	for (PiecePoint* point : points)
@@ -530,7 +531,7 @@ bool PiecePointRow::OptimizeFullRow(PiecePointRow* row)
 
 				float curSliderPos = static_cast<NewtonSliderConstraint*>(attachment.constraint_.Get())->GetSliderPosition();
 
-				curSliderPos = RoundToNearestMultiple(curSliderPos, RowPointDistance());
+				curSliderPos = RoundToNearestMultiple(curSliderPos, pieceManager->RowPointDistance());
 
 				row->DetachFrom(attachment.rowB_);
 				AttachRows(row, attachment.rowB_, attachment.pointB, attachment.pointA_, true);
@@ -606,6 +607,8 @@ void PiecePointRow::UpdatePointOccupancies()
 	if (rowType_ == RowType_RodHard || rowType_ == RowType_HoleTight)
 		return;
 
+	PieceManager* pieceManager = GetScene()->GetComponent<PieceManager>();
+
 
 	//clear occupancies on points
 	for (PiecePoint* point : points_)
@@ -629,7 +632,7 @@ void PiecePointRow::UpdatePointOccupancies()
 		for (PiecePoint* otherPoint : otherPoints)
 		{
 			float dist = (point->GetNode()->GetWorldPosition() - otherPoint->GetNode()->GetWorldPosition()).Length();
-			if (dist < RowPointDistance()) {
+			if (dist < pieceManager->RowPointDistance()) {
 				point->occupiedPoint_ = otherPoint;
 				aPointIsStillOccupied = true;
 				matchFound = true;

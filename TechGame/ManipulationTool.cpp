@@ -341,7 +341,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 	if (IsGathering())
 	{
 
-		float gridSeperation = 0.1;
+		float gridSeperation = GetScene()->GetComponent<PieceManager>()->RowPointDistance()/2.0f;
 		Vector3 constraintPosition;
 		Quaternion constraintOrientation;
 		

@@ -128,6 +128,9 @@ void PieceSolidificationGroup::OnNodeSet(Node* node)
 void PieceSolidificationGroup::HandleUpdate(StringHash event, VariantMap& eventData)
 {
 
+	
+
+
 }
 
 void PieceSolidificationGroup::HandleNodeAdded(StringHash event, VariantMap& eventData)

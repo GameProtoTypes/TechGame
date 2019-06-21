@@ -49,8 +49,6 @@ public:
 	// checks if the given row is full and if it is, reforms constraints.
 	static bool OptimizeFullRow(PiecePointRow* row);
 
-	//distance between 2 points in a row.
-	static float RowPointDistance() { return 0.25*0.5f; }
 
 	static void RegisterObject(Context* context) {
 		context->RegisterFactory<PiecePointRow>();

@@ -405,10 +405,10 @@ void TechGame::CreateScene()
 
 
 
-	for (int x = -50; x <= 50; x++)
-	{
-		for (int z = -50; z <= 50; z++)
-		{
+	//for (int x = -50; x <= 50; x++)
+	//{
+	//	for (int z = -50; z <= 50; z++)
+	//	{
 			Node* floorPiece = scene_->CreateChild();
 			StaticModel* stmdl = floorPiece->CreateComponent<StaticModel>();
 			stmdl->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
@@ -416,17 +416,19 @@ void TechGame::CreateScene()
 			//float scaleFactor = 0.025 / 0.1;
 
 
-			floorPiece->SetWorldPosition(Vector3(x , -0.5, z ));
+			floorPiece->SetWorldPosition(Vector3(0 , -0.5, 0 ));
+			floorPiece->SetScale(Vector3(100, 100, 1.0));
 
 
 			Material* mat = GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/Piece2.xml");
 			SharedPtr<Material> clonedMat = mat->Clone();
 			//clonedMat->SetShaderParameter("MatDiffColor", Vector4(0.3f + Random() / 8, 0.3f + Random() / 8, 0.3f + Random() / 8, 0.0f));
-
+			clonedMat->SetShaderParameter("UOffset", Vector4(100.0f, 0.0f, 1.0f, 1.0f));
+			clonedMat->SetShaderParameter("VOffset", Vector4(0.0f, 100.0f, 1.0f, 1.0f));
 			stmdl->SetMaterial(clonedMat);
 
-		}
-	}
+		//}
+	//}
 	// Create a floor object, 1000 x 1000 world units. Adjust position so that the ground is at zero Y
 	Node* floorNode = scene_->CreateChild("Floor");
 	floorNode->SetPosition(Vector3(0.0f, -5, 0.0f));
@@ -453,7 +455,7 @@ void TechGame::CreateScene()
 
 		ea::vector<Piece*> pieces;
 		int numDiffPieces = 7;
-		for (int y = 0; y < numDiffPieces*10; y += 1) {
+		for (int y = 0; y < numDiffPieces*20; y += 1) {
 
 			Node* piece;
 
@@ -474,7 +476,7 @@ void TechGame::CreateScene()
 				piece = CreatePiece(scene_, "rod_round_no_caps_4", false);
 
 
-			piece->SetWorldPosition(Vector3(Random(-5,5), y * .2, Random(-5, 5)));
+			piece->SetWorldPosition(Vector3(Random(-2,2), y * .05, Random(-2,2)));
 
 			ea::vector<Piece*> singlePiece;
 			singlePiece.push_back(piece->GetComponent<Piece>());
@@ -664,7 +666,7 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 			Piece* piece = scene_->GetComponent<PieceManager>()->GetClosestAimPiece(worldPos, cameraNode_->GetComponent<Camera>());
 			if (piece) {
 
-				URHO3D_LOGINFO("FORMING MANUAL GROUP");
+				URHO3D_LOGINFO("FORMING MANUAL GROUP...");
 				scene_->GetComponent<PieceManager>()->FormSolidGroup(piece);
 			}
 		}

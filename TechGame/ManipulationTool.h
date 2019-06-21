@@ -107,9 +107,6 @@ protected:
 
 
 		}
-
-
-
 	}
 
 	WeakPtr<Node> gatherNode_;
