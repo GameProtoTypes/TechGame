@@ -378,7 +378,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 			PiecePoint* otherPoint = pieceManager_->GetClosestPiecePoint(gatherNode_->GetWorldTransform().Translation(), otherPiece);
 
 
-			if (!allGatherPiecePoints_.contains(otherPoint) &&
+			if (otherPoint && !allGatherPiecePoints_.contains(otherPoint) &&
 				otherPoint->OccupancyCompatible(gatherPiecePoint_) && 
 				gatherPiecePoint_->OccupancyCompatible(otherPoint)) {
 

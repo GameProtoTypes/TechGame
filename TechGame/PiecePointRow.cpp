@@ -279,7 +279,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 		//wait for update finished because we need to do some manual rigidbody moving and hacking.
 		holeBody->GetScene()->GetComponent<NewtonPhysicsWorld>()->WaitForUpdateFinished();
 
-		Matrix3x4 origHoldBodyTransform = holeBody->GetWorldTransform();
+		Matrix3x4 origHoleBodyTransform = holeBody->GetWorldTransform();
 		Matrix3x4 origRodBodyTransform = rodBody->GetWorldTransform();
 
 
@@ -442,12 +442,18 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 
 
-		//restore transforms
-		rodBody->SetWorldTransform(origRodBodyTransform);
-		rodBody->ApplyTransformToNode();
-		holeBody->SetWorldTransform(origHoldBodyTransform);
+		//restore transform of the hole body - letting the  rod body transform relative to that for an exact fit to the the constraint.
+		Matrix3x4 rodLocalToHole = holeBody->GetWorldTransform().Inverse() * rodBody->GetWorldTransform();
+		
+		
+		holeBody->SetWorldTransform(origHoleBodyTransform);
 		holeBody->ApplyTransformToNode();
 
+
+
+		rodBody->SetWorldTransform(origHoleBodyTransform * rodLocalToHole);
+		rodBody->ApplyTransformToNode();
+		
 
 
 		RowAttachement attachment;
@@ -469,6 +475,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 		OptimizeFullRow(rowA);
 		OptimizeFullRow(rowB);
 
+		URHO3D_LOGINFO("row attached");
 		return true;
 
 }
