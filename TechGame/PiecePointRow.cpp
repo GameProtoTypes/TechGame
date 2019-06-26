@@ -300,10 +300,10 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			Quaternion diff = (holeBody->GetWorldRotation().Inverse() * rodBody->GetWorldRotation()).Normalized();
 			diff = diff.Inverse();
 			diff.Normalize();
-			Quaternion diffSnap90 = SnapOrientationAngle(diff, 45.0f);
+			Quaternion diffSnap45 = SnapOrientationAngle(diff, 45.0f);
 
 			holeBody->SetWorldRotation(Quaternion::IDENTITY);
-			rodBody->SetWorldRotation(diffSnap90);
+			rodBody->SetWorldRotation(diffSnap45);
 
 
 
@@ -314,7 +314,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			constraint->SetOwnPosition(theHolePoint->GetNode()->GetPosition());
 			constraint->SetOwnRotation(Quaternion(90, Vector3(0, 1, 0)));
 			constraint->SetOtherPosition(theRodPoint->GetNode()->GetPosition());
-			constraint->SetOtherRotation(diffSnap90 * Quaternion(90, Vector3(0, 1, 0)));
+			constraint->SetOtherRotation(diffSnap45 * Quaternion(90, Vector3(0, 1, 0)));
 
 		}
 		else if (theRodRow->GetRowType() == PiecePointRow::RowType_RodRound)
@@ -335,12 +335,12 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			//URHO3D_LOGINFO("Diff Axis: "  + String(diff.Axis()));
 			
 			
-			Quaternion diffSnap90 = SnapOrientationAngle(diff, 45.0f);
+			Quaternion diffSnap45 = SnapOrientationAngle(diff, 45.0f);
 
 			//URHO3D_LOGINFO("DiffSnapped90: " + String(diffSnap90.Angle()));
 
 			holeBody->SetWorldRotation(Quaternion::IDENTITY);
-			rodBody->SetWorldRotation(diffSnap90);
+			rodBody->SetWorldRotation(diffSnap45);
 
 			if (!attachAsFullRow) {
 
@@ -429,7 +429,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 				constraint->SetOwnPosition(theHoleRow->GetLocalCenter());
 				constraint->SetOwnRotation(Quaternion(90, Vector3(0, 1, 0)));
 				constraint->SetOtherPosition(theRodRow->GetLocalCenter());
-				constraint->SetOtherRotation(diffSnap90 * Quaternion(90, Vector3(0, 1, 0)));
+				constraint->SetOtherRotation(diffSnap45 * Quaternion(90, Vector3(0, 1, 0)));
 
 
 		}
@@ -655,11 +655,20 @@ void PiecePointRow::UpdatePointOccupancies()
 
 	if (!aPointIsStillOccupied)
 	{
-		DetachAll();
+		if (occupiedCountDown_ <= 0) {
+			occupiedCountDown_ = 0;
+			if (GetScene()->GetComponent<PieceManager>()->GetEnableDynamicRodDetachment())
+				DetachAll();
+		}
+		occupiedCountDown_--;
+	}
+	else
+	{
+		occupiedCountDown_ = occupiedCountDownCount_;
 	}
 
 	if (allPointsOccupied)
 	{
-		//rebuild with hinge constraints....
+		
 	}
 }

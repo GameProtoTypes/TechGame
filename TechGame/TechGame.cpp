@@ -638,7 +638,6 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 
 		ui::Begin("Utils");
 
-
 		if (ui::Button("Save Scene..."))
 		{
 			ea::string filePath = "sceneSave.xml";
@@ -678,6 +677,11 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 				scene_->GetComponent<PieceManager>()->RemoveSolidGroup(piece->GetPieceGroup());
 			}
 		}
+
+		ui::Checkbox("DynamicRodDetachment", &scene_->GetComponent<PieceManager>()->enableDynamicRodDetach_);
+
+
+
 
 
 		ui::End();

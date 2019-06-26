@@ -34,6 +34,10 @@ public:
 	float RowPointDistance() { return GetScaleFactor()*0.5f; }
 
 
+	//runtime options
+	bool enableDynamicRodDetach_ = true;
+	void SetEnableDynamicRodDetachment(bool enable) { enableDynamicRodDetach_ = enable; }
+	bool GetEnableDynamicRodDetachment() const { return enableDynamicRodDetach_; }
 
 
 
@@ -108,5 +112,6 @@ protected:
 
 	void HandleNodeAdded(StringHash event, VariantMap& eventData);
 	void HandleNodeRemoved(StringHash event, VariantMap& eventData);
+
 };
 

@@ -150,6 +150,8 @@ protected:
 	void UpdatePointOccupancies();
 
 	bool isOccupiedOptimized_ = false;
+	int occupiedCountDownCount_ = 10;
+	int occupiedCountDown_ = 1;
 	Vector2 oldSliderLimits_;
 
 	Color debugColor_;
