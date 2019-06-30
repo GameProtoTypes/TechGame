@@ -41,7 +41,7 @@ public:
 
 	void GetAttachedPieces(ea::vector<Piece*>& pieces, bool recursive);
 
-	
+	void SetGhostingEffect(bool enable);
 
 	void DetachAll();
 
@@ -71,6 +71,8 @@ public:
 	Color primaryColor_;
 
 protected:
+
+	bool ghostingEffectOn_ = true;
 
 	Matrix3x4 lastRigBodyTransform_;
 
