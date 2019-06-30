@@ -33,7 +33,10 @@ public:
 
 	static void RegisterObject(Context* context);
 
-
+	enum MoveMode {
+		MoveMode_Global = 0,
+		MoveMode_Camera = 1
+	};
 
 
 	bool Gather(bool grabOne = false);
@@ -54,11 +57,32 @@ public:
 	bool GetUseGrid() const { return useGrid_; }
 	void ToggleUseGrid() { useGrid_ = !useGrid_; }
 
+	void SetMoveMode(MoveMode mode)
+	{
+		if (mode != moveMode_) {
+			moveMode_ = mode;
+			if (mode == MoveMode_Camera)
+			{
+				//set gather node to child and in front of tool
+				gatherNode_->SetParent(node_);
+				gatherNode_->SetTransform(Matrix3x4::IDENTITY);
+				gatherNode_->Translate(Vector3(0, 0, 2));
+			}
+			if (mode == MoveMode_Global)
+			{
+				//set gather node to child of scene. keep existing world transform.
+				gatherNode_->SetParent(GetScene());
+			}
+		}
+	}
+	MoveMode GetMoveMode() { return moveMode_; }
+
+
 
 	//rotates the gather node to next nearest rotation within the current contraption.
 	void RotateNextNearest();
 
-
+	void UpdateGatherIndicators();
 
 
 protected:
@@ -110,6 +134,7 @@ protected:
 	}
 
 	WeakPtr<Node> gatherNode_;
+	MoveMode moveMode_ = MoveMode_Camera;
 	WeakPtr<PieceSolidificationGroup> gatheredPieceGroup_;
 	bool gatheredPieceGroupFromExisting = false;
 	WeakPtr<Piece> gatheredPiece_;

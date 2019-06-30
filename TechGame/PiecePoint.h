@@ -29,20 +29,22 @@ public:
 	Vector3 GetDirectionWorld() { return GetNode()->GetWorldRotation().RotationMatrix() * direction_; }
 
 
-
+	void SetShowIndicator(bool enable);
+	bool GetShowIndicator() { return showIndicator_; }
 
 	bool isEndCap_ = false;//if the point is a rod - indicates the point is a limiting end.  if the point is a hole - indicates the hole is a cap and a rod cannot pass through one side. does not need to have row.
 
 
 	Vector3 direction_;//indicates direction in local space
 
-
+	bool showIndicator_ = false;
 
 	WeakPtr<PiecePointRow> row_;
 
 	WeakPtr<PiecePoint> occupiedPoint_;//other point that is "occupying the space of this point"
 	WeakPtr<PiecePoint> occupiedPointPrev_;
 
+	WeakPtr<Node> visNode;
 
 protected:
 	virtual void OnNodeSet(Node* node) override;

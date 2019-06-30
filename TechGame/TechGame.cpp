@@ -309,6 +309,18 @@ void TechGame::UpdateUIInput(float timestep)
 		}
 	}
 
+	if (input->GetKeyPress(KEY_M)) {
+		//toggle move modes
+		ManipulationTool::MoveMode curMode = cameraNode_->GetComponent<ManipulationTool>()->GetMoveMode();
+		if (curMode == ManipulationTool::MoveMode_Camera)
+			curMode = ManipulationTool::MoveMode_Global;
+		else if (curMode == ManipulationTool::MoveMode_Global)
+			curMode = ManipulationTool::MoveMode_Camera;
+
+		cameraNode_->GetComponent<ManipulationTool>()->SetMoveMode(curMode);
+	}
+
+
 	if (input->GetKeyDown(KEY_SHIFT))
 	{
 		crossHairElementOuter_->SetVar("curMode", (int)CrossHairMode::CrossHairMode_Busy);

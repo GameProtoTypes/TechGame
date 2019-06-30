@@ -35,7 +35,7 @@ bool ManipulationTool::Gather(bool grabOne)
 
 	gatheredPiece_ = piece;
 	gatherPiecePoint_ = piecePoint;
-
+	gatherPiecePoint_->SetShowIndicator(true);
 
 
 	if (grabOne)
@@ -246,7 +246,6 @@ void ManipulationTool::drop(bool freeze, bool hadAttachement)
 	{
 		gatheredPiece->GetEffectiveRigidBody()->SetNoCollideOverride(false);
 		gatheredPiece->SetGhostingEffect(false);
-
 	}
 
 	if (!kinamaticConstriant_.Expired()) {
@@ -269,6 +268,7 @@ void ManipulationTool::drop(bool freeze, bool hadAttachement)
 	}
 
 	gatheredPiece_ = nullptr;
+	gatherPiecePoint_->SetShowIndicator(false);
 	gatherPiecePoint_ = nullptr;
 
 	GetScene()->GetComponent<PieceManager>()->CleanAll();
@@ -287,6 +287,9 @@ bool ManipulationTool::IsGathering()
 
 void ManipulationTool::AdvanceGatherPoint(bool forward /*= true*/)
 {
+	gatherPiecePoint_->SetShowIndicator(false);
+
+
 	for (int i = 0; i < allGatherPiecePoints_.size(); i++) {
 
 		if (allGatherPiecePoints_[i] == gatherPiecePoint_) {
@@ -305,7 +308,7 @@ void ManipulationTool::AdvanceGatherPoint(bool forward /*= true*/)
 					gatherPiecePoint_ = allGatherPiecePoints_[allGatherPiecePoints_.size() - 1];
 			}
 
-
+			gatherPiecePoint_->SetShowIndicator(true);
 			gatheredPiece_ = gatherPiecePoint_->GetPiece();
 
 			break;
@@ -346,9 +349,57 @@ void ManipulationTool::RotateNextNearest()
 
 
 
+void ManipulationTool::UpdateGatherIndicators()
+{
+
+	
+}
+
 void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 {
-	
+	if (moveMode_ == MoveMode_Global) {
+		//move gather node
+		Input* input = GetSubsystem<Input>();
+		Vector3 translation;
+		float moveSpeed = 0.01f;
+		if (input->GetKeyDown(KEY_SEMICOLON))
+		{
+			translation += Vector3(moveSpeed, 0.0f, 0.0f);
+		}
+		if (input->GetKeyDown(KEY_K))
+		{
+			translation += Vector3(-moveSpeed, 0.0f, 0.0f);
+		}
+		if (input->GetKeyDown(KEY_O))
+		{
+			translation += Vector3(0.0f, 0.0f, moveSpeed);
+		}
+		if (input->GetKeyDown(KEY_PERIOD))
+		{
+			translation += Vector3(0.0f, 0.0f, -moveSpeed);
+		}
+		if (input->GetKeyDown(KEY_P))
+		{
+			translation += Vector3(0.0f, moveSpeed, 0.0f);
+		}
+		if (input->GetKeyDown(KEY_SLASH))
+		{
+			translation += Vector3(0.0f, -moveSpeed, 0.0f);
+		}
+
+
+		if (input->GetKeyDown(KEY_SHIFT)) {
+			translation *= 2.0f;
+		}
+		else if (input->GetKeyDown(KEY_CTRL)) {
+			translation *= 0.5f;
+		}
+
+
+		gatherNode_->Translate(translation);
+
+	}
+
 	if (IsGathering())
 	{
 
@@ -380,7 +431,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 		ea::vector<Piece*> blackList;
 		blackList.push_back(gatheredPiece_);
 		Piece* otherPiece = pieceManager_->GetClosestGlobalPiece(gatherNode_->GetWorldTransform().Translation(), blackList, 0.1f);
-		if (otherPiece && otherPiece != gatheredPiece_)
+		if (otherPiece && !allGatherPieces_.contains(otherPiece))
 		{
 
 			otherPiece_ = otherPiece;
@@ -394,7 +445,6 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 				gatherPiecePoint_->OccupancyCompatible(otherPoint)) {
 
 				otherPiecePoint_ = otherPoint;
-
 				
 				Vector3 worldPos = otherPoint->GetNode()->GetWorldPosition();
 				Quaternion worldRot = otherPoint->GetNode()->GetWorldRotation() * gatherNode_->GetRotation();
@@ -402,10 +452,12 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 				
 				kinamaticConstriant_->SetOtherWorldPosition(finalTransform.Translation());
 				kinamaticConstriant_->SetOtherWorldRotation(finalTransform.Rotation());
+
+
+				
 			}
 			else
 			{
-
 				otherPiecePoint_ = nullptr;
 			}
 		}
@@ -448,11 +500,21 @@ void ManipulationTool::OnNodeSet(Node* node)
 {
 	if (node) {
 		pieceManager_ = GetScene()->GetComponent<PieceManager>();
+		
+		
+		
+		gatherNode_ = GetScene()->CreateChild();
+		Node* gatherNodeVis = gatherNode_->CreateChild();
+		gatherNodeVis->SetScale(0.1f);
 
+		StaticModel* stMdl = gatherNodeVis->CreateComponent<StaticModel>();
+		stMdl->SetModel(GetSubsystem<ResourceCache>()->GetResource<Model>("Models/LinePrimitives/Basis.mdl"));
+		/*Material* mat = GetSubsystem<ResourceCache>()->GetResource<Material>("Models/DefaultMaterial.xml");
+		stMdl->SetMaterial(mat);
+		mat->SetTechnique(0, GetSubsystem<ResourceCache>()->GetResource<Technique>("Techniques/Diff.xml"));
+		mat->SetShaderParameter("MatDiffColor", Vector4(1.0f, 0.0f, 0.0f, 0.0f));*/
 
-		gatherNode_ = node_->CreateChild();
-		gatherNode_->Translate(Vector3(0, 0, 2));
-
+		SetMoveMode(moveMode_);
 	}
 	else
 	{
