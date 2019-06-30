@@ -294,7 +294,7 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 		staticMdl->SetCastShadows(true);
 
 		Piece* piece = root->CreateComponent<Piece>();
-		piece->primaryColor_.FromUInt(StringHash(name).ToHash());
+		
 
 
 		SharedPtr<File> file = SharedPtr<File>(new File(context_));
@@ -304,14 +304,9 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 
 
 
+	
+	root->GetComponent<Piece>()->SetPrimaryColor(Color(Random(), Random(), Random()));
 
-
-
-	Material* mat = GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/Piece.xml");
-	SharedPtr<Material> clonedMat = mat->Clone();
-	clonedMat->SetShaderParameter("MatDiffColor", Vector4(Random(), Random(), Random(), 0.0f));
-
-	root->GetChild("visualNode")->GetComponent<StaticModel>()->SetMaterial(clonedMat);
 
 	return root;
 }

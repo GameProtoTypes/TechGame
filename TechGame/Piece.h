@@ -41,7 +41,18 @@ public:
 
 	void GetAttachedPieces(ea::vector<Piece*>& pieces, bool recursive);
 
+	Node* GetVisualNode() { return node_->GetChild("visualNode"); }
+
+	void SetPrimaryColor(Color color)
+	{
+		primaryColor_ = color;
+		RefreshVisualMaterial();
+	}
+
+
 	void SetGhostingEffect(bool enable);
+
+	void RefreshVisualMaterial();
 
 	void DetachAll();
 
@@ -68,11 +79,12 @@ public:
 
 	bool IsPartOfPieceGroup(PieceSolidificationGroup* group);
 
-	Color primaryColor_;
+	
 
 protected:
 
-	bool ghostingEffectOn_ = true;
+	bool ghostingEffectOn_ = false;
+	Color primaryColor_;
 
 	Matrix3x4 lastRigBodyTransform_;
 

@@ -30,6 +30,9 @@ bool ManipulationTool::Gather(bool grabOne)
 	//resolve piece and store both at currently gathered.
 	Piece* piece = piecePoint->GetPiece();
 
+
+	
+
 	gatheredPiece_ = piece;
 	gatherPiecePoint_ = piecePoint;
 
@@ -63,6 +66,14 @@ bool ManipulationTool::Gather(bool grabOne)
 		//form list of all connected pieces to the gathered piece and store in allGatherPieces_
 		formGatherContraption(grabOne);
 	}
+
+
+	//apply ghosting effect to contraption
+	for (Piece* pc : allGatherPieces_) {
+		pc->SetGhostingEffect(true);
+	}
+
+
 
 	//re parent contraption to single body
 	{
@@ -234,6 +245,8 @@ void ManipulationTool::drop(bool freeze, bool hadAttachement)
 	for (Piece* gatheredPiece : allGatherPieces_)
 	{
 		gatheredPiece->GetEffectiveRigidBody()->SetNoCollideOverride(false);
+		gatheredPiece->SetGhostingEffect(false);
+
 	}
 
 	if (!kinamaticConstriant_.Expired()) {

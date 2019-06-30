@@ -49,6 +49,44 @@ void Piece::GetAttachedPieces(ea::vector<Piece*>& pieces, bool recursive)
 	pieces.erase_at(pieces.index_of(this));
 }
 
+void Piece::SetGhostingEffect(bool enable)
+{
+	if (enable != ghostingEffectOn_)
+	{
+		ghostingEffectOn_ = enable;
+
+		RefreshVisualMaterial();
+	}
+}
+
+void Piece::RefreshVisualMaterial()
+{
+	Material* ghostMat = GetVisualNode()->GetComponent<StaticModel>(false)->GetMaterial();
+
+	//make sure there is a unique material object for the static model:
+	if (!ghostMat) {
+		SharedPtr<Material> mat = GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/Piece.xml")->Clone();
+		GetVisualNode()->GetComponent<StaticModel>(false)->SetMaterial(mat);
+		ghostMat = mat;
+	}
+
+
+
+
+	
+	if (ghostingEffectOn_) {
+		ghostMat->SetTechnique(0, GetSubsystem<ResourceCache>()->GetResource<Technique>("Techniques/DiffEmissiveAlpha.xml"));
+		ghostMat->SetShaderParameter("MatDiffColor", Color(1.0f,1.0f,1.0f,0.7f));
+	}
+	else
+	{
+		ghostMat->SetTechnique(0, GetSubsystem<ResourceCache>()->GetResource<Technique>("Techniques/Diff.xml"));
+		ghostMat->SetShaderParameter("MatDiffColor", primaryColor_.ToVector4());
+	}
+
+	
+}
+
 void Piece::GetAttachedPiecesRec(ea::vector<Piece*>& pieces, bool recursive)
 {
 	ea::vector<PiecePointRow*> rows;
