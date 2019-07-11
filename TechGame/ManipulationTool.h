@@ -49,35 +49,20 @@ public:
 	{
 		gatherNode_->Rotate(rotation, TS_PARENT);
 	}
-
-	void SetUseGrid(bool enable)
+	void ResetGatherNodeRotation()
 	{
-		useGrid_ = enable;
+		gatherNode_->SetWorldRotation(Quaternion::IDENTITY);
 	}
-	bool GetUseGrid() const { return useGrid_; }
-	void ToggleUseGrid() { useGrid_ = !useGrid_; }
 
-	void SetMoveMode(MoveMode mode)
-	{
-		if (mode != moveMode_) {
-			moveMode_ = mode;
-			if (mode == MoveMode_Camera)
-			{
-				//set gather node to child and in front of tool
-				gatherNode_->SetParent(node_);
-				gatherNode_->SetTransform(Matrix3x4::IDENTITY);
-				gatherNode_->Translate(Vector3(0, 0, 2));
-			}
-			if (mode == MoveMode_Global)
-			{
-				//set gather node to child of scene. keep existing world transform.
-				gatherNode_->SetParent(GetScene());
-			}
-		}
-	}
-	MoveMode GetMoveMode() { return moveMode_; }
+	void SetUseGrid(bool enable);
+	bool GetUseGrid() const;
+	void ToggleUseGrid();
 
+	void SetMoveMode(MoveMode mode);
+	MoveMode GetMoveMode();
 
+	//resets the gather node on the gathered contraptions to where the camera is pointing.
+	void AimPointForce();
 
 	//rotates the gather node to next nearest rotation within the current contraption.
 	void RotateNextNearest();

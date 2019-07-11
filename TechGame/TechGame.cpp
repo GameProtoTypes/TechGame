@@ -309,6 +309,15 @@ void TechGame::UpdateUIInput(float timestep)
 		}
 	}
 
+	if (input->GetMouseButtonPress(Urho3D::MOUSEB_RIGHT))
+	{
+		cameraNode_->GetComponent<ManipulationTool>()->AimPointForce();
+	}
+
+	if (input->GetKeyPress(KEY_R)) {
+		cameraNode_->GetComponent<ManipulationTool>()->ResetGatherNodeRotation();
+	}
+
 	if (input->GetKeyPress(KEY_M)) {
 		//toggle move modes
 		ManipulationTool::MoveMode curMode = cameraNode_->GetComponent<ManipulationTool>()->GetMoveMode();

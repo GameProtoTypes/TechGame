@@ -295,6 +295,8 @@ void PieceManager::RebuildSolidifiesSub(Node* startNode, bool branchSolidified)
 		if (child->GetComponent<Piece>()) {
 
 			child->GetComponent<NewtonRigidBody>()->SetEnabled(!branchSolidified);
+			if (child->GetComponent<NewtonRigidBody>()->GetMassScale() <= 0.0f)
+				startNode->GetComponent<NewtonRigidBody>()->SetMassScale(0.0f);
 		}
 		else
 		{

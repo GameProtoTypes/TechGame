@@ -217,28 +217,8 @@ void ManipulationTool::drop(bool freeze, bool hadAttachement)
 		GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPieceGroup_);
 	}
 
-	if (freeze)
-	{
-
-		if (!gatheredPieceGroup_.Expired())
-		{
-			gatheredPieceGroup_->GetRigidBody()->SetMassScale(0);
-		}
-	}
-	else
-	{
-		if (!gatheredPieceGroup_.Expired())
-		{
-			if (!gatheredPieceGroupFromExisting) {
-				GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPieceGroup_);
-			}
-			else
-			{
-				gatheredPieceGroup_->GetRigidBody()->SetNoCollideOverride(false);
-			}
-		}
-	}
-
+	GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPieceGroup_);
+		
 
 	gatheredPieceGroup_ = nullptr;
 
@@ -246,6 +226,7 @@ void ManipulationTool::drop(bool freeze, bool hadAttachement)
 	{
 		gatheredPiece->GetEffectiveRigidBody()->SetNoCollideOverride(false);
 		gatheredPiece->SetGhostingEffect(false);
+		gatheredPiece->GetRigidBody()->SetMassScale(1.0f*float(!freeze));
 	}
 
 	if (!kinamaticConstriant_.Expired()) {
@@ -265,6 +246,7 @@ void ManipulationTool::drop(bool freeze, bool hadAttachement)
 		{
 			group->GetRigidBody()->SetMassScale(0);
 		}
+		
 	}
 
 	gatheredPiece_ = nullptr;
@@ -274,6 +256,8 @@ void ManipulationTool::drop(bool freeze, bool hadAttachement)
 	GetScene()->GetComponent<PieceManager>()->CleanAll();
 	GetScene()->GetComponent<PieceManager>()->RebuildSolidifies();
 
+	//restore move mode to camera so that the next picked up piece will get picked up in camera mode.
+	SetMoveMode(MoveMode_Camera);
 	
 }
 
@@ -287,7 +271,8 @@ bool ManipulationTool::IsGathering()
 
 void ManipulationTool::AdvanceGatherPoint(bool forward /*= true*/)
 {
-	gatherPiecePoint_->SetShowIndicator(false);
+	if(gatherPiecePoint_)
+		gatherPiecePoint_->SetShowIndicator(false);
 
 
 	for (int i = 0; i < allGatherPiecePoints_.size(); i++) {
@@ -316,6 +301,79 @@ void ManipulationTool::AdvanceGatherPoint(bool forward /*= true*/)
 	}
 
 	updateKinematicsControllerPos(true);
+}
+
+void ManipulationTool::SetUseGrid(bool enable)
+{
+	useGrid_ = enable;
+}
+
+bool ManipulationTool::GetUseGrid() const
+{
+	return useGrid_;
+}
+
+void ManipulationTool::ToggleUseGrid()
+{
+	useGrid_ = !useGrid_;
+}
+
+
+
+
+void ManipulationTool::SetMoveMode(MoveMode mode)
+{
+		moveMode_ = mode;
+		if (mode == MoveMode_Camera)
+		{
+			//set gather node to child and in front of tool
+			gatherNode_->SetParent(node_);
+			gatherNode_->SetTransform(Matrix3x4::IDENTITY);
+			gatherNode_->Translate(Vector3(0, 0, 2));
+		}
+		if (mode == MoveMode_Global)
+		{
+			//set gather node to child of scene. keep existing world transform.
+			gatherNode_->SetParent(GetScene());
+			gatherNode_->SetWorldRotation(SnapOrientationEuler(gatherNode_->GetWorldRotation(), 45.0f));
+		}
+}
+
+
+
+
+ManipulationTool::MoveMode ManipulationTool::GetMoveMode()
+{
+	return moveMode_;
+}
+
+void ManipulationTool::AimPointForce()
+{
+	//Get the PiecePoint we are aiming at, else return.
+	PiecePoint* piecePoint = pieceManager_->GetClosestAimPiecePoint(node_->GetComponent<Camera>());
+
+	if (!piecePoint) {
+		return;
+	}
+
+	if (allGatherPiecePoints_.contains(piecePoint)) {
+
+		if (gatherPiecePoint_)
+		{
+			gatherPiecePoint_->SetShowIndicator(false);
+		}
+
+
+		gatherPiecePoint_ = piecePoint;
+		gatheredPiece_ = gatherPiecePoint_->GetPiece();
+		updateKinematicsControllerPos(true);
+	}
+	else
+	{
+
+		gatherNode_->SetWorldTransform(piecePoint->GetNode()->GetWorldPosition(), Quaternion::IDENTITY, 1.0f);
+
+	}
 }
 
 void ManipulationTool::RotateNextNearest()
@@ -387,6 +445,9 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 			translation += Vector3(0.0f, -moveSpeed, 0.0f);
 		}
 
+		//rotate translation by current camera angle snapped.
+		translation = SnapOrientationEuler(node_->GetWorldRotation(), 90.0f) * translation;
+
 
 		if (input->GetKeyDown(KEY_SHIFT)) {
 			translation *= 2.0f;
@@ -396,8 +457,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 		}
 
 
-		gatherNode_->Translate(translation);
-
+		gatherNode_->Translate(translation, TS_WORLD);
 	}
 
 	if (IsGathering())
@@ -453,8 +513,6 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 				kinamaticConstriant_->SetOtherWorldPosition(finalTransform.Translation());
 				kinamaticConstriant_->SetOtherWorldRotation(finalTransform.Rotation());
 
-
-				
 			}
 			else
 			{
@@ -501,8 +559,6 @@ void ManipulationTool::OnNodeSet(Node* node)
 	if (node) {
 		pieceManager_ = GetScene()->GetComponent<PieceManager>();
 		
-		
-		
 		gatherNode_ = GetScene()->CreateChild();
 		Node* gatherNodeVis = gatherNode_->CreateChild();
 		gatherNodeVis->SetScale(0.1f);
@@ -513,7 +569,7 @@ void ManipulationTool::OnNodeSet(Node* node)
 		stMdl->SetMaterial(mat);
 		mat->SetTechnique(0, GetSubsystem<ResourceCache>()->GetResource<Technique>("Techniques/Diff.xml"));
 		mat->SetShaderParameter("MatDiffColor", Vector4(1.0f, 0.0f, 0.0f, 0.0f));*/
-
+		
 		SetMoveMode(moveMode_);
 	}
 	else
