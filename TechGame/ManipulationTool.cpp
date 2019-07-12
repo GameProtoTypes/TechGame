@@ -489,7 +489,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 		if (otherPiecePoint_)
 		{
-			otherPiecePoint_->SetShowColorIndicator(false, Color::BLACK);
+			otherPiecePoint_->SetShowColorIndicator(false, Color::BLUE);
 		}
 
 		ea::vector<Piece*> blackList;
@@ -518,7 +518,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 				kinamaticConstriant_->SetOtherWorldPosition(finalTransform.Translation());
 				kinamaticConstriant_->SetOtherWorldRotation(finalTransform.Rotation());
 
-				otherPoint->SetShowColorIndicator(true, Color::GREEN);
+				otherPoint->SetShowColorIndicator(true, Color::YELLOW);
 
 			}
 			else
