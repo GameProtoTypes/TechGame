@@ -132,8 +132,10 @@ protected:
 	
 	Quaternion gatherRotation_;
 
+	bool goodToDrop_ = false;
+	bool hasAttachement_ = false;
 
-	WeakPtr<NewtonKinematicsControllerConstraint> kinamaticConstriant_;
+	SharedPtr<NewtonKinematicsControllerConstraint> kinamaticConstriant_;
 	Timer kinamaticConstraintUpdateTimer_;
 	int kinamaticConstraintUpdateTimerTimeout_ = 6000;
 	int kinamaticConstraintTimerFireCount_ = false;
