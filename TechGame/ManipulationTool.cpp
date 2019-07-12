@@ -35,7 +35,7 @@ bool ManipulationTool::Gather(bool grabOne)
 
 	gatheredPiece_ = piece;
 	gatherPiecePoint_ = piecePoint;
-	gatherPiecePoint_->SetShowIndicator(true);
+	gatherPiecePoint_->SetShowBasisIndicator(true);
 
 
 	if (grabOne)
@@ -145,7 +145,8 @@ void ManipulationTool::UnGather(bool freeze)
 			
 			PiecePoint* point = allGatherPiecePoints_[i];
 
-
+			//clear all indicators
+			point->SetShowColorIndicator(false, Color::BLACK);
 
 			//find closest comparison point to point.
 			PiecePoint* closest = nullptr;
@@ -250,7 +251,7 @@ void ManipulationTool::drop(bool freeze, bool hadAttachement)
 	}
 
 	gatheredPiece_ = nullptr;
-	gatherPiecePoint_->SetShowIndicator(false);
+	gatherPiecePoint_->SetShowBasisIndicator(false);
 	gatherPiecePoint_ = nullptr;
 
 	GetScene()->GetComponent<PieceManager>()->CleanAll();
@@ -272,7 +273,7 @@ bool ManipulationTool::IsGathering()
 void ManipulationTool::AdvanceGatherPoint(bool forward /*= true*/)
 {
 	if(gatherPiecePoint_)
-		gatherPiecePoint_->SetShowIndicator(false);
+		gatherPiecePoint_->SetShowBasisIndicator(false);
 
 
 	for (int i = 0; i < allGatherPiecePoints_.size(); i++) {
@@ -293,7 +294,7 @@ void ManipulationTool::AdvanceGatherPoint(bool forward /*= true*/)
 					gatherPiecePoint_ = allGatherPiecePoints_[allGatherPiecePoints_.size() - 1];
 			}
 
-			gatherPiecePoint_->SetShowIndicator(true);
+			gatherPiecePoint_->SetShowBasisIndicator(true);
 			gatheredPiece_ = gatherPiecePoint_->GetPiece();
 
 			break;
@@ -360,7 +361,7 @@ void ManipulationTool::AimPointForce()
 
 		if (gatherPiecePoint_)
 		{
-			gatherPiecePoint_->SetShowIndicator(false);
+			gatherPiecePoint_->SetShowBasisIndicator(false);
 		}
 
 
@@ -446,7 +447,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 		}
 
 		//rotate translation by current camera angle snapped.
-		translation = SnapOrientationEuler(node_->GetWorldRotation(), 90.0f) * translation;
+		translation = SnapOrientationEuler(node_->GetWorldRotation(), 45.0f) * translation;
 
 
 		if (input->GetKeyDown(KEY_SHIFT)) {
@@ -486,7 +487,10 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 		kinamaticConstriant_->SetOtherWorldPosition(constraintPosition);
 		kinamaticConstriant_->SetOtherWorldRotation(constraintOrientation);
 
-
+		if (otherPiecePoint_)
+		{
+			otherPiecePoint_->SetShowColorIndicator(false, Color::BLACK);
+		}
 
 		ea::vector<Piece*> blackList;
 		blackList.push_back(gatheredPiece_);
@@ -499,8 +503,9 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 			PiecePoint* otherPoint = pieceManager_->GetClosestPiecePoint(gatherNode_->GetWorldTransform().Translation(), otherPiece);
 
+			float dist = (otherPoint->GetNode()->GetWorldPosition() - gatherNode_->GetWorldPosition()).Length();
 
-			if (otherPoint && !allGatherPiecePoints_.contains(otherPoint) &&
+			if (otherPoint && (dist < 0.05f) && !allGatherPiecePoints_.contains(otherPoint) &&
 				otherPoint->OccupancyCompatible(gatherPiecePoint_) && 
 				gatherPiecePoint_->OccupancyCompatible(otherPoint)) {
 
@@ -513,6 +518,8 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 				kinamaticConstriant_->SetOtherWorldPosition(finalTransform.Translation());
 				kinamaticConstriant_->SetOtherWorldRotation(finalTransform.Rotation());
 
+				otherPoint->SetShowColorIndicator(true, Color::GREEN);
+
 			}
 			else
 			{
@@ -523,6 +530,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 		{
 			otherPiece_ = nullptr;
 			otherPiecePoint_ = nullptr;
+
 		}
 	}
 	else

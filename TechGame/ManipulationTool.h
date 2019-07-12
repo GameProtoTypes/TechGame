@@ -51,7 +51,10 @@ public:
 	}
 	void ResetGatherNodeRotation()
 	{
-		gatherNode_->SetWorldRotation(Quaternion::IDENTITY);
+		if (MoveMode_Camera)
+			gatherNode_->SetRotation(Quaternion::IDENTITY);
+		else if(MoveMode_Global)
+			gatherNode_->SetWorldRotation(Quaternion::IDENTITY);
 	}
 
 	void SetUseGrid(bool enable);
