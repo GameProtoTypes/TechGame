@@ -72,32 +72,8 @@ void PiecePoint::SetShowColorIndicator(bool enable, Color color)
 		colorIndicatorColor_ = color;
 
 
-		if (showColorIndicator_)
-		{
-			SharedPtr<Material> mat = GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/DefaultMaterial.xml")->Clone();
-
-			if (colorIndicatorNode_.Expired()) {
-				colorIndicatorNode_ = node_->CreateChild();
-
-				colorIndicatorNode_->SetScale(0.02f);
-				colorIndicatorStMdl_ = colorIndicatorNode_->GetOrCreateComponent<StaticModel>();
-				colorIndicatorStMdl_->SetModel(GetSubsystem<ResourceCache>()->GetResource<Model>("Models/Sphere.mdl"));
-
-				mat->SetTechnique(0, GetSubsystem<ResourceCache>()->GetResource<Technique>("Techniques/DiffOverlay.xml"));
-				colorIndicatorStMdl_->SetMaterial(mat);
-				URHO3D_LOGINFO("making " + ea::to_string((int)(void*)this));
-			}
-			mat->SetShaderParameter("MatDiffColor", color.ToVector4());
-		}
-		else
-		{
-			if (colorIndicatorNode_) {
-				colorIndicatorStMdl_->Remove();
-				colorIndicatorNode_->Remove();
-				colorIndicatorNode_ = nullptr;
-				URHO3D_LOGINFO("removing " + ea::to_string((int)(void*)this));
-			}
-		}
+		colorIndicatorStMdl_->GetMaterial()->SetShaderParameter("MatDiffColor", color.ToVector4());
+		colorIndicatorStMdl_->SetEnabled(showColorIndicator_);
 	}
 }
 
@@ -105,6 +81,19 @@ void PiecePoint::OnNodeSet(Node* node)
 {
 	if (node)
 	{
+
+		//make color indicator
+		SharedPtr<Material> mat = GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/DefaultMaterial.xml")->Clone();
+\
+		colorIndicatorNode_ = node_->CreateChild();
+
+		colorIndicatorNode_->SetScale(0.02f);
+		colorIndicatorStMdl_ = colorIndicatorNode_->CreateComponent<StaticModel>();
+		colorIndicatorStMdl_->SetModel(GetSubsystem<ResourceCache>()->GetResource<Model>("Models/Sphere.mdl"));
+
+		mat->SetTechnique(0, GetSubsystem<ResourceCache>()->GetResource<Technique>("Techniques/DiffOverlay.xml"));
+		colorIndicatorStMdl_->SetMaterial(mat);
+		colorIndicatorStMdl_->SetEnabled(false);
 	}
 	else
 	{

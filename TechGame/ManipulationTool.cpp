@@ -255,7 +255,7 @@ void ManipulationTool::SetMoveMode(MoveMode mode)
 			//set gather node to child and in front of tool
 			gatherNode_->SetParent(node_);
 			gatherNode_->SetTransform(Matrix3x4::IDENTITY);
-			gatherNode_->Translate(Vector3(0, 0, 2));
+			gatherNode_->Translate(gatherNodeRefOffset_);
 		}
 		if (mode == MoveMode_Global)
 		{
@@ -385,6 +385,45 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 		gatherNode_->Translate(translation, TS_WORLD);
 	}
+	else if (moveMode_ == MoveMode_Camera)
+	{
+		//cast the gather node forward until it hits something.
+
+
+		Octree* octree = GetScene()->GetComponent<Octree>();
+		RayOctreeQuery query(Ray(node_->GetWorldPosition(), node_->GetDirection()));
+		octree->Raycast(query);
+		Vector3 worldPos;
+		bool foundPos = false;
+		for (int i = 0; i < query.result_.size(); i++)
+		{
+			
+			if (query.result_[i].distance_ <= (gatherNodeMaxCastDist_) && query.result_[i].node_->GetName() == "visualNode")
+			{
+				//its a piece..
+				Piece* piece = query.result_[i].node_->GetParent()->GetComponent<Piece>();
+
+				if (piece && !allGatherPieces_.contains(piece))
+				{
+					worldPos = query.result_[i].position_;
+					foundPos = true;
+					break;
+				}
+
+			}
+
+		}
+	
+		if (foundPos) {
+			gatherNode_->SetWorldPosition(worldPos);
+		}
+		else
+		{
+			gatherNode_->SetPosition(gatherNodeRefOffset_);
+		}
+
+
+	}
 
 
 
@@ -419,8 +458,11 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 
 
-
-
+		//reset all recent colored indicators
+		for (PiecePoint* point : recentPointList_) {
+			point->SetShowColorIndicator(false, Color::BLUE);
+		}
+		recentPointList_.clear();
 
 
 		ea::vector<Piece*> blackList;
@@ -431,12 +473,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 			otherPiece_ = otherPiece;
 
-			//reset all colors on other contraption
-			ea::vector<PiecePoint*> otherPoints;
-			GetScene()->GetComponent<PieceManager>()->GetAllPointsInContraption(otherPiece_, otherPoints);
-			for (PiecePoint* point : otherPoints) {
-				point->SetShowColorIndicator(false, Color::BLUE);
-			}
+
 
 
 			PiecePoint* otherPoint = pieceManager_->GetClosestPiecePoint(gatherNode_->GetWorldTransform().Translation(), otherPiece);
@@ -456,8 +493,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 				kinamaticConstriant_->SetOtherWorldPosition(finalTransform.Translation());
 				kinamaticConstriant_->SetOtherWorldRotation(finalTransform.Rotation());
 
-				otherPoint->SetShowColorIndicator(true, Color::YELLOW);
-
+				
 
 				if (otherPiece_ && otherPiecePoint_) {
 
@@ -533,6 +569,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 						ea::vector<PieceAttachmentStager::AttachmentPair*>& attachments = attachStager_->GetPotentialAttachments();
 						for (auto* pair : attachments) {
 							pair->pointB->SetShowColorIndicator(true, Color::YELLOW);
+							recentPointList_.push_back(pair->pointB);
 						}
 						
 						attachments = attachStager_->GetFinalAttachments();
@@ -553,7 +590,6 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 		{
 			otherPiece_ = nullptr;
 			otherPiecePoint_ = nullptr;
-
 		}
 
 

@@ -133,12 +133,16 @@ protected:
 	
 	Quaternion gatherRotation_;
 
-
+	Vector3 gatherNodeRefOffset_ = Vector3(0,0,2);
+	float gatherNodeMaxCastDist_ = 5.0f;
 
 	WeakPtr<NewtonKinematicsControllerConstraint> kinamaticConstriant_;
 	Timer kinamaticConstraintUpdateTimer_;
 	int kinamaticConstraintUpdateTimerTimeout_ = 6000;
 	int kinamaticConstraintTimerFireCount_ = false;
+
+
+	ea::vector<PiecePoint*> recentPointList_;
 
 	bool useGrid_ = false;
 
