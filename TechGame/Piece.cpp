@@ -37,7 +37,7 @@ void Piece::GetAttachedRows(ea::vector<PiecePointRow*>& rows)
 
 void Piece::GetPoints(ea::vector<PiecePoint*>& points)
 {
-	node_->GetDerivedComponents<PiecePoint>(points, true);
+	node_->GetDerivedComponents<PiecePoint>(points, true, false);
 }
 
 

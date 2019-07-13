@@ -122,7 +122,8 @@ public:
 		isValid_ = false;
 	}
 
-
+	ea::vector<AttachmentPair*>& GetPotentialAttachments() { return potentialAttachments_; }
+	ea::vector<AttachmentPair*>& GetFinalAttachments() { return finalAttachments_; }
 
 protected:
 

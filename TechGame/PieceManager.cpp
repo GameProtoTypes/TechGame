@@ -30,6 +30,18 @@ PiecePoint* PieceManager::GetClosestPiecePoint(Vector3 worldPosition, Piece* pie
 	}
 }
 
+void PieceManager::GetAllPointsInContraption(Piece* pieceInContraption, ea::vector<PiecePoint*>& points)
+{
+	ea::vector<Piece*> pieces;
+	pieceInContraption->GetAttachedPieces(pieces, true);
+	pieces.push_back(pieceInContraption);
+
+	for (Piece* piece : pieces) {
+
+		piece->GetPoints(points);
+	}
+}
+
 Piece* PieceManager::GetClosestGlobalPiece(Vector3 worldPosition, ea::vector<Piece*> blacklist, float radius)
 {
 	Octree* octTree = GetScene()->GetComponent<Octree>();

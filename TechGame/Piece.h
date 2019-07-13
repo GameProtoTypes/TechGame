@@ -37,8 +37,10 @@ public:
 
 	void GetAttachedRows(ea::vector<PiecePointRow*>& rows);
 
+	/// Get Points, Does not clear points vector
 	void GetPoints(ea::vector<PiecePoint*>& points);
 
+	///get attached pieces, not including this piece.
 	void GetAttachedPieces(ea::vector<Piece*>& pieces, bool recursive);
 
 	Node* GetVisualNode() { return node_->GetChild("visualNode"); }

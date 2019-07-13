@@ -41,6 +41,14 @@ public:
 
 
 
+	//contraption utils
+	void GetAllPointsInContraption(Piece* pieceInContraption, ea::vector<PiecePoint*>& points);
+
+
+
+
+
+
 
 	Piece* GetClosestGlobalPiece(Vector3 worldPosition, ea::vector<Piece*> blacklist, float radius);
 

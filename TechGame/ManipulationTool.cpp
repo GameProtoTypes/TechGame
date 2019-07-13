@@ -417,10 +417,11 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 		kinamaticConstriant_->SetOtherWorldPosition(constraintPosition);
 		kinamaticConstriant_->SetOtherWorldRotation(constraintOrientation);
 
-		if (otherPiecePoint_)
-		{
-			otherPiecePoint_->SetShowColorIndicator(false, Color::BLUE);
-		}
+
+
+
+
+
 
 		ea::vector<Piece*> blackList;
 		blackList.push_back(gatheredPiece_);
@@ -429,6 +430,13 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 		{
 
 			otherPiece_ = otherPiece;
+
+			//reset all colors on other contraption
+			ea::vector<PiecePoint*> otherPoints;
+			GetScene()->GetComponent<PieceManager>()->GetAllPointsInContraption(otherPiece_, otherPoints);
+			for (PiecePoint* point : otherPoints) {
+				point->SetShowColorIndicator(false, Color::BLUE);
+			}
 
 
 			PiecePoint* otherPoint = pieceManager_->GetClosestPiecePoint(gatherNode_->GetWorldTransform().Translation(), otherPiece);
@@ -474,9 +482,6 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 						PiecePoint* point = allGatherPiecePoints_[i];
 
-						//clear all indicators
-						point->SetShowColorIndicator(false, Color::BLACK);
-
 						//find closest comparison point to point.
 						PiecePoint* closest = nullptr;
 						float closestDist = M_LARGE_VALUE;
@@ -515,15 +520,25 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 							if (closestPoints[i]) {
 								attachStager_->AddPotentialAttachement(allGatherPiecePoints_[i], closestPoints[i]);
-
-								if (closestPoints[i]->GetShowColorIndicator())
-								{
-									closestPoints[i]->SetShowColorIndicator(true, Color::GREEN);
-								}
 							}
 						}
 
+
+
 						attachStager_->AnalyzeAndFix();
+
+
+
+						//update colors on potential attachments.
+						ea::vector<PieceAttachmentStager::AttachmentPair*>& attachments = attachStager_->GetPotentialAttachments();
+						for (auto* pair : attachments) {
+							pair->pointB->SetShowColorIndicator(true, Color::YELLOW);
+						}
+						
+						attachments = attachStager_->GetFinalAttachments();
+						for (auto* pair : attachments) {
+							pair->pointB->SetShowColorIndicator(true, Color::GREEN);
+						}
 					}
 				}
 
@@ -543,28 +558,11 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 
 
-
-
-
-
-
-
 	}
 	else
 	{
 		//URHO3D_LOGINFO("4");
 	}
-
-
-
-
-
-
-	
-
-
-
-
 
 
 
