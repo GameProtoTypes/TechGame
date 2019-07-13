@@ -480,7 +480,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 			float dist = (otherPoint->GetNode()->GetWorldPosition() - gatherNode_->GetWorldPosition()).Length();
 
-			if (otherPoint && (dist < 0.05f) && !allGatherPiecePoints_.contains(otherPoint) &&
+			if (otherPoint && (dist < 0.1f) && !allGatherPiecePoints_.contains(otherPoint) &&
 				otherPoint->OccupancyCompatible(gatherPiecePoint_) && 
 				gatherPiecePoint_->OccupancyCompatible(otherPoint)) {
 

@@ -14,8 +14,8 @@ const unsigned CTRL_LEFT = 4;
 const unsigned CTRL_RIGHT = 8;
 const unsigned CTRL_JUMP = 16;
 
-const float MOVE_SPEED = 6.0f;
-const float INAIR_MOVE_SPEED = 3.0f;
+const float MOVE_SPEED = 3.0f;
+const float INAIR_MOVE_SPEED = 1.5f;
 const float BRAKE_FORCE = 0.2f;
 const float JUMP_FORCE = 3.5f;
 const float YAW_SENSITIVITY = 0.1f;
