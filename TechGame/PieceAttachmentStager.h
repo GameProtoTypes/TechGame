@@ -82,7 +82,7 @@ public:
 
 		finalAttachments_ = potentialAttachments_;
 
-		URHO3D_LOGINFO("final attachment size " + ea::to_string(finalAttachments_.size()));
+		//URHO3D_LOGINFO("final attachment size " + ea::to_string(finalAttachments_.size()));
 
 		needsAnalyzed_ = false;
 		isValid_ = true;
@@ -92,6 +92,11 @@ public:
 
 	bool IsValid()
 	{
+		//its valid if nothing is staged.
+		if (potentialAttachments_.size() == 0)
+			return true;
+
+
 		if (needsAnalyzed_)
 			return false;
 
@@ -102,7 +107,20 @@ public:
 	bool AttachAll();
 
 
+	void Reset()
+	{
+		potentialAttachmentMapA_.clear();
+		potentialAttachmentMapB_.clear();
 
+		potentialAttachments_.clear();
+		rowsA.clear();
+		rowsB.clear();
+
+		finalAttachments_.clear();
+
+		needsAnalyzed_ = true;
+		isValid_ = false;
+	}
 
 
 

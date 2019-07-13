@@ -11,7 +11,7 @@
 
 bool PieceAttachmentStager::AddPotentialAttachement(PiecePoint* pointA, PiecePoint* pointB)
 {
-	URHO3D_LOGINFO("AddPotentialAttachement");
+	//URHO3D_LOGINFO("AddPotentialAttachement");
 
 
 	if (pointA == nullptr || pointB == nullptr)
@@ -204,6 +204,9 @@ bool PieceAttachmentStager::endPointRulePass(AttachmentPair* attachPair)
 bool PieceAttachmentStager::AttachAll()
 {
 	if (!IsValid())
+		return false;
+
+	if(finalAttachments_.size() == 0)
 		return false;
 
 

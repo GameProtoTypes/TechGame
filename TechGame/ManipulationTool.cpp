@@ -31,8 +31,6 @@ bool ManipulationTool::Gather(bool grabOne)
 	Piece* piece = piecePoint->GetPiece();
 
 
-	
-
 	gatheredPiece_ = piece;
 	gatherPiecePoint_ = piecePoint;
 	gatherPiecePoint_->SetShowBasisIndicator(true);
@@ -59,7 +57,6 @@ bool ManipulationTool::Gather(bool grabOne)
 		for (Piece* pc : piecesInGroup) {
 			pieceManager_->FormSolidGroup(pc);
 		}
-		
 	}
 	else
 	{
@@ -86,6 +83,7 @@ bool ManipulationTool::Gather(bool grabOne)
 			gatheredPieceGroup_ = commonGroup;
 			gatheredPieceGroupFromExisting = true;
 			URHO3D_LOGINFO("gatheredPieceGroup_ assigned to existing common group");
+
 		}
 		else
 		{
@@ -111,6 +109,10 @@ bool ManipulationTool::Gather(bool grabOne)
 	//update the kinematic constraint's position on the body.
 	updateKinematicsControllerPos(true);
 	
+	//make a piece attachment stager.
+	attachStager_ = context_->CreateObject<PieceAttachmentStager>();
+	attachStager_->SetScene(GetScene());
+
 
 	return true;
 }
@@ -118,16 +120,20 @@ bool ManipulationTool::Gather(bool grabOne)
 
 void ManipulationTool::UnGather(bool freeze)
 {
-
-
+	bool goodToDrop = true;
+	bool hasAttachement = false;
+	if (attachStager_->IsValid()) {
+		//attach
+		hasAttachement = attachStager_->AttachAll();
+	}
+	else
+		goodToDrop = false;
 	
 
-
-
-	if (goodToDrop_) {
+	if (goodToDrop) {
 
 		//check collisions
-		drop(freeze, hasAttachement_);
+		drop(freeze, hasAttachement);
 	}
 }
 
@@ -149,10 +155,10 @@ void ManipulationTool::drop(bool freeze, bool hadAttachement)
 		gatheredPiece->GetRigidBody()->SetMassScale(1.0f*float(!freeze));
 	}
 
-	//if (!kinamaticConstriant_.Expired()) {
+	if (!kinamaticConstriant_.Expired()) {
 		kinamaticConstriant_->Remove();
 		kinamaticConstriant_ = nullptr;
-	//}
+	}
 
 	//form new groupings
 	GetScene()->GetComponent<PieceManager>()->FormSolidGroupsOnContraption(gatheredPiece_);
@@ -407,7 +413,6 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 		updateKinematicsControllerPos(false);
 		
-		
 
 		kinamaticConstriant_->SetOtherWorldPosition(constraintPosition);
 		kinamaticConstriant_->SetOtherWorldRotation(constraintOrientation);
@@ -445,6 +450,84 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 				otherPoint->SetShowColorIndicator(true, Color::YELLOW);
 
+
+				if (otherPiece_ && otherPiecePoint_) {
+
+					PieceManager* pieceManager = GetScene()->GetComponent<PieceManager>();
+
+					ea::vector<PiecePoint*> comparisonPoints;
+					pieceManager->GetPointsAroundPoints(allGatherPiecePoints_, comparisonPoints, 0.2f);
+
+					//URHO3D_LOGINFO("comparisonPoints Size: " + ea::to_string(comparisonPoints.size()));
+
+					//check that all other points are within attach tolerance.
+					bool attachmentPotential = false;
+
+					ea::vector<PiecePoint*> goodPoints;
+					ea::vector<PiecePoint*> closestPoints;//corresponds the allGatherPiecePoints
+					closestPoints.resize(allGatherPiecePoints_.size());
+
+
+					for (int i = 0; i < allGatherPiecePoints_.size(); i++)
+					{
+						//URHO3D_LOGINFO("looking at allGatherPiecePoints[" + ea::to_string(i) + "]");
+
+						PiecePoint* point = allGatherPiecePoints_[i];
+
+						//clear all indicators
+						point->SetShowColorIndicator(false, Color::BLACK);
+
+						//find closest comparison point to point.
+						PiecePoint* closest = nullptr;
+						float closestDist = M_LARGE_VALUE;
+
+						for (int j = 0; j < comparisonPoints.size(); j++) {
+
+							//URHO3D_LOGINFO("looking at comparisonPoints[" + ea::to_string(j) + "]");
+
+							PiecePoint* cp = comparisonPoints[j];
+
+							if (cp->GetPiece() == gatheredPiece_)
+								continue;
+
+							float dist = (cp->GetNode()->GetWorldPosition() - point->GetNode()->GetWorldPosition()).Length();
+
+							if (dist < closestDist)
+							{
+								closestDist = dist;
+								closest = cp;
+							}
+						}
+
+						if (closest && closestDist <= pieceManager->GetAttachPointThreshold()) {
+							closestPoints[i] = closest;
+							attachmentPotential = true;
+							//URHO3D_LOGINFO("closest updated");
+						}
+					}
+
+
+					if (attachmentPotential)
+					{
+						
+						attachStager_->Reset();
+						for (int i = 0; i < allGatherPiecePoints_.size(); i++) {
+
+							if (closestPoints[i]) {
+								attachStager_->AddPotentialAttachement(allGatherPiecePoints_[i], closestPoints[i]);
+
+								if (closestPoints[i]->GetShowColorIndicator())
+								{
+									closestPoints[i]->SetShowColorIndicator(true, Color::GREEN);
+								}
+							}
+						}
+
+						attachStager_->AnalyzeAndFix();
+					}
+				}
+
+
 			}
 			else
 			{
@@ -457,6 +540,15 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 			otherPiecePoint_ = nullptr;
 
 		}
+
+
+
+
+
+
+
+
+
 	}
 	else
 	{
@@ -470,91 +562,6 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 	
 
-	if (otherPiece_ && otherPiecePoint_) {
-
-		PieceManager* pieceManager = GetScene()->GetComponent<PieceManager>();
-
-		ea::vector<PiecePoint*> comparisonPoints;
-		pieceManager->GetPointsAroundPoints(allGatherPiecePoints_, comparisonPoints, 0.2f);
-
-		//URHO3D_LOGINFO("comparisonPoints Size: " + ea::to_string(comparisonPoints.size()));
-
-		//check that all other points are within attach tolerance.
-		bool attachmentPotential = false;
-
-		ea::vector<PiecePoint*> goodPoints;
-		ea::vector<PiecePoint*> closestPoints;//corresponds the allGatherPiecePoints
-		closestPoints.resize(allGatherPiecePoints_.size());
-
-
-		for (int i = 0; i < allGatherPiecePoints_.size(); i++)
-		{
-			//URHO3D_LOGINFO("looking at allGatherPiecePoints[" + ea::to_string(i) + "]");
-
-			PiecePoint* point = allGatherPiecePoints_[i];
-
-			//clear all indicators
-			point->SetShowColorIndicator(false, Color::BLACK);
-
-			//find closest comparison point to point.
-			PiecePoint* closest = nullptr;
-			float closestDist = M_LARGE_VALUE;
-
-			for (int j = 0; j < comparisonPoints.size(); j++) {
-
-				//URHO3D_LOGINFO("looking at comparisonPoints[" + ea::to_string(j) + "]");
-
-				PiecePoint* cp = comparisonPoints[j];
-
-				if (cp->GetPiece() == gatheredPiece_)
-					continue;
-
-				float dist = (cp->GetNode()->GetWorldPosition() - point->GetNode()->GetWorldPosition()).Length();
-
-				if (dist < closestDist)
-				{
-					closestDist = dist;
-					closest = cp;
-				}
-			}
-
-			if (closest && closestDist <= pieceManager->GetAttachPointThreshold()) {
-				closestPoints[i] = closest;
-				attachmentPotential = true;
-				//URHO3D_LOGINFO("closest updated");
-			}
-		}
-
-
-
-
-		if (attachmentPotential)
-		{
-			SharedPtr<PieceAttachmentStager> attachStager = context_->CreateObject<PieceAttachmentStager>();
-			attachStager->SetScene(GetScene());
-			for (int i = 0; i < allGatherPiecePoints_.size(); i++) {
-
-				if (closestPoints[i]) {
-					attachStager->AddPotentialAttachement(allGatherPiecePoints_[i], closestPoints[i]);
-
-					if (closestPoints[i]->GetShowColorIndicator())
-					{
-						closestPoints[i]->SetShowColorIndicator(true, Color::GREEN);
-					}
-				}
-			}
-
-			attachStager->AnalyzeAndFix();
-
-			if (attachStager->IsValid()) {
-
-				//attach
-				hasAttachement_ = attachStager->AttachAll();
-			}
-			else
-				goodToDrop_ = false;
-		}
-	}
 
 
 

@@ -6,6 +6,7 @@
 #include "PieceManager.h"
 
 #include "NewtonKinematicsJoint.h"
+#include "PieceAttachmentStager.h"
 
 //tool to be attached to Camera Node (or arm node)
 class Tool : public Component {
@@ -132,10 +133,9 @@ protected:
 	
 	Quaternion gatherRotation_;
 
-	bool goodToDrop_ = false;
-	bool hasAttachement_ = false;
 
-	SharedPtr<NewtonKinematicsControllerConstraint> kinamaticConstriant_;
+
+	WeakPtr<NewtonKinematicsControllerConstraint> kinamaticConstriant_;
 	Timer kinamaticConstraintUpdateTimer_;
 	int kinamaticConstraintUpdateTimerTimeout_ = 6000;
 	int kinamaticConstraintTimerFireCount_ = false;
@@ -146,7 +146,7 @@ protected:
 	WeakPtr<PiecePoint> otherPiecePoint_;
 
 	SharedPtr<PieceManager> pieceManager_;
-
+	SharedPtr<PieceAttachmentStager> attachStager_;
 	
 };
 
