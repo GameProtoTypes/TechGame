@@ -71,17 +71,44 @@ Piece* PieceManager::GetClosestGlobalPiece(Vector3 worldPosition, ea::vector<Pie
 	return closestPiece;
 }
 
-PiecePoint* PieceManager::GetClosestGlobalPiecePoint(Vector3 worldPosition)
+void PieceManager::GetClosestGlobalPieces(Vector3 worldPosition, ea::vector<Piece*> blacklist, float radius, ea::vector<Piece*>& pieces, int maxPieces /*= 5*/)
 {
-	ea::vector<Piece*> blacklist;
-	Piece* piece = GetClosestGlobalPiece(worldPosition, blacklist, 5);
-
-	if (piece)
-	{
-		return GetClosestPiecePoint(worldPosition, piece);
+	for (int i = 0; i < maxPieces; i++) {
+		Piece* piece = GetClosestGlobalPiece(worldPosition, blacklist, radius);
+		if (piece) {
+			pieces.push_back(piece);
+			blacklist.push_back(piece);
+		}
 	}
-	else
-		return nullptr;
+}
+
+PiecePoint* PieceManager::GetClosestGlobalPiecePoint(Vector3 worldPosition, ea::vector<Piece*>& blacklist, float radius, int maxPieces)
+{
+	ea::vector<Piece*> pieces;
+	GetClosestGlobalPieces(worldPosition, blacklist, radius, pieces, maxPieces);
+
+	if (pieces.size())
+	{
+		URHO3D_LOGINFO(ea::to_string(pieces.size()));
+	}
+
+
+	PiecePoint* closestPoint = nullptr;
+	float smallestDist = M_LARGE_VALUE;
+	for (Piece* piece : pieces)
+	{
+		PiecePoint* point = GetClosestPiecePoint(worldPosition, piece);
+
+		float dist = (point->GetNode()->GetWorldPosition() - worldPosition).Length();
+
+		if (dist < smallestDist)
+		{
+			smallestDist = dist;
+			closestPoint = point;
+		}
+	}
+
+	return closestPoint;
 }
 
 void PieceManager::GetPointsInRadius(ea::vector<PiecePoint*>& points, Vector3 worldPosition, float radius)

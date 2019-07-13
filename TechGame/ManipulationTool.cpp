@@ -467,16 +467,16 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 		ea::vector<Piece*> blackList;
 		blackList.push_back(gatheredPiece_);
-		Piece* otherPiece = pieceManager_->GetClosestGlobalPiece(gatherNode_->GetWorldTransform().Translation(), blackList, 0.1f);
-		if (otherPiece && !allGatherPieces_.contains(otherPiece))
+		
+	
+		
+		PiecePoint* otherPoint = pieceManager_->GetClosestGlobalPiecePoint(gatherNode_->GetWorldTransform().Translation(), blackList, 0.1f, 5);
+
+		if (otherPoint && !allGatherPieces_.contains(otherPoint->GetPiece()))
 		{
 
-			otherPiece_ = otherPiece;
+			otherPiece_ = otherPoint->GetPiece();
 
-
-
-
-			PiecePoint* otherPoint = pieceManager_->GetClosestPiecePoint(gatherNode_->GetWorldTransform().Translation(), otherPiece);
 
 			float dist = (otherPoint->GetNode()->GetWorldPosition() - gatherNode_->GetWorldPosition()).Length();
 
