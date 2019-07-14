@@ -41,7 +41,7 @@ bool ManipulationTool::Gather(bool grabOne)
 		allGatherPieces_.clear();
 		allGatherPieces_.push_back(gatheredPiece_);
 		allGatherPiecePoints_.clear();
-		allGatherPiecePoints_.push_back(gatherPiecePoint_);
+		gatheredPiece_->GetPoints(allGatherPiecePoints_);
 
 		PieceSolidificationGroup* existingGroup = gatheredPiece_->GetPieceGroup();
 		ea::vector<Piece*> piecesInGroup;
@@ -50,6 +50,7 @@ bool ManipulationTool::Gather(bool grabOne)
 			piecesInGroup.erase_at(piecesInGroup.index_of(gatheredPiece_));
 			pieceManager_->RemoveSolidGroup(existingGroup);
 		}
+
 		//detach from its contraption.
 		gatheredPiece_->DetachAll();
 		
@@ -200,6 +201,7 @@ void ManipulationTool::AdvanceGatherPoint(bool forward /*= true*/)
 	if(gatherPiecePoint_)
 		gatherPiecePoint_->SetShowBasisIndicator(false);
 
+	
 
 	for (int i = 0; i < allGatherPiecePoints_.size(); i++) {
 
