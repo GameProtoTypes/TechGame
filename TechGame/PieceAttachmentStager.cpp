@@ -144,9 +144,11 @@ bool PieceAttachmentStager::endPointRulePass(AttachmentPair* attachPair)
 				}
 				else
 				{
-					if (pointA->GetDirectionWorld().DotProduct(pointB->GetDirectionWorld()) < 0.0f) {
-						pass = false;
-						URHO3D_LOGINFO("end cap direction does not agree");
+					if (pointB->row_->Count() > 1) {
+						if (pointA->GetDirectionWorld().DotProduct(pointB->GetDirectionWorld()) < 0.0f) {
+							pass = false;
+							URHO3D_LOGINFO("end cap direction does not agree");
+						}
 					}
 
 				}

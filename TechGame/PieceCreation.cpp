@@ -212,24 +212,24 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 			row2->PushBack(point2);
 			row3->PushBack(point3);
 
-			rowCenter->SetRowType(PiecePointRow::RowType_HoleTight);
+			rowCenter->SetRowType(PiecePointRow::RowType_Hole);
 			rowCenter->SetRowDirectionLocal(Vector3(0, 0, 1));
 			rowCenter->Finalize();
 
 
-			row0->SetRowType(PiecePointRow::RowType_HoleTight);
+			row0->SetRowType(PiecePointRow::RowType_Hole);
 			row0->SetRowDirectionLocal(Vector3(0, 0, 1));
 			row0->Finalize();
 
-			row1->SetRowType(PiecePointRow::RowType_HoleTight);
+			row1->SetRowType(PiecePointRow::RowType_Hole);
 			row1->SetRowDirectionLocal(Vector3(0, 0, 1));
 			row1->Finalize();
 
-			row2->SetRowType(PiecePointRow::RowType_HoleTight);
+			row2->SetRowType(PiecePointRow::RowType_Hole);
 			row2->SetRowDirectionLocal(Vector3(0, 0, 1));
 			row2->Finalize();
 			
-			row3->SetRowType(PiecePointRow::RowType_HoleTight);
+			row3->SetRowType(PiecePointRow::RowType_Hole);
 			row3->SetRowDirectionLocal(Vector3(0, 0, 1));
 			row3->Finalize();
 
@@ -270,7 +270,7 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 
 			rowCenter->PushBack(pointCenter);
 
-			rowCenter->SetRowType(PiecePointRow::RowType_HoleTight);
+			rowCenter->SetRowType(PiecePointRow::RowType_Hole);
 			rowCenter->SetRowDirectionLocal(Vector3(0, 0, 1));
 			rowCenter->Finalize();
 
@@ -310,7 +310,7 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 
 			rowCenter->PushBack(pointCenter);
 
-			rowCenter->SetRowType(PiecePointRow::RowType_HoleTight);
+			rowCenter->SetRowType(PiecePointRow::RowType_Hole);
 			rowCenter->SetRowDirectionLocal(Vector3(0, 0, 1));
 			rowCenter->Finalize();
 

@@ -46,8 +46,8 @@ void PieceGear::ReEvalConstraints()
 
 
 
-	ea::vector<NewtonGearConstraint*> existingGearConstraints;
-	node_->GetComponents<NewtonGearConstraint>(existingGearConstraints);
+	ea::vector<NewtonGearConstraint*> ownGearConstraints;
+	node_->GetComponents<NewtonGearConstraint>(ownGearConstraints);
 	
 	for (PieceGear* otherGear : proximityPieceGears) {
 
@@ -59,10 +59,19 @@ void PieceGear::ReEvalConstraints()
 		//search for existing constraint
 		bool constraintAlreadyExists = false;
 		NewtonGearConstraint* constraintOfInterest = nullptr;
-		for (NewtonGearConstraint* gr : existingGearConstraints) {
+		for (NewtonGearConstraint* gr : ownGearConstraints) {
 			if (gr->GetOtherBody(false) == otherGear->node_->GetComponent<Piece>()->GetRigidBody()) {
 				constraintAlreadyExists = true;
 				constraintOfInterest = gr;
+			}
+		}
+
+		ea::vector<NewtonGearConstraint*> otherGearConstraints;
+		otherGear->node_->GetComponents<NewtonGearConstraint>(otherGearConstraints);
+		for (NewtonGearConstraint* otherGrCnstraint : otherGearConstraints) {
+			if (otherGrCnstraint->GetOtherBody(false) == node_->GetComponent<Piece>()->GetRigidBody()) {
+				constraintAlreadyExists = true;
+				constraintOfInterest = otherGrCnstraint;
 			}
 		}
 
