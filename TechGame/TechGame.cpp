@@ -475,7 +475,7 @@ void TechGame::CreateScene()
 		Node* prevPiece = nullptr;
 
 		ea::vector<Piece*> pieces;
-		int numDiffPieces = 13;
+		int numDiffPieces = 14;
 		for (int y = 0; y < numDiffPieces*20; y += 1) {
 
 			Node* piece;
@@ -507,7 +507,8 @@ void TechGame::CreateScene()
 				piece = CreatePiece(scene_, "2_piece_thick", false);
 			else if (rnd == 12)
 				piece = CreatePiece(scene_, "4x4_piece_thin", false);
-
+			else if (rnd == 13)
+				piece = CreatePiece(scene_, "4x8_piece_thin", false);
 
 			piece->SetWorldPosition(Vector3(Random(-2,2), y * .05, Random(-2,2)));
 
