@@ -53,6 +53,9 @@ public:
 	Piece* GetClosestGlobalPiece(Vector3 worldPosition, ea::vector<Piece*> blacklist, float radius);
 
 	void GetClosestGlobalPieces(Vector3 worldPosition, ea::vector<Piece*> blacklist, float radius, ea::vector<Piece*>& pieces, int maxPieces = 5);
+	
+	void GetGlobalPiecesInRadius(Vector3 worldPosition, ea::vector<Piece*> blacklist, float radius, ea::vector<Piece*>& pieces, int maxPieces = 5);
+
 
 
 	PiecePoint* GetClosestGlobalPiecePoint(Vector3 worldPosition, ea::vector<Piece*>& blacklist, float radius, int maxPieces);

@@ -5,6 +5,7 @@
 
 #include "NewtonCollisionShapesDerived.h"
 #include "PieceManager.h"
+#include "PieceGear.h"
 
 
 Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
@@ -232,6 +233,10 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 			row3->SetRowDirectionLocal(Vector3(0, 0, 1));
 			row3->Finalize();
 
+			//add gear component
+			PieceGear* gear = root->CreateComponent<PieceGear>();
+			gear->SetRadius(1.5f * scaleFactor);
+
 			staticMdl->SetModel(pieceModel);
 		}
 
@@ -269,6 +274,9 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 			rowCenter->SetRowDirectionLocal(Vector3(0, 0, 1));
 			rowCenter->Finalize();
 
+			//add gear component
+			PieceGear* gear = root->CreateComponent<PieceGear>();
+			gear->SetRadius(1.0f * scaleFactor);
 
 			staticMdl->SetModel(pieceModel);
 		}
@@ -306,6 +314,9 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 			rowCenter->SetRowDirectionLocal(Vector3(0, 0, 1));
 			rowCenter->Finalize();
 
+			//add gear component
+			PieceGear* gear = root->CreateComponent<PieceGear>();
+			gear->SetRadius(0.5f * scaleFactor);
 
 			staticMdl->SetModel(pieceModel);
 		}

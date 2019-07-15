@@ -71,8 +71,12 @@ Piece* PieceManager::GetClosestGlobalPiece(Vector3 worldPosition, ea::vector<Pie
 	return closestPiece;
 }
 
+//SLOW!!!!!
 void PieceManager::GetClosestGlobalPieces(Vector3 worldPosition, ea::vector<Piece*> blacklist, float radius, ea::vector<Piece*>& pieces, int maxPieces /*= 5*/)
 {
+
+	
+
 	for (int i = 0; i < maxPieces; i++) {
 		Piece* piece = GetClosestGlobalPiece(worldPosition, blacklist, radius);
 		if (piece) {
@@ -82,15 +86,33 @@ void PieceManager::GetClosestGlobalPieces(Vector3 worldPosition, ea::vector<Piec
 	}
 }
 
+void PieceManager::GetGlobalPiecesInRadius(Vector3 worldPosition, ea::vector<Piece*> blacklist, float radius, ea::vector<Piece*>& pieces, int maxPieces /*= 5*/)
+{
+	Octree* octTree = GetScene()->GetComponent<Octree>();
+
+	ea::vector<Drawable*> result;
+	SphereOctreeQuery query(result, Sphere(worldPosition, radius));
+	octTree->GetDrawables(query);
+
+
+	Piece* closestPiece = nullptr;
+	float closestDist = M_LARGE_VALUE;
+	for (Drawable* drawable : result) {
+
+
+		Piece* piece = drawable->GetNode()->GetParent()->GetComponent<Piece>(false);
+
+		if (piece && !blacklist.contains(piece)) {
+			pieces.push_back(piece);
+		}
+	}
+}
+
 PiecePoint* PieceManager::GetClosestGlobalPiecePoint(Vector3 worldPosition, ea::vector<Piece*>& blacklist, float radius, int maxPieces)
 {
 	ea::vector<Piece*> pieces;
 	GetClosestGlobalPieces(worldPosition, blacklist, radius, pieces, maxPieces);
 
-	if (pieces.size())
-	{
-		URHO3D_LOGINFO(ea::to_string(pieces.size()));
-	}
 
 
 	PiecePoint* closestPoint = nullptr;

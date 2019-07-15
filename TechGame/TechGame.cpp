@@ -18,6 +18,7 @@
 #include "VisualDebugger.h"
 #include "Urho3D/SystemUI/Console.h"
 #include "Urho3D/SystemUI/DebugHud.h"
+#include "PieceGear.h"
 
 void TechGame::Setup()
 {
@@ -44,6 +45,7 @@ void TechGame::Setup()
 	PieceSolidificationGroup::RegisterObject(context_);
 	PiecePoint::RegisterObject(context_);
 	PiecePointRow::RegisterObject(context_);
+	PieceGear::RegisterObject(context_);
 
 	RegisterNewtonPhysicsLibrary(context_);
 }
