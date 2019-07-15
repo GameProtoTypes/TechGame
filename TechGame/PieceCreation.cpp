@@ -152,6 +152,53 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 		}
 
 
+
+		if (name == "4x4_piece_thin") {
+
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/4x4_piece_thin.mdl");
+			Vector3 offset(0, 0, 0);
+
+			const int length = 4;
+			const int width = 4;
+			const float thickness = 0.5f;
+
+			//make shapes
+			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Box>();
+			shape1->SetScaleFactor(Vector3(length, width, thickness)*scaleFactor);
+			shape1->SetPositionOffset((Vector3(0, 0, 0) + offset)*scaleFactor);
+
+
+			//make hole nodes.
+			for (int xi = 0; xi < length; xi++) 
+			{
+				for (int yi = 0; yi < width; yi++) 
+				{
+
+					float x = (float(xi) + 0.5f) - length / 2.0f;
+					float y = (float(yi) + 0.5f) - width / 2.0f;
+
+					Node* hole0 = root->CreateChild();
+					hole0->SetPosition(Vector3(x, y, 0)*scaleFactor);
+					PiecePoint* point = hole0->CreateComponent<PiecePoint>();
+
+					PiecePointRow* row = root->CreateComponent<PiecePointRow>();
+					row->PushBack(point);
+					row->SetRowType(PiecePointRow::RowType_Hole);
+
+					row->SetRowDirectionLocal(Vector3(0, 0, 1));
+					row->Finalize();
+				}
+			}
+
+			staticMdl->SetModel(pieceModel);
+
+			//body->SetUseInertiaHack(true);
+		}
+
+
+
+
+
 		if (name == "6_piece_thin") {
 
 			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/6_piece_thin.mdl");
@@ -187,6 +234,233 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 
 			//body->SetUseInertiaHack(true);
 		}
+
+		if (name == "6_piece_thick") {
+
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/6_piece_thick.mdl");
+			Vector3 offset(0, 0, 0);
+
+			const int length = 6;
+			const float thickness = 1.0f;
+
+			//make shapes
+			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Box>();
+			shape1->SetScaleFactor(Vector3(length, 1, thickness)*scaleFactor);
+			shape1->SetPositionOffset((Vector3(0, 0, 0) + offset)*scaleFactor);
+
+
+			//make hole nodes.
+			for (int i = 0; i < length; i++) {
+
+				float x = (float(i) + 0.5f) - length / 2.0f;
+
+
+				Node* hole0 = root->CreateChild();
+				hole0->SetPosition((Vector3(x, 0, -0.25))*scaleFactor);
+				PiecePoint* point0 = hole0->CreateComponent<PiecePoint>();
+
+				Node* hole1 = root->CreateChild();
+				hole1->SetPosition((Vector3(x, 0, 0.25))*scaleFactor);
+				PiecePoint* point1 = hole1->CreateComponent<PiecePoint>();
+
+
+
+				PiecePointRow* row = root->CreateComponent<PiecePointRow>();
+				row->PushBack(point0);
+				row->PushBack(point1);
+				row->SetRowType(PiecePointRow::RowType_Hole);
+
+				row->SetRowDirectionLocal(Vector3(0, 0, 1));
+				row->Finalize();
+			}
+
+			staticMdl->SetModel(pieceModel);
+
+			//body->SetUseInertiaHack(true);
+		}
+
+
+
+
+		if (name == "5_piece_thick") {
+
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/5_piece_thick.mdl");
+			Vector3 offset(0, 0, 0);
+
+			const int length = 5;
+			const float thickness = 1.0f;
+
+			//make shapes
+			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Box>();
+			shape1->SetScaleFactor(Vector3(length, 1, thickness)*scaleFactor);
+			shape1->SetPositionOffset((Vector3(0, 0, 0) + offset)*scaleFactor);
+
+
+			//make hole nodes.
+			for (int i = 0; i < length; i++) {
+
+				float x = (float(i) + 0.5f) - length / 2.0f;
+
+
+				Node* hole0 = root->CreateChild();
+				hole0->SetPosition((Vector3(x, 0, -0.25))*scaleFactor);
+				PiecePoint* point0 = hole0->CreateComponent<PiecePoint>();
+
+				Node* hole1 = root->CreateChild();
+				hole1->SetPosition((Vector3(x, 0, 0.25))*scaleFactor);
+				PiecePoint* point1 = hole1->CreateComponent<PiecePoint>();
+
+
+
+				PiecePointRow* row = root->CreateComponent<PiecePointRow>();
+				row->PushBack(point0);
+				row->PushBack(point1);
+				row->SetRowType(PiecePointRow::RowType_Hole);
+
+				row->SetRowDirectionLocal(Vector3(0, 0, 1));
+				row->Finalize();
+			}
+
+			staticMdl->SetModel(pieceModel);
+
+			//body->SetUseInertiaHack(true);
+		}
+
+
+
+		if (name == "4_piece_thick") {
+
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/4_piece_thick.mdl");
+			Vector3 offset(0, 0, 0);
+
+			const int length = 4;
+			const float thickness = 1.0f;
+
+			//make shapes
+			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Box>();
+			shape1->SetScaleFactor(Vector3(length, 1, thickness)*scaleFactor);
+			shape1->SetPositionOffset((Vector3(0, 0, 0) + offset)*scaleFactor);
+
+
+			//make hole nodes.
+			for (int i = 0; i < length; i++) {
+
+				float x = (float(i) + 0.5f) - length / 2.0f;
+
+
+				Node* hole0 = root->CreateChild();
+				hole0->SetPosition((Vector3(x, 0, -0.25))*scaleFactor);
+				PiecePoint* point0 = hole0->CreateComponent<PiecePoint>();
+
+				Node* hole1 = root->CreateChild();
+				hole1->SetPosition((Vector3(x, 0, 0.25))*scaleFactor);
+				PiecePoint* point1 = hole1->CreateComponent<PiecePoint>();
+
+
+
+				PiecePointRow* row = root->CreateComponent<PiecePointRow>();
+				row->PushBack(point0);
+				row->PushBack(point1);
+				row->SetRowType(PiecePointRow::RowType_Hole);
+
+				row->SetRowDirectionLocal(Vector3(0, 0, 1));
+				row->Finalize();
+			}
+
+			staticMdl->SetModel(pieceModel);
+
+			//body->SetUseInertiaHack(true);
+		}
+
+		if (name == "3_piece_thick") {
+
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/3_piece_thick.mdl");
+			Vector3 offset(0, 0, 0);
+
+			const int length = 3;
+			const float thickness = 1.0f;
+
+			//make shapes
+			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Box>();
+			shape1->SetScaleFactor(Vector3(length, 1, thickness)*scaleFactor);
+			shape1->SetPositionOffset((Vector3(0, 0, 0) + offset)*scaleFactor);
+
+
+			//make hole nodes.
+			for (int i = 0; i < length; i++) {
+
+				float x = (float(i) + 0.5f) - length / 2.0f;
+
+
+				Node* hole0 = root->CreateChild();
+				hole0->SetPosition((Vector3(x, 0, -0.25))*scaleFactor);
+				PiecePoint* point0 = hole0->CreateComponent<PiecePoint>();
+
+				Node* hole1 = root->CreateChild();
+				hole1->SetPosition((Vector3(x, 0, 0.25))*scaleFactor);
+				PiecePoint* point1 = hole1->CreateComponent<PiecePoint>();
+
+
+
+				PiecePointRow* row = root->CreateComponent<PiecePointRow>();
+				row->PushBack(point0);
+				row->PushBack(point1);
+				row->SetRowType(PiecePointRow::RowType_Hole);
+
+				row->SetRowDirectionLocal(Vector3(0, 0, 1));
+				row->Finalize();
+			}
+
+			staticMdl->SetModel(pieceModel);
+
+			//body->SetUseInertiaHack(true);
+		}
+
+		if (name == "2_piece_thick") {
+
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/2_piece_thick.mdl");
+			Vector3 offset(0, 0, 0);
+
+			const int length = 2;
+			const float thickness = 1.0f;
+
+			//make shapes
+			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Box>();
+			shape1->SetScaleFactor(Vector3(length, 1, thickness)*scaleFactor);
+			shape1->SetPositionOffset((Vector3(0, 0, 0) + offset)*scaleFactor);
+
+
+			//make hole nodes.
+			for (int i = 0; i < length; i++) {
+
+				float x = (float(i) + 0.5f) - length / 2.0f;
+
+
+				Node* hole0 = root->CreateChild();
+				hole0->SetPosition((Vector3(x, 0, -0.25))*scaleFactor);
+				PiecePoint* point0 = hole0->CreateComponent<PiecePoint>();
+
+				Node* hole1 = root->CreateChild();
+				hole1->SetPosition((Vector3(x, 0, 0.25))*scaleFactor);
+				PiecePoint* point1 = hole1->CreateComponent<PiecePoint>();
+
+
+
+				PiecePointRow* row = root->CreateComponent<PiecePointRow>();
+				row->PushBack(point0);
+				row->PushBack(point1);
+				row->SetRowType(PiecePointRow::RowType_Hole);
+
+				row->SetRowDirectionLocal(Vector3(0, 0, 1));
+				row->Finalize();
+			}
+
+			staticMdl->SetModel(pieceModel);
+
+			//body->SetUseInertiaHack(true);
+		}
+
+
 
 
 		if (name == "rod_round_4")
