@@ -16,7 +16,6 @@
 #include "NewtonPhysicsEvents.h"
 
 #include "VisualDebugger.h"
-#include "ContraptionAttachmentMonitor.h"
 #include "Urho3D/SystemUI/Console.h"
 #include "Urho3D/SystemUI/DebugHud.h"
 
@@ -41,7 +40,6 @@ void TechGame::Setup()
 
 	PieceManager::RegisterObject(context_);
 	PieceAttachmentStager::RegisterObject(context_);
-	ContraptionAttachmentMonitor::RegisterObject(context_);
 	Piece::RegisterObject(context_);
 	PieceSolidificationGroup::RegisterObject(context_);
 	PiecePoint::RegisterObject(context_);
@@ -475,7 +473,7 @@ void TechGame::CreateScene()
 		Node* prevPiece = nullptr;
 
 		ea::vector<Piece*> pieces;
-		int numDiffPieces = 14;
+		int numDiffPieces = 17;
 		for (int y = 0; y < numDiffPieces*20; y += 1) {
 
 			Node* piece;
@@ -509,6 +507,12 @@ void TechGame::CreateScene()
 				piece = CreatePiece(scene_, "4x4_piece_thin", false);
 			else if (rnd == 13)
 				piece = CreatePiece(scene_, "4x8_piece_thin", false);
+			else if (rnd == 14)
+				piece = CreatePiece(scene_, "gear_large", false);
+			else if (rnd == 15)
+				piece = CreatePiece(scene_, "gear_medium", false);
+			else if (rnd == 16)
+				piece = CreatePiece(scene_, "gear_small", false);
 
 			piece->SetWorldPosition(Vector3(Random(-2,2), y * .05, Random(-2,2)));
 
