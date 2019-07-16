@@ -469,13 +469,13 @@ void TechGame::CreateScene()
 	auto* shape = floorNode->CreateComponent<NewtonCollisionShape_Box>();
 
 	{
-		CreatePiece(scene_, "rod_hard_4", false)->SetWorldPosition(Vector3(-1,0,0));
-		CreatePiece(scene_, "2_sleeve", false)->SetWorldPosition(Vector3(1, 0, 0));
+		CreatePiece(scene_, "8_piece_Cshape", false)->SetWorldPosition(Vector3(-1,0,0));
+		//CreatePiece(scene_, "2_sleeve", false)->SetWorldPosition(Vector3(1, 0, 0));
 
 		Node* prevPiece = nullptr;
 
 		ea::vector<Piece*> pieces;
-		int numDiffPieces = 17;
+		int numDiffPieces = 0;
 		for (int y = 0; y < numDiffPieces*20; y += 1) {
 
 			Node* piece;
