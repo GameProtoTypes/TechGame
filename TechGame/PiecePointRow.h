@@ -47,7 +47,7 @@ public:
 	static bool RowsHaveDegreeOfFreedom(PiecePointRow* rowA, PiecePointRow* rowB);
 
 	// checks if the given row is full and if it is, reforms constraints.
-	static bool OptimizeFullRow(PiecePointRow* row);
+	static bool UpdateOptimizeFullRow(PiecePointRow* row);
 
 
 	static void RegisterObject(Context* context) {
@@ -148,6 +148,8 @@ protected:
 	void HandleUpdate(StringHash event, VariantMap& eventData);
 
 	void UpdatePointOccupancies();
+
+	void UpdateDynamicDettachement();
 
 	bool isOccupiedOptimized_ = false;
 	int occupiedCountDownCount_ = 10;

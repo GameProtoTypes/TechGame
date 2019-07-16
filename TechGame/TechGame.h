@@ -77,6 +77,7 @@ protected:
 	bool drawDebugVisualDebugger = false;
 	bool drawDebugPiecePoints = false;
 	bool drawDebugPiecePointRows = false;
+	bool drawDebugPieceGears = false;
 	bool drawDebugPiecePointsDepthTest = false;
 
 	bool drawDebugPieceGroups = false;

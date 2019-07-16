@@ -22,15 +22,25 @@ public:
 	}
 	float GetRadius() const { return radius_; }
 
+	void SetNormal(Vector3 normal) { normal_ = normal; }
+	Vector3 GetNormal() const { return normal_; }
+
+	Vector3 GetWorldNormal() const { return node_->GetWorldRotation() * normal_; }
 
 	void HandleUpdate(StringHash event, VariantMap& eventData);
 
 	void ReEvalConstraints();
 
+
+	virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
+
+
 protected:
 
 	int refreshCounter_ = PIECEGEAR_REFRESH_CNT;
 	float radius_ = 1.0f;
+
+	Vector3 normal_ = Vector3::FORWARD;
 
 	virtual void OnNodeSet(Node* node) override;
 

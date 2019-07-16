@@ -54,7 +54,7 @@ void PieceGear::ReEvalConstraints()
 		Vector3 delta = otherGear->node_->GetWorldPosition() - node_->GetWorldPosition();
 
 		float connectionDist = otherGear->GetRadius() + GetRadius();
-		const float epsilon = 0.01f;
+		
 		
 		//search for existing constraint
 		bool constraintAlreadyExists = false;
@@ -75,16 +75,40 @@ void PieceGear::ReEvalConstraints()
 			}
 		}
 
+		const float epsilon = 0.01f;
+		bool alignmentCheck = true;
 
+		//gears must be correct distance apart
+		alignmentCheck &= (delta.Length() <= connectionDist + epsilon && delta.Length() >= connectionDist - epsilon);
+		//URHO3D_LOGINFO(ea::to_string(alignmentCheck));
+		
+		//gears must also have the correct angle
+		alignmentCheck &= (delta.Normalized().CrossProduct(GetWorldNormal()).Length() >= (1.0f - epsilon));
+		
+		if (alignmentCheck) {
+			//URHO3D_LOGINFO(ea::to_string(alignmentCheck));
+			float angle = GetWorldNormal().Angle(otherGear->GetWorldNormal());
 
-		if (delta.Length() <= connectionDist + epsilon && delta.Length() >= connectionDist - epsilon) {
-			//URHO3D_LOGINFO("Gear within proximity");
+			while (angle >= 90)
+				angle -= 180;
+			while (angle <= -90)
+				angle += 180;
 
+			//URHO3D_LOGINFO(ea::to_string(angle));
+			alignmentCheck &= (Abs<float>(angle) < 1.0f);
+			//URHO3D_LOGINFO(ea::to_string(alignmentCheck));
+		}
+
+		if (alignmentCheck) {
 
 			if (!constraintAlreadyExists) {
 				URHO3D_LOGINFO("building gear link...");
 				NewtonGearConstraint* constraint = node_->CreateComponent<NewtonGearConstraint>();
 				constraint->SetOtherBody(otherGear->node_->GetComponent<Piece>()->GetRigidBody());
+				constraint->SetOwnPosition(Vector3::ZERO);
+				constraint->SetOwnRotation(Quaternion(0, 90, 0));
+
+				constraint->SetOtherRotation(Quaternion(0, 90, 0));
 			}
 		}
 		else
@@ -105,6 +129,16 @@ void PieceGear::ReEvalConstraints()
 
 
 	//URHO3D_LOGINFO("found " + ea::to_string(proximityPieceGears.size()) + " piece gears in proximity");
+}
+
+void PieceGear::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
+{
+	//draw normal direction
+	debug->AddLine(node_->GetWorldPosition(), node_->GetWorldPosition() + node_->GetWorldRotation() * normal_*0.25f, Color::RED, depthTest);
+
+
+
+
 }
 
 void PieceGear::OnNodeSet(Node* node)

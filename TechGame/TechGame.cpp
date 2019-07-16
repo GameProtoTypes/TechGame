@@ -516,7 +516,7 @@ void TechGame::CreateScene()
 			else if (rnd == 16)
 				piece = CreatePiece(scene_, "gear_small", false);
 
-			piece->SetWorldPosition(Vector3(Random(-2,2), y * .05, Random(-2,2)));
+			piece->SetWorldPosition(Vector3(Random(-10,10), y * .05, Random(-10,10)));
 
 			ea::vector<Piece*> singlePiece;
 			singlePiece.push_back(piece->GetComponent<Piece>());
@@ -653,8 +653,20 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 		}
 
 
+		ui::Checkbox("PieceGears", &drawDebugPieceGears);
+		if (drawDebugPieceGears)
+		{
+
+			ea::vector<PieceGear*> components;
+			scene_->GetDerivedComponents<PieceGear>(components, true);
+
+			for (PieceGear* comp : components)
+			{
+				comp->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), drawDebugPiecePointsDepthTest);
+			}
 
 
+		}
 
 
 

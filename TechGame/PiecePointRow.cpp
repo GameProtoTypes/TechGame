@@ -203,6 +203,12 @@ bool PiecePointRow::DetachFrom(PiecePointRow* otherRow)
 	}
 
 
+	URHO3D_LOGINFO("PiecePointRow:: Row Detached");
+	UpdatePointOccupancies();
+	otherRow->UpdatePointOccupancies();
+	UpdateOptimizeFullRow(this);
+	UpdateOptimizeFullRow(otherRow);
+
 
 	
 	return detached;
@@ -272,8 +278,8 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 	NewtonRigidBody* rodBody = theRodPiece->GetRigidBody();
 
 
-	URHO3D_LOGINFO("holebody enabled: " + ea::to_string(holeBody->IsEnabledEffective()));
-	URHO3D_LOGINFO("rodbody enabled: " + ea::to_string(rodBody->IsEnabledEffective()));
+	URHO3D_LOGINFO("PiecePointRow::AttachRows holebody enabled: " + ea::to_string(holeBody->IsEnabledEffective()));
+	URHO3D_LOGINFO("PiecePointRow::AttachRows rodbody enabled: " + ea::to_string(rodBody->IsEnabledEffective()));
 
 
 		//wait for update finished because we need to do some manual rigidbody moving and hacking.
@@ -290,7 +296,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 		if (theRodRow->GetRowType() == PiecePointRow::RowType_RodHard || theHoleRow->GetRowType() == PiecePointRow::RowType_HoleTight)
 		{
 
-			URHO3D_LOGINFO("running hard attachment case.");
+			URHO3D_LOGINFO("PiecePointRow::AttachRows running hard attachment case.");
 
 
 			holeBody->SetWorldPosition(-theHolePoint->GetNode()->GetPosition() );
@@ -411,14 +417,14 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 				if (flipped)
 				{
-					URHO3D_LOGINFO("flipped");
+					URHO3D_LOGINFO("PiecePointRow::AttachRows flipped");
 					float tmp = slideLimits.x_;
 					slideLimits.x_ = -slideLimits.y_;
 					slideLimits.y_ = -tmp;
 				}
 				
 
-				const float slopDist = 0.01f;
+				const float slopDist = 0.005f;
 				if (!attachAsFullRow) {
 					static_cast<NewtonSliderConstraint*>(constraint)->SetSliderLimits(slideLimits.x_ - slopDist, slideLimits.y_ + slopDist);
 					static_cast<NewtonSliderConstraint*>(constraint)->SetSliderFriction(0.01f);
@@ -433,7 +439,10 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 
 		}
-
+		else
+		{
+			URHO3D_LOGINFO("PiecePointRow::AttachRows No Constraint Created.");
+		}
 
 
 
@@ -450,6 +459,9 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 		rodBody->SetWorldTransform(origRodBodyTransform);
 		rodBody->ApplyTransformToNode();
 		
+		//explicitly disable collisions.
+		rodBody->SetCollisionOverride(holeBody, false);
+
 
 
 		RowAttachement attachment;
@@ -468,8 +480,8 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 		rowA->UpdatePointOccupancies();
 		rowB->UpdatePointOccupancies();
-		OptimizeFullRow(rowA);
-		OptimizeFullRow(rowB);
+		UpdateOptimizeFullRow(rowA);
+		UpdateOptimizeFullRow(rowB);
 
 		URHO3D_LOGINFO("row attached");
 		return true;
@@ -511,7 +523,7 @@ bool PiecePointRow::RowsHaveDegreeOfFreedom(PiecePointRow* rowA, PiecePointRow* 
 	}
 }
 
-bool PiecePointRow::OptimizeFullRow(PiecePointRow* row)
+bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)
 {
 	ea::vector<PiecePoint*> points = row->GetPoints();
 	PieceManager* pieceManager = row->GetScene()->GetComponent<PieceManager>();
@@ -521,8 +533,14 @@ bool PiecePointRow::OptimizeFullRow(PiecePointRow* row)
 	{
 		fullyOccupied &= (bool)point->occupiedPoint_;
 	}
+
+
+
 	if ((row->GetGeneralRowType() == RowTypeGeneral_Rod))
 	{
+
+		URHO3D_LOGINFO("is fully occupied: " + ea::to_string(fullyOccupied));
+
 		if (fullyOccupied && !row->isOccupiedOptimized_)
 		{
 			URHO3D_LOGINFO("Optimizing Rod..");
@@ -596,7 +614,7 @@ Piece* PiecePointRow::GetPiece()
 
 void PiecePointRow::HandleUpdate(StringHash event, VariantMap& eventData)
 {
-	//#todo restore.
+
 	UpdatePointOccupancies();
 	return;
 }
@@ -607,11 +625,11 @@ void PiecePointRow::UpdatePointOccupancies()
 	if (!rowAttachements_.size())
 		return;
 
+	//don't dynamically update occupied points for rows that have no movement allowed
 	if (rowType_ == RowType_RodHard || rowType_ == RowType_HoleTight)
 		return;
 
 	PieceManager* pieceManager = GetScene()->GetComponent<PieceManager>();
-
 
 	//clear occupancies on points
 	for (PiecePoint* point : points_)
@@ -621,32 +639,42 @@ void PiecePointRow::UpdatePointOccupancies()
 	}
 
 	ea::vector<PiecePoint*> otherPoints;
-
 	for (RowAttachement& row : rowAttachements_)
 	{
 		otherPoints.push_back(row.rowA_->points_);	
 	}
 
-	bool aPointIsStillOccupied = false;
-	bool allPointsOccupied = true;
+	int numPointsOccupied = 0;
 	for (PiecePoint* point : points_)
 	{
-		bool matchFound = false;
+		int numDuplicatePoints = 0;
+
 		for (PiecePoint* otherPoint : otherPoints)
 		{
+			
 			float dist = (point->GetNode()->GetWorldPosition() - otherPoint->GetNode()->GetWorldPosition()).Length();
-			if (dist < pieceManager->RowPointDistance()) {
-				point->occupiedPoint_ = otherPoint;
-				aPointIsStillOccupied = true;
-				matchFound = true;
-			}
-		}
+			
+			if (dist < pieceManager->RowPointDistance()*0.5f) {
 
-		if (!matchFound)
-			allPointsOccupied = false;
+				point->occupiedPoint_ = otherPoint;
+				numPointsOccupied++;
+			}
+
+		}
+	}
+}
+
+void PiecePointRow::UpdateDynamicDettachement()
+{
+	bool hasOccupiedPoint = false;
+	for (PiecePoint* point : points_)
+	{
+		if (point->occupiedPoint_)
+			hasOccupiedPoint = true;
 	}
 
-	if (!aPointIsStillOccupied)
+
+	if (!hasOccupiedPoint)
 	{
 		if (occupiedCountDown_ <= 0) {
 			occupiedCountDown_ = 0;
@@ -660,8 +688,4 @@ void PiecePointRow::UpdatePointOccupancies()
 		occupiedCountDown_ = occupiedCountDownCount_;
 	}
 
-	if (allPointsOccupied)
-	{
-		
-	}
 }
