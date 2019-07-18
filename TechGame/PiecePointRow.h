@@ -138,8 +138,6 @@ public:
 
 	Piece* GetPiece();
 
-
-
 	ea::vector<PiecePoint*> points_;
 
 	ea::vector<RowAttachement> rowAttachements_;//row attachments where rowA is the "other row" and robB is this row. (same with points)

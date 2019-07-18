@@ -164,7 +164,7 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 			//make shapes
 			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Cylinder>();
 			shape1->SetLength(thickness*scaleFactor);
-			shape1->SetRadius(2.0f*scaleFactor);
+			shape1->SetRadius(1.5f*scaleFactor);
 			shape1->SetRotationOffset(Quaternion(0, 90, 0));
 			shape1->SetPositionOffset((Vector3(0, 0, 0) + offset)*scaleFactor);
 
@@ -252,7 +252,7 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 			//make shapes
 			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Cylinder>();
 			shape1->SetLength(thickness*scaleFactor);
-			shape1->SetRadius(1.0f*scaleFactor);
+			shape1->SetRadius(0.9f*scaleFactor);
 			shape1->SetRotationOffset(Quaternion(0, 90, 0));
 			shape1->SetPositionOffset((Vector3(0, 0, 0) + offset)*scaleFactor);
 
@@ -293,7 +293,7 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 			//make shapes
 			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Cylinder>();
 			shape1->SetLength(thickness*scaleFactor);
-			shape1->SetRadius(0.5f*scaleFactor);
+			shape1->SetRadius(0.4f*scaleFactor);
 			shape1->SetRotationOffset(Quaternion(0, 90, 0));
 			shape1->SetPositionOffset((Vector3(0, 0, 0) + offset)*scaleFactor);
 

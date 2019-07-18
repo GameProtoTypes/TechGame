@@ -22,7 +22,7 @@ void PieceGear::HandleUpdate(StringHash event, VariantMap& eventData)
 
 		ReEvalConstraints();
 
-		refreshCounter_ = PIECEGEAR_REFRESH_CNT + Random(0, 100);
+		refreshCounter_ = PIECEGEAR_REFRESH_CNT + Random(0, PIECEGEAR_REFRESH_CNT);
 	}
 }
 
@@ -82,9 +82,14 @@ void PieceGear::ReEvalConstraints()
 		alignmentCheck &= (delta.Length() <= connectionDist + epsilon && delta.Length() >= connectionDist - epsilon);
 		//URHO3D_LOGINFO(ea::to_string(alignmentCheck));
 		
-		//gears must also have the correct angle
+		
 		alignmentCheck &= (delta.Normalized().CrossProduct(GetWorldNormal()).Length() >= (1.0f - epsilon));
 		
+
+
+
+		
+		//gears must also have the correct angle with each other
 		if (alignmentCheck) {
 			//URHO3D_LOGINFO(ea::to_string(alignmentCheck));
 			float angle = GetWorldNormal().Angle(otherGear->GetWorldNormal());
@@ -104,11 +109,31 @@ void PieceGear::ReEvalConstraints()
 			if (!constraintAlreadyExists) {
 				URHO3D_LOGINFO("building gear link...");
 				NewtonGearConstraint* constraint = node_->CreateComponent<NewtonGearConstraint>();
+				
 				constraint->SetOtherBody(otherGear->node_->GetComponent<Piece>()->GetRigidBody());
 				constraint->SetOwnPosition(Vector3::ZERO);
 				constraint->SetOwnRotation(Quaternion(0, 90, 0));
 
 				constraint->SetOtherRotation(Quaternion(0, 90, 0));
+
+
+				Vector3 dir1 = GetWorldNormal();
+				Vector3 dir2 = otherGear->GetWorldNormal();
+				
+				
+				float ratio = (radius_) / (otherGear->radius_);
+				
+				//URHO3D_LOGINFO(ea::to_string(dir1.Angle(dir2)));
+				if (Abs(dir1.Angle(dir2)) > 170.0f)
+				{
+					//URHO3D_LOGINFO("gear orientations opposite - using inverse ratio..");
+					constraint->SetGearRatio(-ratio);
+				}
+				else
+				{
+					constraint->SetGearRatio(ratio);
+				}
+
 			}
 		}
 		else

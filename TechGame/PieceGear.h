@@ -3,7 +3,7 @@
 #include <Urho3D/Urho3DAll.h>
 #include "PieceManager.h"
 
-#define PIECEGEAR_REFRESH_CNT 100
+#define PIECEGEAR_REFRESH_CNT 20
 
 class Piece;
 class PieceGear : public Component
