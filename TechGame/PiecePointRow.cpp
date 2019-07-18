@@ -176,7 +176,7 @@ void PiecePointRow::GetAttachedRows(ea::vector<PiecePointRow*>& rows)
 	}
 }
 
-bool PiecePointRow::DetachFrom(PiecePointRow* otherRow)
+bool PiecePointRow::DetachFrom(PiecePointRow* otherRow, bool updateOccupiedPoints)
 {
 
 	bool detached = false;
@@ -204,11 +204,12 @@ bool PiecePointRow::DetachFrom(PiecePointRow* otherRow)
 
 
 	URHO3D_LOGINFO("PiecePointRow:: Row Detached");
-	UpdatePointOccupancies();
-	otherRow->UpdatePointOccupancies();
-	UpdateOptimizeFullRow(this);
-	UpdateOptimizeFullRow(otherRow);
-
+	if (updateOccupiedPoints) {
+		UpdatePointOccupancies();
+		otherRow->UpdatePointOccupancies();
+		UpdateOptimizeFullRow(this);
+		UpdateOptimizeFullRow(otherRow);
+	}
 
 	
 	return detached;
@@ -218,7 +219,7 @@ bool PiecePointRow::DetachAll()
 {
 	ea::vector<RowAttachement> rowAttachementsCopy = rowAttachements_;
 	for (int i = 0; i < rowAttachementsCopy.size(); i++) {
-		DetachFrom(rowAttachementsCopy[i].rowA_);
+		DetachFrom(rowAttachementsCopy[i].rowA_, true);
 	}
 
 	rowAttachements_.clear();
@@ -554,7 +555,7 @@ bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)
 
 				curSliderPos = RoundToNearestMultiple(curSliderPos, pieceManager->RowPointDistance());
 
-				row->DetachFrom(attachment.rowB_);
+				row->DetachFrom(attachment.rowB_, false);
 				AttachRows(row, attachment.rowB_, attachment.pointB, attachment.pointA_, true);
 
 
@@ -590,7 +591,7 @@ bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)
 					if (attachment.rowA_->GetGeneralRowType() != RowTypeGeneral_Hole)
 						continue;
 
-					row->DetachFrom(attachment.rowB_);
+					row->DetachFrom(attachment.rowB_, true);
 					AttachRows(row, attachment.rowB_, attachment.pointB, attachment.pointA_);
 
 

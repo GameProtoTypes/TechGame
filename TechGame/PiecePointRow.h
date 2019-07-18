@@ -132,7 +132,7 @@ public:
 	///get all rows that are attached to this row.
 	void GetAttachedRows(ea::vector<PiecePointRow*>& rows);
 
-	bool DetachFrom(PiecePointRow* otherRow);
+	bool DetachFrom(PiecePointRow* otherRow, bool updateOccupiedPoints);
 
 	bool DetachAll();
 
@@ -142,7 +142,7 @@ public:
 
 	ea::vector<PiecePoint*> points_;
 
-	ea::vector<RowAttachement> rowAttachements_;
+	ea::vector<RowAttachement> rowAttachements_;//row attachments where rowA is the "other row" and robB is this row. (same with points)
 protected:
 
 	void HandleUpdate(StringHash event, VariantMap& eventData);
