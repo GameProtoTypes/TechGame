@@ -4,3 +4,6 @@
 [submodule "rbfx-newton"]
 	path = rbfx-newton
 	url = https://github.com/TrevorCash/rbfx-newton
+[submodule "rbfx-openvr"]
+	path = rbfx-openvr
+	url = https://github.com/TrevorCash/rbfx-openvr
