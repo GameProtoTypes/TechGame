@@ -591,7 +591,7 @@ bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)
 					if (attachment.rowA_->GetGeneralRowType() != RowTypeGeneral_Hole)
 						continue;
 
-					row->DetachFrom(attachment.rowB_, true);
+					row->DetachFrom(attachment.rowB_, false);
 					AttachRows(row, attachment.rowB_, attachment.pointB, attachment.pointA_);
 
 

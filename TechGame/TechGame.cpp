@@ -475,58 +475,73 @@ void TechGame::CreateScene()
 		Node* prevPiece = nullptr;
 
 		ea::vector<Piece*> pieces;
-		int numDiffPieces = 17;
+		int numDiffPieces = 18;
 		for (int y = 0; y < numDiffPieces*20; y += 1) {
 
-			Node* piece;
+			Node* pieceNode;
 
 			int rnd = y % numDiffPieces;// Random(0, numDiffPieces);
 			if (rnd == 0)
-				piece = CreatePiece(scene_, "8_piece_Cshape", false);
+				pieceNode = CreatePiece(scene_, "8_piece_Cshape", false);
 			else if (rnd == 1)
-				piece = CreatePiece(scene_, "rod_hard_4", false);
+				pieceNode = CreatePiece(scene_, "rod_hard_4", false);
 			else if (rnd == 2)
-				piece = CreatePiece(scene_, "rod_round_4", false);
+				pieceNode = CreatePiece(scene_, "rod_round_4", false);
 			else if (rnd == 3)
-				piece = CreatePiece(scene_, "6_piece_thin", false);
+				pieceNode = CreatePiece(scene_, "6_piece_thin", false);
 			else if (rnd == 4)
-				piece = CreatePiece(scene_, "2_sleeve", false);
+				pieceNode = CreatePiece(scene_, "2_sleeve", false);
 			else if (rnd == 5)
-				piece = CreatePiece(scene_, "1_cap_small", false);
+				pieceNode = CreatePiece(scene_, "1_cap_small", false);
 			else if (rnd == 6)
-				piece = CreatePiece(scene_, "rod_round_no_caps_4", false);
+				pieceNode = CreatePiece(scene_, "rod_round_no_caps_4", false);
 			else if (rnd == 7)
-				piece = CreatePiece(scene_, "6_piece_thick", false);
+				pieceNode = CreatePiece(scene_, "6_piece_thick", false);
 			else if (rnd == 8)
-				piece = CreatePiece(scene_, "5_piece_thick", false);
+				pieceNode = CreatePiece(scene_, "5_piece_thick", false);
 			else if (rnd == 9)
-				piece = CreatePiece(scene_, "4_piece_thick", false);
+				pieceNode = CreatePiece(scene_, "4_piece_thick", false);
 			else if (rnd == 10)
-				piece = CreatePiece(scene_, "3_piece_thick", false);
+				pieceNode = CreatePiece(scene_, "3_piece_thick", false);
 			else if (rnd == 11)
-				piece = CreatePiece(scene_, "2_piece_thick", false);
+				pieceNode = CreatePiece(scene_, "2_piece_thick", false);
 			else if (rnd == 12)
-				piece = CreatePiece(scene_, "4x4_piece_thin", false);
+				pieceNode = CreatePiece(scene_, "4x4_piece_thin", false);
 			else if (rnd == 13)
-				piece = CreatePiece(scene_, "4x8_piece_thin", false);
+				pieceNode = CreatePiece(scene_, "4x8_piece_thin", false);
 			else if (rnd == 14)
-				piece = CreatePiece(scene_, "gear_large", false);
+				pieceNode = CreatePiece(scene_, "gear_large", false);
 			else if (rnd == 15)
-				piece = CreatePiece(scene_, "gear_medium", false);
+				pieceNode = CreatePiece(scene_, "gear_medium", false);
 			else if (rnd == 16)
-				piece = CreatePiece(scene_, "gear_small", false);
+				pieceNode = CreatePiece(scene_, "gear_small", false);
+			else if (rnd == 17)
+				pieceNode = CreatePiece(scene_, "rod_round_1", false);
 
-			piece->SetWorldPosition(Vector3(Random(-10,10), y * .05, Random(-10,10)));
+
+
+			pieceNode->SetWorldPosition(Vector3(Random(-10,10), y * .05, Random(-10,10)));
+
+			Color color;
+			float colorBaseHue = Color::GREEN.Hue();
+			float colorRange = 0.0f;
+			color.FromHSL(Wrap<float>(colorBaseHue + Random(-0.5f ,0.5f)*colorRange, 0.0f, 1.0f), 0.3f, 0.5f + Random(-0.4f, 0.0f));
+			
+
+
+			pieceNode->GetComponent<Piece>()->SetPrimaryColor(color);
+
+
 
 			ea::vector<Piece*> singlePiece;
-			singlePiece.push_back(piece->GetComponent<Piece>());
+			singlePiece.push_back(pieceNode->GetComponent<Piece>());
 
 
 
-			pieces.push_back(piece->GetComponent<Piece>());
+			pieces.push_back(pieceNode->GetComponent<Piece>());
 
 
-			prevPiece = piece;
+			prevPiece = pieceNode;
 		}
 
 		//PieceSolidificationGroup* group = scene_->GetComponent<PieceManager>()->AddPiecesToNewSolidGroup(pieces);

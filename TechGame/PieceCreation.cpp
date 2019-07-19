@@ -676,7 +676,45 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 			//body->SetUseInertiaHack(true);
 		}
 
+		if (name == "rod_round_1")
+		{
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/rod_round_1.mdl");
+			Vector3 offset(0, 0, 0);
 
+			//make shapes
+			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Cylinder>();
+			shape1->SetScaleFactor(Vector3(0.5, 0.5, 0.5)*scaleFactor);
+
+			//shape1->SetRadius(0.25*scaleFactor);
+			//shape1->SetLength(4 * scaleFactor);
+
+			shape1->SetRotationOffset(Quaternion(90, Vector3(0, 1, 0)));
+
+			PiecePointRow* pointRow = root->CreateComponent<PiecePointRow>();
+
+			for (int p = 0; p < 2; p++)
+			{
+				Node* point = root->CreateChild();
+				point->SetPosition(Vector3(0, 0, (p*0.5f - 0.5*0.5f)*scaleFactor));
+				PiecePoint* piecePoint = point->CreateComponent<PiecePoint>();
+
+				pointRow->PushBack(piecePoint);
+
+
+
+				if (p == 0 || p == 1)
+					piecePoint->isEndCap_ = true;
+
+			}
+			pointRow->Finalize();
+			pointRow->SetRowType(PiecePointRow::RowType_RodRound);
+
+			//body->SetUseInertiaHack(true);
+
+			staticMdl->SetModel(pieceModel);
+
+
+		}
 
 
 		if (name == "rod_round_4")
@@ -691,6 +729,8 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 			//shape1->SetRadius(0.25*scaleFactor);
 			//shape1->SetLength(4 * scaleFactor);
 
+			float length = 4.0f;
+
 			shape1->SetRotationOffset(Quaternion(90, Vector3(0, 1, 0)));
 
 			PiecePointRow* pointRow = root->CreateComponent<PiecePointRow>();
@@ -698,7 +738,7 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 			for (int p = 0; p < 8; p++)
 			{
 				Node* point = root->CreateChild();
-				point->SetPosition(Vector3(0, 0, (p*0.5f - 3.5*0.5f)*scaleFactor));
+				point->SetPosition(Vector3(0, 0, (p*0.5f - (length - 0.5)*0.5f)*scaleFactor));
 				PiecePoint* piecePoint = point->CreateComponent<PiecePoint>();
 				
 				pointRow->PushBack(piecePoint);
@@ -795,7 +835,7 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 
 
 	
-	root->GetComponent<Piece>()->SetPrimaryColor(Color(Random(), Random(), Random()));
+
 
 
 	return root;
