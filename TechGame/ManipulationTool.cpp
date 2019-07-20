@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "PieceAttachmentStager.h"
 #include "MathExtras.h"
+#include "PieceGear.h"
 
 
 ManipulationTool::ManipulationTool(Context* context) : Tool(context)
@@ -69,6 +70,12 @@ bool ManipulationTool::Gather(bool grabOne)
 	//apply ghosting effect to contraption
 	for (Piece* pc : allGatherPieces_) {
 		pc->SetGhostingEffect(true);
+		
+		if (pc->GetNode()->HasComponent<PieceGear>()) {
+			pc->GetNode()->GetComponent<PieceGear>()->SetEnabled(false);
+
+		}
+
 	}
 
 
@@ -154,6 +161,11 @@ void ManipulationTool::drop(bool freeze, bool hadAttachement)
 		gatheredPiece->GetEffectiveRigidBody()->SetNoCollideOverride(false);
 		gatheredPiece->SetGhostingEffect(false);
 		gatheredPiece->GetRigidBody()->SetMassScale(1.0f*float(!freeze));
+
+
+		if (gatheredPiece->GetNode()->HasComponent<PieceGear>()) {
+			gatheredPiece->GetNode()->GetComponent<PieceGear>()->SetEnabled(true);
+		}
 	}
 
 	if (!kinamaticConstriant_.Expired()) {
@@ -454,10 +466,10 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 		updateKinematicsControllerPos(false);
 		
-
-		kinamaticConstriant_->SetOtherWorldPosition(constraintPosition);
-		kinamaticConstriant_->SetOtherWorldRotation(constraintOrientation);
-
+		if (!kinamaticConstriant_.Expired()) {
+			kinamaticConstriant_->SetOtherWorldPosition(constraintPosition);
+			kinamaticConstriant_->SetOtherWorldRotation(constraintOrientation);
+		}
 
 
 		//reset all recent colored indicators

@@ -24,10 +24,10 @@ public:
 	};
 
 	struct RowAttachement {
-		WeakPtr<PiecePoint> pointA_;
-		WeakPtr<PiecePoint> pointB ;
-		WeakPtr<PiecePointRow> rowA_ ;
-		WeakPtr<PiecePointRow> rowB_ ;
+		WeakPtr<PiecePoint> pointOther_;
+		WeakPtr<PiecePoint> point ;
+		WeakPtr<PiecePointRow> rowOther_ ;
+		WeakPtr<PiecePointRow> row_ ;
 		WeakPtr<NewtonConstraint> constraint_ ;
 	};
 
@@ -42,7 +42,7 @@ public:
 	static bool RowsAttachCompatable(PiecePointRow* rowA, PiecePointRow* rowB);
 
 	//attach 2 rows together.  Must be in setup in world configuration first.
-	static bool AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePoint* pointA, PiecePoint* pointB, bool attachAsFullRow = false);
+	static bool AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePoint* pointA, PiecePoint* pointB, bool attachAsFullRow = false, bool updateOptimizations = true);
 
 	static bool RowsHaveDegreeOfFreedom(PiecePointRow* rowA, PiecePointRow* rowB);
 

@@ -16,9 +16,11 @@ void PieceGear::RegisterObject(Context* context)
 
 void PieceGear::HandleUpdate(StringHash event, VariantMap& eventData)
 {
+
+
+
 	refreshCounter_--;
 	if (refreshCounter_ <= 0) {
-
 
 		ReEvalConstraints();
 
@@ -59,21 +61,34 @@ void PieceGear::ReEvalConstraints()
 		//search for existing constraint
 		bool constraintAlreadyExists = false;
 		NewtonGearConstraint* constraintOfInterest = nullptr;
+
+
+
 		for (NewtonGearConstraint* gr : ownGearConstraints) {
 			if (gr->GetOtherBody(false) == otherGear->node_->GetComponent<Piece>()->GetRigidBody()) {
 				constraintAlreadyExists = true;
 				constraintOfInterest = gr;
+				break;
 			}
 		}
 
-		ea::vector<NewtonGearConstraint*> otherGearConstraints;
-		otherGear->node_->GetComponents<NewtonGearConstraint>(otherGearConstraints);
-		for (NewtonGearConstraint* otherGrCnstraint : otherGearConstraints) {
-			if (otherGrCnstraint->GetOtherBody(false) == node_->GetComponent<Piece>()->GetRigidBody()) {
-				constraintAlreadyExists = true;
-				constraintOfInterest = otherGrCnstraint;
+		if (!constraintAlreadyExists) {
+
+			//continue searching on other gears.
+			ea::vector<NewtonGearConstraint*> otherGearConstraints;
+			otherGear->node_->GetComponents<NewtonGearConstraint>(otherGearConstraints);
+			for (NewtonGearConstraint* otherGrCnstraint : otherGearConstraints) {
+				if (otherGrCnstraint->GetOtherBody(false) == node_->GetComponent<Piece>()->GetRigidBody()) {
+					constraintAlreadyExists = true;
+					constraintOfInterest = otherGrCnstraint;
+					break;
+				}
 			}
 		}
+
+		//At this point we know if there is a connection or not.
+
+
 
 		const float epsilon = 0.05f;
 		bool alignmentCheck = true;
@@ -108,57 +123,53 @@ void PieceGear::ReEvalConstraints()
 		//URHO3D_LOGINFO(ea::to_string(alignmentCheck));
 		
 
-		if (alignmentCheck) {
+		if (!constraintAlreadyExists && alignmentCheck && IsEnabledEffective()) {
+			URHO3D_LOGINFO("building gear link...");
+			NewtonGearConstraint* constraint = node_->CreateComponent<NewtonGearConstraint>();
 
-			if (!constraintAlreadyExists) {
-				URHO3D_LOGINFO("building gear link...");
-				NewtonGearConstraint* constraint = node_->CreateComponent<NewtonGearConstraint>();
-				
-				constraint->SetOtherBody(otherGear->node_->GetComponent<Piece>()->GetRigidBody());
-				constraint->SetOwnPosition(Vector3::ZERO);
-				constraint->SetOwnRotation(Quaternion(0, 90, 0));
+			constraint->SetOtherBody(otherGear->node_->GetComponent<Piece>()->GetRigidBody());
+			constraint->SetOwnPosition(Vector3::ZERO);
 
-				constraint->SetOtherRotation(Quaternion(0, 90, 0));
+			Vector3 dir1 = GetNormal();
+			Vector3 dir2 = otherGear->GetNormal();
+
+			
+			Quaternion localRotOwn;
+			localRotOwn.FromRotationTo(Vector3::RIGHT, dir1);
+			Quaternion localRotOther;
+			localRotOther.FromRotationTo(Vector3::RIGHT, dir2);
+
+			constraint->SetOwnRotation(localRotOwn);
+			constraint->SetOtherRotation(localRotOther);
 
 
-				Vector3 dir1 = GetWorldNormal();
-				Vector3 dir2 = otherGear->GetWorldNormal();
-				
-				
-				float ratio = (radius_) / (otherGear->radius_);
-				
-				//URHO3D_LOGINFO(ea::to_string(dir1.Angle(dir2)));
-				if (Abs(dir1.Angle(dir2)) > 170.0f)
-				{
-					//URHO3D_LOGINFO("gear orientations opposite - using inverse ratio..");
-					constraint->SetGearRatio(-ratio);
-				}
-				else
-				{
-					constraint->SetGearRatio(ratio);
-				}
+			
 
-			}
-		}
-		else
-		{
-			if (constraintAlreadyExists)
+
+			float ratio = (radius_) / (otherGear->radius_);
+			URHO3D_LOGINFO("Gear Ratio: " + ea::to_string(ratio));
+
+			//URHO3D_LOGINFO(ea::to_string(dir1.Angle(dir2)));
+			if (Abs(dir1.Angle(dir2)) > 170.0f)
 			{
-				URHO3D_LOGINFO("removing gear link.. distanceCheck: " + ea::to_string(distanceCheck) 
-					+ " angleCheck: " + ea::to_string(angleCheck) + " angle: " + ea::to_string(angle));
-				node_->RemoveComponent(constraintOfInterest);
+				//URHO3D_LOGINFO("gear orientations opposite - using inverse ratio..");
+				constraint->SetGearRatio(-ratio);
 			}
-
-
+			else
+			{
+				constraint->SetGearRatio(ratio);
+			}
 		}
+		else if (constraintAlreadyExists && (!alignmentCheck || !IsEnabledEffective()))
+		{
+			URHO3D_LOGINFO("removing gear link.. distanceCheck: " + ea::to_string(distanceCheck)
+				+ " angleCheck: " + ea::to_string(angleCheck) + " angle: " + ea::to_string(angle));
 
+			//remove the constraint from either this gear or the other gear, whichever was found in the search.
+			constraintOfInterest->Remove();
+		}
 	}
 
-
-
-
-
-	//URHO3D_LOGINFO("found " + ea::to_string(proximityPieceGears.size()) + " piece gears in proximity");
 }
 
 void PieceGear::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
@@ -169,6 +180,19 @@ void PieceGear::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 
 
 
+}
+
+void PieceGear::OnSetEnabled()
+{
+	if (IsEnabledEffective()) {
+		URHO3D_LOGINFO("gear enabled");
+	}
+	else
+	{
+		URHO3D_LOGINFO("gear disabled");
+	}
+
+	ReEvalConstraints();
 }
 
 void PieceGear::OnNodeSet(Node* node)

@@ -163,7 +163,7 @@ Urho3D::Vector3 PiecePointRow::GetWorldCenter()
 bool PiecePointRow::AttachedToRow(PiecePointRow* row)
 {
 	for (int i = 0; i < rowAttachements_.size(); i++) {
-		if (rowAttachements_[i].rowA_ == row)
+		if (rowAttachements_[i].rowOther_ == row)
 			return true;
 	}
 	return false;
@@ -172,7 +172,7 @@ bool PiecePointRow::AttachedToRow(PiecePointRow* row)
 void PiecePointRow::GetAttachedRows(ea::vector<PiecePointRow*>& rows)
 {
 	for (int i = 0; i < rowAttachements_.size(); i++) {
-		rows.push_back(rowAttachements_[i].rowA_);
+		rows.push_back(rowAttachements_[i].rowOther_);
 	}
 }
 
@@ -182,7 +182,7 @@ bool PiecePointRow::DetachFrom(PiecePointRow* otherRow, bool updateOccupiedPoint
 	bool detached = false;
 	for (int i = 0; i < rowAttachements_.size(); i++) {
 		
-		if (rowAttachements_[i].rowA_ == otherRow)
+		if (rowAttachements_[i].rowOther_ == otherRow)
 		{
 			if (!rowAttachements_[i].constraint_.Expired())
 			{
@@ -195,7 +195,7 @@ bool PiecePointRow::DetachFrom(PiecePointRow* otherRow, bool updateOccupiedPoint
 	}
 	for (int i = 0; i < otherRow->rowAttachements_.size(); i++) {
 
-		if (otherRow->rowAttachements_[i].rowA_ == this)
+		if (otherRow->rowAttachements_[i].rowOther_ == this)
 		{
 			otherRow->rowAttachements_.erase_at(i);
 			detached = true;
@@ -219,7 +219,7 @@ bool PiecePointRow::DetachAll()
 {
 	ea::vector<RowAttachement> rowAttachementsCopy = rowAttachements_;
 	for (int i = 0; i < rowAttachementsCopy.size(); i++) {
-		DetachFrom(rowAttachementsCopy[i].rowA_, true);
+		DetachFrom(rowAttachementsCopy[i].rowOther_, true);
 	}
 
 	rowAttachements_.clear();
@@ -227,7 +227,7 @@ bool PiecePointRow::DetachAll()
 	return true;
 }
 
-bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePoint* pointA, PiecePoint* pointB, bool attachAsFullRow)
+bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePoint* pointA, PiecePoint* pointB, bool attachAsFullRow /*= false*/, bool updateOptimizations /*= true*/)
 {
 	
 	if (!PiecePointRow::RowsAttachCompatable(rowA, rowB)) {
@@ -360,6 +360,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			{
 				constraint = holeBody->GetNode()->CreateComponent<NewtonHingeConstraint>();
 				static_cast<NewtonHingeConstraint*>(constraint)->SetEnableLimits(false);
+				static_cast<NewtonHingeConstraint*>(constraint)->SetFriction(0.0f);
 			}
 
 				//compute slide limits
@@ -466,24 +467,31 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 
 		RowAttachement attachment;
-		attachment.pointA_ = pointA;
-		attachment.pointB = pointB;
-		attachment.rowA_ = theHoleRow;
-		attachment.rowB_ = theRodRow;
+		attachment.pointOther_ = pointB;
+		attachment.point = pointA;
+		attachment.rowOther_ = rowB;
+		attachment.row_ = rowA;
 		attachment.constraint_ = constraint;
 
-		theRodRow->rowAttachements_.push_back(attachment);
-		attachment.rowA_ = theRodRow;
-		attachment.rowB_ = theHoleRow;
-		attachment.pointA_ = pointB;
-		attachment.pointB = pointA;
-		theHoleRow->rowAttachements_.push_back(attachment);
+		rowA->rowAttachements_.push_back(attachment);
+
+		attachment.pointOther_ = pointA;
+		attachment.point = pointB;
+		attachment.rowOther_ = rowA;
+		attachment.row_ = rowB;
+		attachment.constraint_ = constraint;
+
+		rowB->rowAttachements_.push_back(attachment);
+
+
 
 		rowA->UpdatePointOccupancies();
 		rowB->UpdatePointOccupancies();
-		UpdateOptimizeFullRow(rowA);
-		UpdateOptimizeFullRow(rowB);
 
+		if (updateOptimizations) {
+			UpdateOptimizeFullRow(rowA);
+			UpdateOptimizeFullRow(rowB);
+		}
 		URHO3D_LOGINFO("row attached");
 		return true;
 
@@ -548,31 +556,28 @@ bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)
 			for (RowAttachement attachment : row->rowAttachements_)
 			{
 
-				if (attachment.rowB_->GetGeneralRowType() != RowTypeGeneral_Hole)
-					continue;
-
 				float curSliderPos = static_cast<NewtonSliderConstraint*>(attachment.constraint_.Get())->GetSliderPosition();
 
 				curSliderPos = RoundToNearestMultiple(curSliderPos, pieceManager->RowPointDistance());
 
-				row->DetachFrom(attachment.rowB_, false);
-				AttachRows(row, attachment.rowB_, attachment.pointB, attachment.pointA_, true);
+				row->DetachFrom(attachment.rowOther_, false);
+				AttachRows(row, attachment.rowOther_, attachment.point, attachment.pointOther_, true, false);
 
 
 				bool allPlaner = true;
 				for (RowAttachement attachment2 : row->rowAttachements_)
 				{
-					allPlaner &= attachment2.rowA_->GetIsPiecePlaner();
+					allPlaner &= attachment2.rowOther_->GetIsPiecePlaner();
 				}
 
 				//if all pieces are planer - disable collisions between them.
 				if (allPlaner) {
+					URHO3D_LOGINFO("all pieces planer, disabling collisions.");
 					for (RowAttachement attachment2 : row->rowAttachements_)
 					{
-						attachment.rowA_->GetPiece()->GetRigidBody()->SetCollisionOverride(attachment2.rowA_->GetPiece()->GetRigidBody(), false);
+						attachment.rowOther_->GetPiece()->GetRigidBody()->SetCollisionOverride(attachment2.row_->GetPiece()->GetRigidBody(), false);
 					}
 				}
-
 			}
 
 			row->isOccupiedOptimized_ = true;
@@ -582,20 +587,20 @@ bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)
 			URHO3D_LOGINFO("Un Optimizing Rod..");
 			for (RowAttachement attachment : row->rowAttachements_)
 			{
-				if (attachment.rowA_->GetGeneralRowType() != RowTypeGeneral_Hole)
-					continue;
 
 
 				for (RowAttachement attachment2 : row->rowAttachements_)
 				{
-					if (attachment.rowA_->GetGeneralRowType() != RowTypeGeneral_Hole)
-						continue;
-
-					row->DetachFrom(attachment.rowB_, false);
-					AttachRows(row, attachment.rowB_, attachment.pointB, attachment.pointA_);
+					attachment.rowOther_->GetPiece()->GetRigidBody()->RemoveCollisionOverride(attachment2.row_->GetPiece()->GetRigidBody());
 
 
-					attachment.rowA_->GetPiece()->GetRigidBody()->RemoveCollisionOverride(attachment2.rowA_->GetPiece()->GetRigidBody());
+					row->DetachFrom(attachment.rowOther_, false);
+
+
+					AttachRows(row, attachment.rowOther_, attachment.point, attachment.pointOther_, false, false);
+
+
+					
 				}
 
 
@@ -617,6 +622,7 @@ void PiecePointRow::HandleUpdate(StringHash event, VariantMap& eventData)
 {
 
 	UpdatePointOccupancies();
+	UpdateDynamicDettachement();
 	return;
 }
 
@@ -642,7 +648,7 @@ void PiecePointRow::UpdatePointOccupancies()
 	ea::vector<PiecePoint*> otherPoints;
 	for (RowAttachement& row : rowAttachements_)
 	{
-		otherPoints.push_back(row.rowA_->points_);	
+		otherPoints.push_back(row.rowOther_->points_);	
 	}
 
 	int numPointsOccupied = 0;

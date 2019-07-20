@@ -35,6 +35,9 @@ public:
 	virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
 
 
+
+	virtual void OnSetEnabled() override;
+
 protected:
 
 	int refreshCounter_ = PIECEGEAR_REFRESH_CNT;
