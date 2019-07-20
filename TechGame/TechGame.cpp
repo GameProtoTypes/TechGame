@@ -475,7 +475,7 @@ void TechGame::CreateScene()
 		Node* prevPiece = nullptr;
 
 		ea::vector<Piece*> pieces;
-		int numDiffPieces = 18;
+		int numDiffPieces = 19;
 		for (int y = 0; y < numDiffPieces*20; y += 1) {
 
 			Node* pieceNode;
@@ -516,6 +516,8 @@ void TechGame::CreateScene()
 			else if (rnd == 16)
 				pieceNode = CreatePiece(scene_, "gear_small", false);
 			else if (rnd == 17)
+				pieceNode = CreatePiece(scene_, "gear_extra_large", false);
+			else if (rnd == 18)
 				pieceNode = CreatePiece(scene_, "rod_round_1", false);
 
 

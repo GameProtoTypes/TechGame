@@ -75,34 +75,38 @@ void PieceGear::ReEvalConstraints()
 			}
 		}
 
-		const float epsilon = 0.01f;
+		const float epsilon = 0.05f;
 		bool alignmentCheck = true;
 
 		//gears must be correct distance apart
-		alignmentCheck &= (delta.Length() <= connectionDist + epsilon && delta.Length() >= connectionDist - epsilon);
+
+		bool distanceCheck = (delta.Length() <= connectionDist + epsilon && delta.Length() >= connectionDist - epsilon);
+		alignmentCheck &= distanceCheck;
+		
 		//URHO3D_LOGINFO(ea::to_string(alignmentCheck));
 		
 		
-		alignmentCheck &= (delta.Normalized().CrossProduct(GetWorldNormal()).Length() >= (1.0f - epsilon));
+		//alignmentCheck &= (delta.Normalized().CrossProduct(GetWorldNormal()).Length() >= (1.0f - epsilon));
 		
 
 
 
 		
 		//gears must also have the correct angle with each other
-		if (alignmentCheck) {
 			//URHO3D_LOGINFO(ea::to_string(alignmentCheck));
-			float angle = GetWorldNormal().Angle(otherGear->GetWorldNormal());
+		float angle = GetWorldNormal().Angle(otherGear->GetWorldNormal());
 
-			while (angle >= 90)
-				angle -= 180;
-			while (angle <= -90)
-				angle += 180;
+		while (angle >= 90)
+			angle -= 180;
+		while (angle <= -90)
+			angle += 180;
 
-			//URHO3D_LOGINFO(ea::to_string(angle));
-			alignmentCheck &= (Abs<float>(angle) < 1.0f);
-			//URHO3D_LOGINFO(ea::to_string(alignmentCheck));
-		}
+		//URHO3D_LOGINFO(ea::to_string(angle));
+		bool angleCheck = (Abs<float>(angle) < 10.0f);
+		alignmentCheck &= angleCheck;
+
+		//URHO3D_LOGINFO(ea::to_string(alignmentCheck));
+		
 
 		if (alignmentCheck) {
 
@@ -140,7 +144,8 @@ void PieceGear::ReEvalConstraints()
 		{
 			if (constraintAlreadyExists)
 			{
-				URHO3D_LOGINFO("removing gear link..");
+				URHO3D_LOGINFO("removing gear link.. distanceCheck: " + ea::to_string(distanceCheck) 
+					+ " angleCheck: " + ea::to_string(angleCheck) + " angle: " + ea::to_string(angle));
 				node_->RemoveComponent(constraintOfInterest);
 			}
 

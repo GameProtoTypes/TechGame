@@ -241,6 +241,98 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 			staticMdl->SetModel(pieceModel);
 		}
 
+		if (name == "gear_extra_large") {
+
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/gear_extra_large.mdl");
+			Vector3 offset(0, 0, 0);
+
+
+			const float thickness = 0.5f;
+
+			//make shapes
+			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Cylinder>();
+			shape1->SetLength(thickness*scaleFactor);
+			shape1->SetRadius(2.0f*scaleFactor);
+			shape1->SetRotationOffset(Quaternion(0, 90, 0));
+			shape1->SetPositionOffset((Vector3(0, 0, 0) + offset)*scaleFactor);
+
+
+			//make hole nodes.
+			Node* prevHole = nullptr;
+
+			Node* holeCenter = root->CreateChild();
+			holeCenter->SetPosition(Vector3(0, 0, 0)*scaleFactor);
+			PiecePointRow* rowCenter = root->CreateComponent<PiecePointRow>();
+			PiecePoint* pointCenter = holeCenter->CreateComponent<PiecePoint>();
+			pointCenter->direction_ = -Vector3::FORWARD;
+
+
+			
+
+			Node* hole0 = root->CreateChild();
+			hole0->SetPosition(Vector3(-1, 0.0, 0.0)*scaleFactor);
+			PiecePointRow* row0 = root->CreateComponent<PiecePointRow>();
+			PiecePoint* point0 = hole0->CreateComponent<PiecePoint>();
+			point0->direction_ = -Vector3::FORWARD;
+
+			Node* hole1 = root->CreateChild();
+			hole1->SetPosition(Vector3(1, 0, 0)*scaleFactor);
+			PiecePointRow* row1 = root->CreateComponent<PiecePointRow>();
+			PiecePoint* point1 = hole1->CreateComponent<PiecePoint>();
+			point1->direction_ = -Vector3::FORWARD;
+
+			Node* hole2 = root->CreateChild();
+			hole2->SetPosition(Vector3(0, 1, 0)*scaleFactor);
+			PiecePointRow* row2 = root->CreateComponent<PiecePointRow>();
+			PiecePoint* point2 = hole2->CreateComponent<PiecePoint>();
+			point2->direction_ = -Vector3::FORWARD;
+
+			Node* hole3 = root->CreateChild();
+			hole3->SetPosition(Vector3(0, -1, 0)*scaleFactor);
+			PiecePointRow* row3 = root->CreateComponent<PiecePointRow>();
+			PiecePoint* point3 = hole3->CreateComponent<PiecePoint>();
+			point3->direction_ = -Vector3::FORWARD;
+
+
+
+			rowCenter->PushBack(pointCenter);
+			row0->PushBack(point0);
+			row1->PushBack(point1);
+			row2->PushBack(point2);
+			row3->PushBack(point3);
+
+			rowCenter->SetRowType(PiecePointRow::RowType_Hole);
+			rowCenter->SetRowDirectionLocal(Vector3(0, 0, 1));
+			rowCenter->Finalize();
+
+
+			row0->SetRowType(PiecePointRow::RowType_Hole);
+			row0->SetRowDirectionLocal(Vector3(0, 0, 1));
+			row0->Finalize();
+
+			row1->SetRowType(PiecePointRow::RowType_Hole);
+			row1->SetRowDirectionLocal(Vector3(0, 0, 1));
+			row1->Finalize();
+
+			row2->SetRowType(PiecePointRow::RowType_Hole);
+			row2->SetRowDirectionLocal(Vector3(0, 0, 1));
+			row2->Finalize();
+
+			row3->SetRowType(PiecePointRow::RowType_Hole);
+			row3->SetRowDirectionLocal(Vector3(0, 0, 1));
+			row3->Finalize();
+
+			//add gear component
+			PieceGear* gear = root->CreateComponent<PieceGear>();
+			gear->SetRadius(2.0f * scaleFactor);
+
+			staticMdl->SetModel(pieceModel);
+		}
+
+
+
+
+
 		if (name == "gear_medium") {
 
 			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/gear_medium.mdl");
