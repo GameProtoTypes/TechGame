@@ -48,9 +48,14 @@ protected:
 	/// Scene.
 	SharedPtr<Scene> scene_;
 	/// Camera scene node.
-	SharedPtr<Node> cameraNode_;
+	SharedPtr<Node> lookNode_;
 	/// The controllable character component.
 	WeakPtr<Character> character_;
+
+
+	SharedPtr<Node> leftHandNode_;
+	SharedPtr<Node> rightHandNode_;
+
 
 	/// Camera yaw angle.
 	float yaw_ = 0.0f;

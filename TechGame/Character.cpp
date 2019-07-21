@@ -93,8 +93,8 @@ void Character::Update(float timeStep)
 	Quaternion headDir = rot * Quaternion(limitPitch, Vector3(1.0f, 0.0f, 0.0f));
 
 
-	cameraNode_->SetPosition(node_->GetWorldPosition() + Vector3(0, 0.7, 0) + rot * Vector3(0.0f, 0.15f, 0.2f));
-	cameraNode_->SetRotation(dir);
+	lookNode_->SetPosition(node_->GetWorldPosition() + Vector3(0, 0.7, 0) + rot * Vector3(0.0f, 0.15f, 0.2f));
+	lookNode_->SetRotation(dir);
 
 
 
@@ -104,9 +104,9 @@ void Character::Update(float timeStep)
 
 }
 
-void Character::SetCameraNode(Node* cameraNode)
+void Character::SetLookNode(Node* lookNode)
 {
-	cameraNode_ = cameraNode;
+	lookNode_ = lookNode;
 }
 
 void Character::HandleNodeCollision(StringHash eventType, VariantMap& eventData)
@@ -144,7 +144,7 @@ void Character::HandleNodeCollisionEnd(StringHash eventType, VariantMap& eventDa
 void Character::updatePhysics(float timeStep)
 {
 
-	if (cameraNode_ == nullptr)
+	if (lookNode_ == nullptr)
 		return;
 
 	/// \todo Could cache the components for faster access instead of finding them each frame
@@ -160,7 +160,7 @@ void Character::updatePhysics(float timeStep)
 	bool softGrounded = inAirTimer_ < INAIR_THRESHOLD_TIME;
 
 	// Update movement & animation
-	const Quaternion& rot = cameraNode_->GetWorldRotation();
+	const Quaternion& rot = lookNode_->GetWorldRotation();
 	Vector3 moveDir = Vector3::ZERO;
 	const Vector3& velocity = body->GetLinearVelocity();
 	// Velocity on the XZ plane

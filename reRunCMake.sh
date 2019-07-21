@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mkdir build
+mkdir -p build
 cd build 
 rm -f -r *
 
@@ -16,4 +16,5 @@ cmake .. -G "Visual Studio 15 2017 Win64" \
 -DURHO3D_NETWORK=OFF \
 -DURHO3D_PROFILING=OFF \
 -DNEWTON_WITH_AVX2_PLUGIN=ON \
--DNEWTON_DOUBLE_PRECISION=ON
+-DNEWTON_DOUBLE_PRECISION=ON \
+-DOPENVR_BUILD_SHARED=ON

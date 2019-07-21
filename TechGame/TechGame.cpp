@@ -19,6 +19,7 @@
 #include "Urho3D/SystemUI/Console.h"
 #include "Urho3D/SystemUI/DebugHud.h"
 #include "PieceGear.h"
+#include "VR.h"
 
 void TechGame::Setup()
 {
@@ -55,8 +56,7 @@ void TechGame::Start()
 	// Create the scene content
 	CreateScene();
 
-
-	CreateCharacter();
+	
 
 	CreateGameUI();
 
@@ -90,8 +90,8 @@ void TechGame::SpawnObject()
 
 	// Create a smaller box at camera position
 	Node* boxNode = scene_->CreateChild("SmallBox");
-	boxNode->SetPosition(cameraNode_->GetPosition());
-	boxNode->SetRotation(cameraNode_->GetRotation());
+	boxNode->SetPosition(lookNode_->GetPosition());
+	boxNode->SetRotation(lookNode_->GetRotation());
 	boxNode->SetScale(0.25f);
 	auto* boxObject = boxNode->CreateComponent<StaticModel>();
 	boxObject->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
@@ -110,7 +110,7 @@ void TechGame::SpawnObject()
 
 	// Set initial velocity for the NewtonRigidBody based on camera forward vector. Add also a slight up component
 	// to overcome gravity better
-	body->SetLinearVelocity(cameraNode_->GetRotation() * Vector3(0.0f, 0.25f, 1.0f) * OBJECT_VELOCITY);
+	body->SetLinearVelocity(lookNode_->GetRotation() * Vector3(0.0f, 0.25f, 1.0f) * OBJECT_VELOCITY);
 }
 
 void TechGame::CreateCharacter()
@@ -157,7 +157,7 @@ void TechGame::CreateCharacter()
 	// Remember it so that we can set the controls. Use a WeakPtr because the scene hierarchy already owns it
 	// and keeps it alive as long as it's not removed from the hierarchy
 	character_ = objectNode->CreateComponent<Character>();
-	character_->SetCameraNode(cameraNode_);
+	character_->SetLookNode(lookNode_);
 }
 
 
@@ -263,7 +263,7 @@ void TechGame::SetupViewport()
 	renderer->SetDefaultRenderPath(renderPath);
 
 	// Set up a viewport to the Renderer subsystem so that the 3D scene can be seen
-	SharedPtr<Viewport> viewport(new Viewport(context_, scene_, cameraNode_->GetComponent<Camera>()));
+	SharedPtr<Viewport> viewport(new Viewport(context_, scene_, lookNode_->GetComponent<Camera>()));
 	renderer->SetViewport(0, viewport);
 }
 
@@ -295,14 +295,14 @@ void TechGame::UpdateUIInput(float timestep)
 
 	if (input->GetMouseButtonPress(Urho3D::MOUSEB_LEFT)) {
 
-		if (cameraNode_->GetComponent<ManipulationTool>()->IsGathering())
+		if (rightHandNode_->GetComponent<ManipulationTool>()->IsGathering())
 		{
-			cameraNode_->GetComponent<ManipulationTool>()->UnGather(input->GetKeyDown(KEY_SHIFT));
+			rightHandNode_->GetComponent<ManipulationTool>()->UnGather(input->GetKeyDown(KEY_SHIFT));
 			crossHairElement_->SetVar("curMode", (int)CrossHairMode::CrossHairMode_Free);
 		}
 		else
 		{
-			bool gatherSuccess = cameraNode_->GetComponent<ManipulationTool>()->Gather(input->GetKeyDown(KEY_SHIFT));
+			bool gatherSuccess = rightHandNode_->GetComponent<ManipulationTool>()->Gather(input->GetKeyDown(KEY_SHIFT));
 			
 			if(gatherSuccess)
 				crossHairElement_->SetVar("curMode", (int)CrossHairMode::CrossHairMode_Busy);
@@ -311,22 +311,22 @@ void TechGame::UpdateUIInput(float timestep)
 
 	if (input->GetMouseButtonPress(Urho3D::MOUSEB_RIGHT))
 	{
-		cameraNode_->GetComponent<ManipulationTool>()->AimPointForce();
+		rightHandNode_->GetComponent<ManipulationTool>()->AimPointForce();
 	}
 
 	if (input->GetKeyPress(KEY_R)) {
-		cameraNode_->GetComponent<ManipulationTool>()->ResetGatherNodeRotation();
+		rightHandNode_->GetComponent<ManipulationTool>()->ResetGatherNodeRotation();
 	}
 
 	if (input->GetKeyPress(KEY_M)) {
 		//toggle move modes
-		ManipulationTool::MoveMode curMode = cameraNode_->GetComponent<ManipulationTool>()->GetMoveMode();
+		ManipulationTool::MoveMode curMode = rightHandNode_->GetComponent<ManipulationTool>()->GetMoveMode();
 		if (curMode == ManipulationTool::MoveMode_Camera)
 			curMode = ManipulationTool::MoveMode_Global;
 		else if (curMode == ManipulationTool::MoveMode_Global)
 			curMode = ManipulationTool::MoveMode_Camera;
 
-		cameraNode_->GetComponent<ManipulationTool>()->SetMoveMode(curMode);
+		rightHandNode_->GetComponent<ManipulationTool>()->SetMoveMode(curMode);
 	}
 
 
@@ -341,15 +341,15 @@ void TechGame::UpdateUIInput(float timestep)
 
 	if (input->GetKeyPress(KEY_G))
 	{
-		cameraNode_->GetComponent<ManipulationTool>()->ToggleUseGrid();
+		rightHandNode_->GetComponent<ManipulationTool>()->ToggleUseGrid();
 	}
 
 
 	int mouseWheelMove = input->GetMouseMoveWheel();
 	if (mouseWheelMove > 0)
-		cameraNode_->GetComponent<ManipulationTool>()->AdvanceGatherPoint(true);
+		rightHandNode_->GetComponent<ManipulationTool>()->AdvanceGatherPoint(true);
 	if(mouseWheelMove < 0)
-		cameraNode_->GetComponent<ManipulationTool>()->AdvanceGatherPoint(false);
+		lookNode_->GetComponent<ManipulationTool>()->AdvanceGatherPoint(false);
 
 
 
@@ -360,13 +360,13 @@ void TechGame::UpdateUIInput(float timestep)
 		rotationAxis = Vector3(0, 1, 0);
 
 	if (input->GetKeyPress(KEY_E))
-		cameraNode_->GetComponent<ManipulationTool>()->RotateGatherNode(Quaternion(-45, rotationAxis));
+		rightHandNode_->GetComponent<ManipulationTool>()->RotateGatherNode(Quaternion(-45, rotationAxis));
 	if (input->GetKeyPress(KEY_Q))
-		cameraNode_->GetComponent<ManipulationTool>()->RotateGatherNode(Quaternion(45, rotationAxis));
+		rightHandNode_->GetComponent<ManipulationTool>()->RotateGatherNode(Quaternion(45, rotationAxis));
 	
 	
 	if (input->GetKeyPress(KEY_TAB))
-		cameraNode_->GetComponent<ManipulationTool>()->RotateNextNearest();
+		rightHandNode_->GetComponent<ManipulationTool>()->RotateNextNearest();
 
 
 
@@ -380,17 +380,48 @@ void TechGame::CreateScene()
 {
 	auto* cache = GetSubsystem<ResourceCache>();
 
-	scene_ = new Scene(context_);
-	//scene_->SetTimeScale(0.1f);
-
-	scene_->CreateComponent<Octree>();
-	NewtonPhysicsWorld* physicsWorld = scene_->CreateComponent<NewtonPhysicsWorld>();
+	scene_ = new Scene(context_);	
 	scene_->CreateComponent<DebugRenderer>();
 	scene_->CreateComponent<PieceManager>();
 
+	scene_->CreateComponent<Octree>();
+	NewtonPhysicsWorld* physicsWorld = scene_->CreateComponent<NewtonPhysicsWorld>();	
+	physicsWorld->SetGravity(Vector3(0, -9.81, 0));
+	
+	
+
 	context_->RegisterSubsystem<VisualDebugger>();
 
-	physicsWorld->SetGravity(Vector3(0, -9.81, 0));
+
+
+
+	CreateCamera();
+
+	CreateCharacter();
+
+
+	context_->RegisterSubsystem(new VR(context_));
+	VR* vr = context_->GetSubsystem<VR>();
+	bool vrInitialized = vr->InitializeVR(character_->GetNode());
+
+	if (vrInitialized) {
+
+		leftHandNode_ = vr->leftHandNode_->CreateChild();
+		rightHandNode_ = vr->rightHandNode_->CreateChild();
+	}
+	else
+	{
+		leftHandNode_ = lookNode_->CreateChild();
+		rightHandNode_ = lookNode_->CreateChild();
+	}
+
+	ManipulationTool* manipTool = rightHandNode_->CreateComponent<ManipulationTool>();
+	manipTool->SetVRHandMode(vrInitialized);
+	if (vrInitialized) {
+		manipTool->SetMoveMode(ManipulationTool::MoveMode_VR);
+	}
+
+
 
 
 	Node* zoneNode = scene_->CreateChild("Zone");
@@ -525,8 +556,8 @@ void TechGame::CreateScene()
 			pieceNode->SetWorldPosition(Vector3(Random(-10,10), y * .05, Random(-10,10)));
 
 			Color color;
-			float colorBaseHue = Color::GREEN.Hue();
-			float colorRange = 0.0f;
+			float colorBaseHue = Color::BLUE.Hue();
+			float colorRange = 1.0f;
 			color.FromHSL(Wrap<float>(colorBaseHue + Random(-0.5f ,0.5f)*colorRange, 0.0f, 1.0f), 0.3f, 0.5f + Random(-0.4f, 0.0f));
 			
 
@@ -551,7 +582,9 @@ void TechGame::CreateScene()
 
 	}
 
-	CreateCamera();
+
+
+
 
 }
 
@@ -559,12 +592,12 @@ void TechGame::CreateCamera()
 {
 	// Create the camera. Set far clip to match the fog. Note: now we actually create the camera node outside the scene, because
 	// we want it to be unaffected by scene load / save
-	cameraNode_ = scene_->CreateChild();
-	cameraNode_->SetTemporary(true);
-	auto* camera = cameraNode_->CreateComponent<Camera>();
+	lookNode_ = scene_->CreateChild();
+	lookNode_->SetTemporary(true);
+	auto* camera = lookNode_->CreateComponent<Camera>();
 	camera->SetFarClip(500.0f);
 
-	SoundListener* soundListener = cameraNode_->CreateComponent<SoundListener>();
+	SoundListener* soundListener = lookNode_->CreateComponent<SoundListener>();
 
 	// Get a pointer to the Audio subsystem.
 	Audio *audio_subsys = GetSubsystem<Audio>();
@@ -572,10 +605,12 @@ void TechGame::CreateCamera()
 	// Set the listener for that audio subsystem
 	audio_subsys->SetListener(soundListener);
 
-	ManipulationTool* manipTool = cameraNode_->CreateComponent<ManipulationTool>();
+
+
+
 
 	// Set an initial position for the camera scene node above the floor
-	cameraNode_->SetPosition(Vector3(0.0f, 5.0f, -20.0f));
+	lookNode_->SetPosition(Vector3(0.0f, 5.0f, -20.0f));
 }
 
 void TechGame::HandleUpdate(StringHash eventType, VariantMap& eventData)
@@ -731,7 +766,7 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 		if (ui::Button("Form PieceSolidificationGroup"))
 		{
 			Vector3 worldPos;
-			Piece* piece = scene_->GetComponent<PieceManager>()->GetClosestAimPiece(worldPos, cameraNode_->GetComponent<Camera>());
+			Piece* piece = scene_->GetComponent<PieceManager>()->GetClosestAimPiece(worldPos, lookNode_);
 			if (piece) {
 
 				URHO3D_LOGINFO("FORMING MANUAL GROUP...");
@@ -741,7 +776,7 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 		if (ui::Button("Remove PieceSolidificationGroup"))
 		{
 			Vector3 worldPos;
-			Piece* piece = scene_->GetComponent<PieceManager>()->GetClosestAimPiece(worldPos, cameraNode_->GetComponent<Camera>());
+			Piece* piece = scene_->GetComponent<PieceManager>()->GetClosestAimPiece(worldPos, lookNode_);
 			if (piece) {
 				scene_->GetComponent<PieceManager>()->RemoveSolidGroup(piece->GetPieceGroup());
 			}
@@ -758,7 +793,7 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 
 		ui::Begin("Stats");
 
-		ui::Text(("Camera Position: " + cameraNode_->GetWorldPosition().ToString()).c_str());
+		ui::Text(("Camera Position: " + lookNode_->GetWorldPosition().ToString()).c_str());
 
 		ui::End();
 

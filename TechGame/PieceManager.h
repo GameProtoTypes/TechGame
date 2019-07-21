@@ -65,9 +65,9 @@ public:
 
 	void GetPointsInRadius(ea::vector<PiecePoint*>& pieces, Vector3 worldPosition, float radius);
 
-	Piece* GetClosestAimPiece(Vector3& worldPos, Camera* camera);
+	Piece* GetClosestAimPiece(Vector3& worldPos, Node* lookNode);
 
-	PiecePoint* GetClosestAimPiecePoint(Camera* camera);
+	PiecePoint* GetClosestAimPiecePoint(Node* lookNode);
 	///given inPieces - returns a list of possible connection pieces using radius searches around each point.  outPieces should contain no duplicates and contain no points from inPieces.
 	void GetPointsAroundPoints(ea::vector<PiecePoint*>& inPieces, ea::vector<PiecePoint*>& outPieces, float radius);
 

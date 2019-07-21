@@ -22,6 +22,15 @@ public:
 		context->RegisterFactory<Tool>();
 	}
 
+
+	void SetVRHandMode(bool enable) { vrHandMode_ = enable; }
+	bool GetVRHandMode() const { return vrHandMode_;  }
+
+
+protected:
+
+	bool vrHandMode_ = false;
+
 };
 
 
@@ -36,7 +45,8 @@ public:
 
 	enum MoveMode {
 		MoveMode_Global = 0,
-		MoveMode_Camera = 1
+		MoveMode_Camera = 1,
+		MoveMode_VR = 2
 	};
 
 
@@ -52,7 +62,7 @@ public:
 	}
 	void ResetGatherNodeRotation()
 	{
-		if (MoveMode_Camera)
+		if (MoveMode_Camera || MoveMode_VR)
 			gatherNode_->SetRotation(Quaternion::IDENTITY);
 		else if(MoveMode_Global)
 			gatherNode_->SetWorldRotation(Quaternion::IDENTITY);

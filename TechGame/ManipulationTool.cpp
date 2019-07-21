@@ -23,7 +23,18 @@ bool ManipulationTool::Gather(bool grabOne)
 	URHO3D_LOGINFO("Gathering:");
 
 	//Get the PiecePoint we are aiming at, else return.
-	PiecePoint* piecePoint = pieceManager_->GetClosestAimPiecePoint(node_->GetComponent<Camera>());
+	PiecePoint* piecePoint = nullptr;
+	if (!vrHandMode_) {
+		piecePoint = pieceManager_->GetClosestAimPiecePoint(node_);
+	}
+	else
+	{
+		ea::vector<Piece*> blacklist;
+		piecePoint = pieceManager_->GetClosestGlobalPiecePoint(node_->GetWorldPosition(), blacklist, 0.01f, 1);
+	}
+
+
+
 
 	if (!piecePoint)
 		return false;
@@ -264,12 +275,14 @@ void ManipulationTool::ToggleUseGrid()
 void ManipulationTool::SetMoveMode(MoveMode mode)
 {
 		moveMode_ = mode;
-		if (mode == MoveMode_Camera)
+		if (mode == MoveMode_Camera || mode == MoveMode_VR)
 		{
 			//set gather node to child and in front of tool
 			gatherNode_->SetParent(node_);
 			gatherNode_->SetTransform(Matrix3x4::IDENTITY);
-			gatherNode_->Translate(gatherNodeRefOffset_);
+			if (mode == MoveMode_Camera) {
+				gatherNode_->Translate(gatherNodeRefOffset_);
+			}
 		}
 		if (mode == MoveMode_Global)
 		{
@@ -290,7 +303,7 @@ ManipulationTool::MoveMode ManipulationTool::GetMoveMode()
 void ManipulationTool::AimPointForce()
 {
 	//Get the PiecePoint we are aiming at, else return.
-	PiecePoint* piecePoint = pieceManager_->GetClosestAimPiecePoint(node_->GetComponent<Camera>());
+	PiecePoint* piecePoint = pieceManager_->GetClosestAimPiecePoint(node_);
 
 	if (!piecePoint) {
 		return;
@@ -435,6 +448,10 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 		{
 			gatherNode_->SetPosition(gatherNodeRefOffset_);
 		}
+
+
+	}
+	else if (moveMode_ == MoveMode_VR) {
 
 
 	}

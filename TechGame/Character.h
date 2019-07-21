@@ -40,7 +40,7 @@ public:
 
 	void Update(float timeStep) override;
 
-	void SetCameraNode(Node* cameraNode);
+	void SetLookNode(Node* lookNode);
 
 	/// Movement controls. Assigned by the main program each frame.
 	Controls controls_;
@@ -60,6 +60,9 @@ private:
 	/// In air timer. Due to possible physics inaccuracy, character can be off ground for max. 1/10 second and still be allowed to move.
 	float inAirTimer_;
 
-	/// camera
-	WeakPtr<Node> cameraNode_;
+	/// look node (gets rotated by mouse)
+	WeakPtr<Node> lookNode_;
+
+
+
 };

@@ -163,11 +163,11 @@ void PieceManager::GetPointsInRadius(ea::vector<PiecePoint*>& points, Vector3 wo
 }
 
 
-Piece* PieceManager::GetClosestAimPiece(Vector3& worldPos, Camera* camera)
+Piece* PieceManager::GetClosestAimPiece(Vector3& worldPos, Node* lookNode)
 {
 
 	//Camera* camera = node_->GetComponent<Camera>();
-	Node* node = camera->GetNode();
+	Node* node = lookNode;
 
 	Octree* octree = GetScene()->GetComponent<Octree>();
 	RayOctreeQuery querry(Ray(node->GetWorldPosition(), node->GetDirection()));
@@ -190,11 +190,11 @@ Piece* PieceManager::GetClosestAimPiece(Vector3& worldPos, Camera* camera)
 
 
 
-PiecePoint* PieceManager::GetClosestAimPiecePoint(Camera* camera)
+PiecePoint* PieceManager::GetClosestAimPiecePoint(Node* lookNode)
 {
 
 	Vector3 worldPos;
-	Piece* piece = GetClosestAimPiece(worldPos, camera);
+	Piece* piece = GetClosestAimPiece(worldPos, lookNode);
 	if (!piece)
 		return nullptr;
 
