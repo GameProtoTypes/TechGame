@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<material>
+	<technique name="Techniques/DiffSpec.xml" />
+	<texture unit="diffuse" name="Textures/valve_controller_knu_1_0_right_diff.png" />
+	<texture unit="specular" name="Textures/valve_controller_knu_1_0_right_spec.png" />
+	<parameter name="MatDiffColor" value="0.588235 0.588235 0.588235 1" />
+	<parameter name="MatSpecColor" value="0.828 0.828 0.828 60" />
+	<parameter name="MatEmissiveColor" value="0 0 0 1" />
+</material>

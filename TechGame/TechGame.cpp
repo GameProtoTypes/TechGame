@@ -35,7 +35,7 @@ void TechGame::Setup()
 #else
 	engineParameters_[EP_RESOURCE_PREFIX_PATHS] = ".";
 #endif
-
+	
 
 	Character::RegisterObject(context_);
 	ManipulationTool::RegisterObject(context_);
@@ -48,11 +48,17 @@ void TechGame::Setup()
 	PiecePointRow::RegisterObject(context_);
 	PieceGear::RegisterObject(context_);
 
+
+
 	RegisterNewtonPhysicsLibrary(context_);
 }
 
 void TechGame::Start()
 {
+
+	GetSubsystem<Engine>()->SetMaxFps(1000);
+	GetSubsystem<Engine>()->SetMinFps(90);
+
 	// Create the scene content
 	CreateScene();
 
@@ -399,9 +405,12 @@ void TechGame::CreateScene()
 
 	CreateCharacter();
 
+	
 
-	context_->RegisterSubsystem(new VR(context_));
+	VR::RegisterObject(context_);
+
 	VR* vr = context_->GetSubsystem<VR>();
+	
 	bool vrInitialized = vr->InitializeVR(character_->GetNode());
 
 	if (vrInitialized) {
@@ -419,6 +428,9 @@ void TechGame::CreateScene()
 	manipTool->SetVRHandMode(vrInitialized);
 	if (vrInitialized) {
 		manipTool->SetMoveMode(ManipulationTool::MoveMode_VR);
+
+
+
 	}
 
 
