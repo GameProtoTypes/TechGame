@@ -77,9 +77,10 @@ protected:
 	bool drawDebugPhysicsWorldConstraints = true;
 	bool drawDebugPhysicsWorldContacts = true;
 	bool drawDebugPhysicsWorldRigidBodies = true;
-	bool drawDebugPhysicsWorldDepthTest = true;
+	bool debugDepthTest = true;
 
 	bool drawDebugVisualDebugger = false;
+	bool drawDebugHandTools = false;
 	bool drawDebugPiecePoints = false;
 	bool drawDebugPiecePointRows = false;
 	bool drawDebugPieceGears = false;

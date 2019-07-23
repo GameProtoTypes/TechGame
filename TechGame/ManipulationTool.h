@@ -26,6 +26,7 @@ public:
 	void SetVRHandMode(bool enable) { vrHandMode_ = enable; }
 	bool GetVRHandMode() const { return vrHandMode_;  }
 
+	virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
 
 protected:
 

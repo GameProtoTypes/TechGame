@@ -417,20 +417,21 @@ void TechGame::CreateScene()
 
 		leftHandNode_ = vr->leftHandNode_->CreateChild();
 		rightHandNode_ = vr->rightHandNode_->CreateChild();
+
+		URHO3D_LOGINFO("vr enabled.");
 	}
 	else
 	{
 		leftHandNode_ = lookNode_->CreateChild();
 		rightHandNode_ = lookNode_->CreateChild();
+
+		URHO3D_LOGINFO("vr not enabled.");
 	}
 
 	ManipulationTool* manipTool = rightHandNode_->CreateComponent<ManipulationTool>();
 	manipTool->SetVRHandMode(vrInitialized);
 	if (vrInitialized) {
 		manipTool->SetMoveMode(ManipulationTool::MoveMode_VR);
-
-
-
 	}
 
 
@@ -659,9 +660,10 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 
 		ui::Begin("Debug Drawing");
 
-
+		ui::Checkbox("DepthTest", &debugDepthTest);
 
 		ui::Checkbox("PhysicsWorld", &drawDebugPhysicsWorld);
+
 		if (drawDebugPhysicsWorld) {
 
 			ui::BeginGroup();
@@ -669,11 +671,10 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 			ui::Checkbox("Constraints", &drawDebugPhysicsWorldConstraints);
 			ui::Checkbox("Contacts", &drawDebugPhysicsWorldContacts);
 			ui::Checkbox("RigidBodies", &drawDebugPhysicsWorldRigidBodies);
-			ui::Checkbox("DepthTest", &drawDebugPhysicsWorldDepthTest);
 			ui::EndGroup();
 
 			scene_->GetComponent<NewtonPhysicsWorld>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(),
-				drawDebugPhysicsWorldConstraints, drawDebugPhysicsWorldContacts, drawDebugPhysicsWorldRigidBodies, drawDebugPhysicsWorldDepthTest);
+				drawDebugPhysicsWorldConstraints, drawDebugPhysicsWorldContacts, drawDebugPhysicsWorldRigidBodies, debugDepthTest);
 
 
 		}
@@ -683,12 +684,28 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 			GetSubsystem<VisualDebugger>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>());
 
 
+		ui::Checkbox("Hand Tools", &drawDebugHandTools);
+		if (drawDebugHandTools)
+		{
+			ea::vector<Tool*> components;
+			scene_->GetDerivedComponents<Tool>(components, true);
+
+			for (Tool* comp : components)
+			{
+				comp->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), debugDepthTest);
+			}
+
+
+		}
+
+
+
 		ui::Checkbox("PiecePoints", &drawDebugPiecePoints);
 		if (drawDebugPiecePoints) {
 
 			ui::BeginGroup();
 			ui::Indent(10.0f);
-			ui::Checkbox("DepthTest", &drawDebugPiecePointsDepthTest);
+			ui::Checkbox("DepthTest", &debugDepthTest);
 			
 
 
@@ -697,7 +714,7 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 
 			for (PiecePoint* comp : components)
 			{
-				comp->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), drawDebugPiecePointsDepthTest);
+				comp->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), debugDepthTest);
 			}
 
 
@@ -709,7 +726,7 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 
 				for (PiecePointRow* comp : components)
 				{
-					comp->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), drawDebugPiecePointsDepthTest);
+					comp->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), debugDepthTest);
 				}
 			}
 			ui::EndGroup();
@@ -726,7 +743,7 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 
 			for (PieceGear* comp : components)
 			{
-				comp->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), drawDebugPiecePointsDepthTest);
+				comp->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), debugDepthTest);
 			}
 
 

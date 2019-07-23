@@ -23,8 +23,6 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 		
 		float scaleFactor = scene_->GetComponent<PieceManager>()->GetScaleFactor();
 
-		URHO3D_LOGINFO("scale factor: " + ea::to_string(scaleFactor));
-
 		auto* body = root->CreateComponent<NewtonRigidBody>();
 		Node* visualNode = root->CreateChild("visualNode");
 		StaticModel* staticMdl = visualNode->CreateComponent<StaticModel>();

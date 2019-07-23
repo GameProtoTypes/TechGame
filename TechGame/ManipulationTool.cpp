@@ -682,3 +682,9 @@ void ManipulationTool::OnNodeSet(Node* node)
 		//UnGather(false);
 	}
 }
+
+void Tool::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
+{
+	//draw forward vector
+	debug->AddLine(node_->GetWorldPosition(), node_->GetWorldPosition() + node_->GetDirection() * 10.0f, Color::GREEN, depthTest);
+}
