@@ -8,13 +8,14 @@
 #include "NewtonKinematicsJoint.h"
 #include "PieceAttachmentStager.h"
 
-//tool to be attached to Camera Node (or arm node)
+//tool to be attached to hand node.
+
 class Tool : public Component {
 	URHO3D_OBJECT(Tool, Component);
 public:
 	Tool(Context* context) : Component(context)
 	{
-
+		SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(Tool, HandleUpdate));
 	}
 
 	static void RegisterObject(Context* context)
@@ -22,17 +23,24 @@ public:
 		context->RegisterFactory<Tool>();
 	}
 
-
-	void SetVRHandMode(bool enable) { vrHandMode_ = enable; }
-	bool GetVRHandMode() const { return vrHandMode_;  }
+	//if SetPointAtNode is set, the tool will always make node_ face the given node.
+	void SetPointAtNode(Node* node) { pointAtNode_ = node; }
+	
+	Node* GetPointAtNode() const {
+		return pointAtNode_;
+	}
 
 	virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
 
 protected:
 
-	bool vrHandMode_ = false;
+	void HandleUpdate(StringHash eventType, VariantMap& eventData);
+	WeakPtr<Node> pointAtNode_;
 
 };
+
+
+
 
 
 

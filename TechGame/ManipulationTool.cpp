@@ -683,8 +683,46 @@ void ManipulationTool::OnNodeSet(Node* node)
 	}
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void Tool::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
 	//draw forward vector
 	debug->AddLine(node_->GetWorldPosition(), node_->GetWorldPosition() + node_->GetDirection() * 10.0f, Color::GREEN, depthTest);
+}
+
+void Tool::HandleUpdate(StringHash eventType, VariantMap& eventData)
+{
+	if (pointAtNode_) {
+		node_->LookAt(pointAtNode_->GetWorldPosition(), Vector3::UP, TS_WORLD);
+	}
 }
