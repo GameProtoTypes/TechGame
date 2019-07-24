@@ -1,4 +1,4 @@
-Copywrite 2019 subMatrix Software
+Copywrite 2019 subMatrix Software.
 Please do not redistribute or sell without permission obtained in signed writing from subMatrix Software.
 
 
