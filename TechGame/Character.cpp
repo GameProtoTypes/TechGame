@@ -86,22 +86,10 @@ void Character::Update(float timeStep)
 	controls_.pitch_ = Clamp(controls_.pitch_, -80.0f, 80.0f);
 
 	
-	// Set rotation already here so that it's updated every rendering frame instead of every physics frame
-	GetNode()->SetRotation(Quaternion(controls_.yaw_, Vector3::UP));
-
-	// Get camera lookat dir from character yaw + pitch
-	const Quaternion& rot = node_->GetRotation();
-	Quaternion dir = rot * Quaternion(controls_.pitch_, Vector3::RIGHT);
-
-	// Turn head to camera pitch, but limit to avoid unnatural animation
-	float limitPitch = Clamp(controls_.pitch_, -45.0f, 45.0f);
-	Quaternion headDir = rot * Quaternion(limitPitch, Vector3(1.0f, 0.0f, 0.0f));
-
-
-	headNode_->SetPosition(node_->GetWorldPosition() + Vector3(0, 0.7, 0) + rot * Vector3(0.0f, 0.15f, 0.2f));
-	headNode_->SetRotation(dir);
-
-
+	groundNode_->SetRotation(Quaternion(controls_.yaw_, Vector3::UP));
+	
+	headNode_->SetRotation(Quaternion(controls_.pitch_, Vector3::RIGHT));
+	headNode_->SetPosition(Vector3(0, 0.7f, 0));
 
 
 	updatePhysics(timeStep);
@@ -159,7 +147,6 @@ void Character::updatePhysics(float timeStep)
 	bool softGrounded = inAirTimer_ < INAIR_THRESHOLD_TIME;
 
 	// Update movement & animation
-	const Quaternion& rot = headNode_->GetWorldRotation();
 	Vector3 moveDir = Vector3::ZERO;
 	const Vector3& velocity = body->GetLinearVelocity();
 	// Velocity on the XZ plane
@@ -182,11 +169,11 @@ void Character::updatePhysics(float timeStep)
 
 
 
-	Vector3 forwardVectorWorld = (rot * moveDir);
-	forwardVectorWorld.y_ = 0;
-	forwardVectorWorld.Normalize();
+	Vector3 finalMoveVector = groundNode_->GetWorldRotation() * moveDir;
+	finalMoveVector.y_ = 0;
+	finalMoveVector.Normalize();
 
-	body->SetLinearVelocity(forwardVectorWorld * (softGrounded ? MOVE_SPEED : INAIR_MOVE_SPEED) + Vector3(0, velocity.y_, 0));
+	body->SetLinearVelocity(finalMoveVector * (softGrounded ? MOVE_SPEED : INAIR_MOVE_SPEED) + Vector3(0, velocity.y_, 0));
 
 	//ui::Checkbox("onGround", &onGround_);
 	if (onGround_ && softGrounded)
@@ -213,10 +200,10 @@ void Character::OnNodeSet(Node* node)
 	{
 		//create nodes
 
-
+		groundNode_ = node->CreateChild();
 
 		//headnode with camera:
-		headNode_ = node->CreateChild("Head");
+		headNode_ = groundNode_->CreateChild("Head");
 		auto* camera = headNode_->CreateComponent<Camera>();
 		camera->SetFarClip(500.0f);
 
@@ -238,11 +225,11 @@ void Character::OnNodeSet(Node* node)
 		
 		
 		
-		leftHandNode_ = node->CreateChild("LeftHand");
-		rightHandNode_ = node->CreateChild("RightHand");
+		leftHandNode_ = groundNode_->CreateChild("LeftHand");
+		rightHandNode_ = groundNode_->CreateChild("RightHand");
 
-		leftHandNode_->SetPosition(Vector3(0.2f, 0.5f, 0));
-		rightHandNode_->SetPosition(Vector3(-0.2f, 0.5f, 0));
+		leftHandNode_->SetPosition(Vector3(-0.5f, 0.5f, 0));
+		rightHandNode_->SetPosition(Vector3(0.5f, 0.5f, 0));
 
 
 

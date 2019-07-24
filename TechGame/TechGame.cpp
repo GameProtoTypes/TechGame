@@ -96,11 +96,11 @@ void TechGame::CreateCharacter()
 {
 	auto* cache = GetSubsystem<ResourceCache>();
 
-	Node* objectNode = scene_->CreateChild("Jack");
-	objectNode->SetPosition(Vector3(0.0f, 10.0f, 0.0f));
+	Node* playerNode = scene_->CreateChild("player");
+	playerNode->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
 
 
-	character_ = objectNode->CreateComponent<Character>();
+	character_ = playerNode->CreateComponent<Character>();
 
 }
 

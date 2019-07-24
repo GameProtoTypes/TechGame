@@ -52,6 +52,7 @@ public:
 
 
 	///nodes that are part of the character.
+	SharedPtr<Node> groundNode_;
 	SharedPtr<Node> headNode_;
 	SharedPtr<Node> rightHandNode_;
 	SharedPtr<Node> leftHandNode_;
