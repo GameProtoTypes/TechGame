@@ -18,6 +18,11 @@
 #include "Urho3D/IO/Log.h"
 #include "Urho3D/SystemUI/SystemUI.h"
 #include "Urho3D/Input/Input.h"
+#include "NewtonCollisionShapesDerived.h"
+#include "Newton6DOFConstraint.h"
+#include "Urho3D/Graphics/Camera.h"
+#include "Urho3D/Audio/SoundListener.h"
+#include "Urho3D/Audio/Audio.h"
 
 Character::Character(Context* context) :
 	LogicComponent(context),
@@ -83,7 +88,7 @@ void Character::Update(float timeStep)
 	
 	// Set rotation already here so that it's updated every rendering frame instead of every physics frame
 	GetNode()->SetRotation(Quaternion(controls_.yaw_, Vector3::UP));
-		
+
 	// Get camera lookat dir from character yaw + pitch
 	const Quaternion& rot = node_->GetRotation();
 	Quaternion dir = rot * Quaternion(controls_.pitch_, Vector3::RIGHT);
@@ -93,8 +98,8 @@ void Character::Update(float timeStep)
 	Quaternion headDir = rot * Quaternion(limitPitch, Vector3(1.0f, 0.0f, 0.0f));
 
 
-	lookNode_->SetPosition(node_->GetWorldPosition() + Vector3(0, 0.7, 0) + rot * Vector3(0.0f, 0.15f, 0.2f));
-	lookNode_->SetRotation(dir);
+	headNode_->SetPosition(node_->GetWorldPosition() + Vector3(0, 0.7, 0) + rot * Vector3(0.0f, 0.15f, 0.2f));
+	headNode_->SetRotation(dir);
 
 
 
@@ -104,10 +109,6 @@ void Character::Update(float timeStep)
 
 }
 
-void Character::SetLookNode(Node* lookNode)
-{
-	lookNode_ = lookNode;
-}
 
 void Character::HandleNodeCollision(StringHash eventType, VariantMap& eventData)
 {
@@ -144,8 +145,6 @@ void Character::HandleNodeCollisionEnd(StringHash eventType, VariantMap& eventDa
 void Character::updatePhysics(float timeStep)
 {
 
-	if (lookNode_ == nullptr)
-		return;
 
 	/// \todo Could cache the components for faster access instead of finding them each frame
 	auto* body = GetComponent<NewtonRigidBody>();
@@ -160,7 +159,7 @@ void Character::updatePhysics(float timeStep)
 	bool softGrounded = inAirTimer_ < INAIR_THRESHOLD_TIME;
 
 	// Update movement & animation
-	const Quaternion& rot = lookNode_->GetWorldRotation();
+	const Quaternion& rot = headNode_->GetWorldRotation();
 	Vector3 moveDir = Vector3::ZERO;
 	const Vector3& velocity = body->GetLinearVelocity();
 	// Velocity on the XZ plane
@@ -206,4 +205,83 @@ void Character::updatePhysics(float timeStep)
 	onGround_ = false;
 
 
+}
+
+void Character::OnNodeSet(Node* node)
+{
+	if (node)
+	{
+		//create nodes
+
+
+
+		//headnode with camera:
+		headNode_ = node->CreateChild("Head");
+		auto* camera = headNode_->CreateComponent<Camera>();
+		camera->SetFarClip(500.0f);
+
+		SoundListener* soundListener = headNode_->CreateComponent<SoundListener>();
+
+		// Get a pointer to the Audio subsystem.
+		Audio *audio_subsys = GetSubsystem<Audio>();
+
+		// Set the listener for that audio subsystem
+		audio_subsys->SetListener(soundListener);
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		leftHandNode_ = node->CreateChild("LeftHand");
+		rightHandNode_ = node->CreateChild("RightHand");
+
+		leftHandNode_->SetPosition(Vector3(0.2f, 0.5f, 0));
+		rightHandNode_->SetPosition(Vector3(-0.2f, 0.5f, 0));
+
+
+
+		// Create rigidbody, and set non-zero mass so that the body becomes dynamic
+		auto* body = node->CreateComponent<NewtonRigidBody>();
+		body->SetCollisionLayer(1);
+		body->SetMassScale(1.0f);
+		body->SetAutoSleep(false);
+
+
+		// Set zero angular factor so that physics doesn't turn the character on its own.
+		// Instead we will control the character yaw manually
+		//body->SetAngularFactor(Vector3::ZERO);
+
+		// Set the rigidbody to signal collision also when in rest, so that we get ground collisions properly
+		body->SetCollisionEventMode(NewtonRigidBody::COLLISION_ALL);
+
+		// Set a capsule shape for collision
+		auto* shape = node->CreateComponent<NewtonCollisionShape_Capsule>();
+		shape->SetRotationOffset(Quaternion(0, 0, 90));
+		shape->SetPositionOffset(Vector3(0, 0.9, 0));
+		shape->SetElasticity(0.0f);
+
+		//create 6dof constraint to limit angles
+		NewtonSixDofConstraint* constraint = node->CreateComponent<NewtonSixDofConstraint>();
+		constraint->SetPitchLimits(0, 0);
+		constraint->SetYawLimits(0, 0);
+		constraint->SetRollLimits(0, 0);
+
+
+
+
+
+
+
+	}
+	else
+	{
+
+
+	}
 }

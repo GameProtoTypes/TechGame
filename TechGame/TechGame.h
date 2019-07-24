@@ -19,7 +19,7 @@ public:
 
 	void CreateScene();
 
-	void CreateCamera();
+
 
 	void SetupViewport();
 	void SubscribeToEvents();
@@ -39,7 +39,6 @@ public:
 	void HandleNodeCollisionEnd(StringHash eventType, VariantMap& eventData);
 
 
-	void SpawnObject();
 	void CreateCharacter();
 
 	Node* CreatePiece(Node* parent, ea::string name, bool loadExisting);
@@ -47,14 +46,11 @@ public:
 protected:
 	/// Scene.
 	SharedPtr<Scene> scene_;
-	/// Camera scene node.
-	SharedPtr<Node> lookNode_;
+
+
 	/// The controllable character component.
 	WeakPtr<Character> character_;
 
-
-	SharedPtr<Node> leftHandNode_;
-	SharedPtr<Node> rightHandNode_;
 
 
 	/// Camera yaw angle.

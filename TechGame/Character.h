@@ -40,10 +40,22 @@ public:
 
 	void Update(float timeStep) override;
 
-	void SetLookNode(Node* lookNode);
+	
+	void SetIsVRCharacter(bool enable) { isVR_ = enable; }
+	bool GetIsVRCharacter() const {
+		return isVR_;
+	}
+
 
 	/// Movement controls. Assigned by the main program each frame.
 	Controls controls_;
+
+
+	///nodes that are part of the character.
+	SharedPtr<Node> headNode_;
+	SharedPtr<Node> rightHandNode_;
+	SharedPtr<Node> leftHandNode_;
+
 
 private:
 	/// Handle physics collision event.
@@ -60,9 +72,10 @@ private:
 	/// In air timer. Due to possible physics inaccuracy, character can be off ground for max. 1/10 second and still be allowed to move.
 	float inAirTimer_;
 
-	/// look node (gets rotated by mouse)
-	WeakPtr<Node> lookNode_;
 
 
+	bool isVR_ = false;
 
+protected:
+	virtual void OnNodeSet(Node* node) override;
 };
