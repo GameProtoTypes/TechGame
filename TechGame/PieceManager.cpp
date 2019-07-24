@@ -5,6 +5,7 @@
 
 
 #include "EASTL/sort.h"
+#include "VisualDebugger.h"
 
 PiecePoint* PieceManager::GetClosestPiecePoint(Vector3 worldPosition, Piece* piece)
 {
@@ -171,6 +172,9 @@ Piece* PieceManager::GetClosestAimPiece(Vector3& worldPos, Node* lookNode)
 
 	Octree* octree = GetScene()->GetComponent<Octree>();
 	RayOctreeQuery querry(Ray(node->GetWorldPosition(), node->GetDirection()));
+
+	GetSubsystem<VisualDebugger>()->AddLine(node->GetWorldPosition(), node->GetWorldPosition() + node->GetDirection()* 10.0f, Color::GREEN, false);
+
 	octree->Raycast(querry);
 
 	if (querry.result_.size() > 1)

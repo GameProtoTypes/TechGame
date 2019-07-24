@@ -355,7 +355,7 @@ void TechGame::UpdateUIInput(float timestep)
 	if (mouseWheelMove > 0)
 		rightHandNode_->GetComponent<ManipulationTool>()->AdvanceGatherPoint(true);
 	if(mouseWheelMove < 0)
-		lookNode_->GetComponent<ManipulationTool>()->AdvanceGatherPoint(false);
+		rightHandNode_->GetComponent<ManipulationTool>()->AdvanceGatherPoint(false);
 
 
 
@@ -429,7 +429,7 @@ void TechGame::CreateScene()
 	}
 
 	ManipulationTool* manipTool = rightHandNode_->CreateComponent<ManipulationTool>();
-	manipTool->SetVRHandMode(vrInitialized);
+	
 	if (vrInitialized) {
 		manipTool->SetMoveMode(ManipulationTool::MoveMode_VR);
 	}

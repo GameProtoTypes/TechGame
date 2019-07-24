@@ -24,15 +24,9 @@ bool ManipulationTool::Gather(bool grabOne)
 
 	//Get the PiecePoint we are aiming at, else return.
 	PiecePoint* piecePoint = nullptr;
-	if (!vrHandMode_) {
-		piecePoint = pieceManager_->GetClosestAimPiecePoint(node_);
-	}
-	else
-	{
-		ea::vector<Piece*> blacklist;
-		piecePoint = pieceManager_->GetClosestGlobalPiecePoint(node_->GetWorldPosition(), blacklist, 0.01f, 1);
-	}
+	
 
+	piecePoint = pieceManager_->GetClosestAimPiecePoint(node_);
 
 
 
