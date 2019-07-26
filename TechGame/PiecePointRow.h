@@ -149,8 +149,10 @@ protected:
 
 	void UpdateDynamicDettachement();
 
-	bool isOccupiedOptimized_ = false;
-	int occupiedCountDownCount_ = 10;
+	bool isFullRowOptimized_ = false;
+
+	int numOccupiedPoints_ = 0;
+	int occupiedCountDownCount_ = 500;
 	int occupiedCountDown_ = 1;
 	Vector2 oldSliderLimits_;
 

@@ -7,37 +7,8 @@
 
 #include "NewtonKinematicsJoint.h"
 #include "PieceAttachmentStager.h"
-
-//tool to be attached to hand node.
-
-class Tool : public Component {
-	URHO3D_OBJECT(Tool, Component);
-public:
-	Tool(Context* context) : Component(context)
-	{
-		SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(Tool, HandleUpdate));
-	}
-
-	static void RegisterObject(Context* context)
-	{
-		context->RegisterFactory<Tool>();
-	}
-
-	//if SetPointAtNode is set, the tool will always make node_ face the given node.
-	void SetPointAtNode(Node* node) { pointAtNode_ = node; }
-	
-	Node* GetPointAtNode() const {
-		return pointAtNode_;
-	}
-
-	virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
-
-protected:
-
-	void HandleUpdate(StringHash eventType, VariantMap& eventData);
-	WeakPtr<Node> pointAtNode_;
-
-};
+#include "Character.h"
+#include "HandTool.h"
 
 
 
@@ -45,8 +16,9 @@ protected:
 
 
 
-class ManipulationTool : public Tool {
-	URHO3D_OBJECT(ManipulationTool, Tool);
+
+class ManipulationTool : public HandTool {
+	URHO3D_OBJECT(ManipulationTool, HandTool);
 public:
 	ManipulationTool(Context* context);
 
@@ -54,10 +26,13 @@ public:
 
 	enum MoveMode {
 		MoveMode_Global = 0,
-		MoveMode_Camera = 1,
-		MoveMode_VR = 2
+		MoveMode_Camera = 1
 	};
 
+
+	bool BeginDrag();
+	void EndDrag();
+	bool IsDragging() { return isDragging_; }
 
 	bool Gather(bool grabOne = false);
 	bool IsGathering();
@@ -71,7 +46,7 @@ public:
 	}
 	void ResetGatherNodeRotation()
 	{
-		if (MoveMode_Camera || MoveMode_VR)
+		if (MoveMode_Camera)
 			gatherNode_->SetRotation(Quaternion::IDENTITY);
 		else if(MoveMode_Global)
 			gatherNode_->SetWorldRotation(Quaternion::IDENTITY);
@@ -93,6 +68,10 @@ public:
 	void UpdateGatherIndicators();
 
 
+
+	virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
+
+
 protected:
 
 
@@ -105,46 +84,13 @@ protected:
 
 	void formGatherContraption(bool onlyOne = false);
 
-	void updateKinematicsControllerPos(bool forceUpdate)
-	{
-		if (!gatherPiecePoint_)
-			return;
+	void updateKinematicsControllerPos(bool forceUpdate);
 
-		if (forceUpdate)
-		{
-			kinamaticConstraintTimerFireCount_ = 10;
-			kinamaticConstraintUpdateTimer_.Reset();
-		}
+	bool isDragging_ = false;
+	WeakPtr<Node> dragPoint_;
+	WeakPtr<Piece> dragPiece_;
+	float dragMassTotal_ = 0.0f;
 
-
-		bool doUpdate = false;
-		if(forceUpdate)
-			doUpdate = true;
-
-		if (kinamaticConstraintUpdateTimer_.GetMSec(false) >= kinamaticConstraintUpdateTimerTimeout_)
-		{
-			if (kinamaticConstraintTimerFireCount_ > 0) {
-				doUpdate = true;
-				kinamaticConstraintUpdateTimer_.Reset();
-				kinamaticConstraintTimerFireCount_--;
-			}
-			else
-				kinamaticConstraintTimerFireCount_ = 0;
-		}
-
-		if (doUpdate) {
-
-			if (!kinamaticConstriant_.Expired()) {
-				
-				kinamaticConstriant_->SetOwnWorldPosition(gatherPiecePoint_->GetNode()->GetWorldPosition());
-				kinamaticConstriant_->SetOwnWorldRotation(gatherPiecePoint_->GetNode()->GetWorldRotation());
-			}
-			else
-			{
-			}
-
-		}
-	}
 
 	WeakPtr<Node> gatherNode_;
 	MoveMode moveMode_ = MoveMode_Camera;
@@ -161,6 +107,7 @@ protected:
 	float gatherNodeMaxCastDist_ = 5.0f;
 
 	WeakPtr<NewtonKinematicsControllerConstraint> kinamaticConstriant_;
+
 	Timer kinamaticConstraintUpdateTimer_;
 	int kinamaticConstraintUpdateTimerTimeout_ = 6000;
 	int kinamaticConstraintTimerFireCount_ = false;

@@ -6,9 +6,10 @@
 #include "PieceAttachmentStager.h"
 #include "MathExtras.h"
 #include "PieceGear.h"
+#include "VisualDebugger.h"
 
 
-ManipulationTool::ManipulationTool(Context* context) : Tool(context)
+ManipulationTool::ManipulationTool(Context* context) : HandTool(context)
 {
 	SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(ManipulationTool, HandleUpdate));
 }
@@ -18,15 +19,62 @@ void ManipulationTool::RegisterObject(Context* context)
 	context->RegisterFactory<ManipulationTool>();
 }
 
+bool ManipulationTool::BeginDrag()
+{
+	if (IsGathering())
+		return false;
+
+
+	Vector3 worldHitPos;
+	Piece* aimPiece = node_->GetScene()->GetComponent<PieceManager>()->GetClosestAimPiece(worldHitPos, GetEffectiveLookNode());
+
+	if (!aimPiece)
+		return false;
+
+	dragPiece_ = aimPiece;
+
+	dragPoint_ = aimPiece->GetNode()->CreateChild("DragPoint");
+	dragPoint_->SetWorldPosition(worldHitPos);
+
+	URHO3D_LOGINFO("beginning drag.");
+
+	isDragging_ = true;
+
+	ea::vector<Piece*> pieces;
+	aimPiece->GetAttachedPieces(pieces, true);
+	pieces.push_back(aimPiece);
+	dragMassTotal_ = 0.0f;
+
+	for (Piece* pc : pieces) {
+		dragMassTotal_ += pc->GetRigidBody()->GetEffectiveMass();
+	}
+
+
+}
+
+void ManipulationTool::EndDrag()
+{
+	URHO3D_LOGINFO("ending drag.");
+	//kinamaticConstriant_->Remove();
+
+	dragPiece_->GetEffectiveRigidBody()->ResetForces();
+	dragPoint_->Remove();
+
+	isDragging_ = false;
+}
+
 bool ManipulationTool::Gather(bool grabOne)
 {
+	if (IsDragging())
+		return false;
+
 	URHO3D_LOGINFO("Gathering:");
 
 	//Get the PiecePoint we are aiming at, else return.
 	PiecePoint* piecePoint = nullptr;
 	
 
-	piecePoint = pieceManager_->GetClosestAimPiecePoint(node_);
+	piecePoint = pieceManager_->GetClosestAimPiecePoint(GetEffectiveLookNode());
 
 
 
@@ -117,6 +165,10 @@ bool ManipulationTool::Gather(bool grabOne)
 	rigBody->SetMassScale(1.0f);
 
 	kinamaticConstriant_ = rigBody->GetNode()->CreateComponent<NewtonKinematicsControllerConstraint>();
+	kinamaticConstriant_->SetLimitRotationalVelocity(false);
+	kinamaticConstriant_->SetLinearFrictionalAcceleration(10000.0f);
+	kinamaticConstriant_->SetAngularFrictionalAcceleration(10000.0f);
+
 	kinamaticConstraintUpdateTimer_.Reset();
 
 	//update the kinematic constraint's position on the body.
@@ -269,10 +321,10 @@ void ManipulationTool::ToggleUseGrid()
 void ManipulationTool::SetMoveMode(MoveMode mode)
 {
 		moveMode_ = mode;
-		if (mode == MoveMode_Camera || mode == MoveMode_VR)
+		if (mode == MoveMode_Camera)
 		{
 			//set gather node to child and in front of tool
-			gatherNode_->SetParent(node_);
+			gatherNode_->SetParent(GetEffectiveLookNode());
 			gatherNode_->SetTransform(Matrix3x4::IDENTITY);
 			if (mode == MoveMode_Camera) {
 				gatherNode_->Translate(gatherNodeRefOffset_);
@@ -297,7 +349,7 @@ ManipulationTool::MoveMode ManipulationTool::GetMoveMode()
 void ManipulationTool::AimPointForce()
 {
 	//Get the PiecePoint we are aiming at, else return.
-	PiecePoint* piecePoint = pieceManager_->GetClosestAimPiecePoint(node_);
+	PiecePoint* piecePoint = pieceManager_->GetClosestAimPiecePoint(GetEffectiveLookNode());
 
 	if (!piecePoint) {
 		return;
@@ -360,6 +412,17 @@ void ManipulationTool::UpdateGatherIndicators()
 	
 }
 
+void ManipulationTool::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
+{
+	if (IsDragging())
+	{
+
+		debug->AddLine(gatherNode_->GetWorldPosition(), dragPoint_->GetWorldPosition(), Color::YELLOW, depthTest);
+
+	}
+}
+
+
 void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 {
 	if (moveMode_ == MoveMode_Global) {
@@ -408,47 +471,48 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 	}
 	else if (moveMode_ == MoveMode_Camera)
 	{
-		//cast the gather node forward until it hits something.
 
+		if (IsGathering()) {
+			//cast the gather node forward until it hits something.
 
-		Octree* octree = GetScene()->GetComponent<Octree>();
-		RayOctreeQuery query(Ray(node_->GetWorldPosition(), node_->GetDirection()));
-		octree->Raycast(query);
-		Vector3 worldPos;
-		bool foundPos = false;
-		for (int i = 0; i < query.result_.size(); i++)
-		{
-			
-			if (query.result_[i].distance_ <= (gatherNodeMaxCastDist_) && query.result_[i].node_->GetName() == "visualNode")
+			Octree* octree = GetScene()->GetComponent<Octree>();
+			RayOctreeQuery query(Ray(GetEffectiveLookNode()->GetWorldPosition(), GetEffectiveLookNode()->GetWorldDirection()));
+
+			//GetSubsystem<VisualDebugger>()->AddLine(GetEffectiveLookNode()->GetWorldPosition(), GetEffectiveLookNode()->GetWorldPosition() + )
+
+			octree->Raycast(query);
+			Vector3 worldPos;
+			bool foundPos = false;
+			for (int i = 0; i < query.result_.size(); i++)
 			{
-				//its a piece..
-				Piece* piece = query.result_[i].node_->GetParent()->GetComponent<Piece>();
 
-				if (piece && !allGatherPieces_.contains(piece))
+				if (query.result_[i].distance_ <= (gatherNodeMaxCastDist_) && query.result_[i].node_->GetName() == "visualNode")
 				{
-					worldPos = query.result_[i].position_;
-					foundPos = true;
-					break;
+					//its a piece..
+					Piece* piece = query.result_[i].node_->GetParent()->GetComponent<Piece>();
+
+					if (piece && !allGatherPieces_.contains(piece))
+					{
+						worldPos = query.result_[i].position_;
+						foundPos = true;
+						break;
+					}
+
 				}
 
 			}
 
+			if (foundPos) {
+				gatherNode_->SetWorldPosition(worldPos);
+			}
+			else
+			{
+				gatherNode_->SetPosition(gatherNodeRefOffset_);
+			}
 		}
-	
-		if (foundPos) {
-			gatherNode_->SetWorldPosition(worldPos);
-		}
-		else
-		{
-			gatherNode_->SetPosition(gatherNodeRefOffset_);
-		}
-
 
 	}
-	else if (moveMode_ == MoveMode_VR) {
 
-
-	}
 
 
 
@@ -620,9 +684,36 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 
 	}
-	else
+	else if(IsDragging())
 	{
-		//URHO3D_LOGINFO("4");
+		
+
+	//kinamaticConstriant_->SetOtherWorldPosition(gatherNode_->GetWorldPosition());
+	//kinamaticConstriant_->SetOtherWorldRotation(gatherNode_->GetWorldRotation());
+
+
+	Vector3 displacement = (gatherNode_->GetWorldPosition() - dragPoint_->GetWorldPosition());
+
+	Vector3 worldVel = dragPiece_->GetEffectiveRigidBody()->GetLinearVelocity(TS_WORLD);
+
+	Vector3 finalWorldForce = (Urho3D::Ln<float>(displacement.Length() + 1) * 1.0f * displacement.Normalized()) + worldVel*-0.1f;
+
+	//finalWorldForce -= GetScene()->GetComponent<NewtonPhysicsWorld>()->GetGravity() * dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass();
+
+	dragPiece_->GetEffectiveRigidBody()->ResetForces();
+
+
+	dragPiece_->GetEffectiveRigidBody()->AddWorldForce(finalWorldForce * dragMassTotal_ * 100.0f, dragPoint_->GetWorldPosition());
+
+
+	dragPiece_->GetEffectiveRigidBody()->SetNetWorldTorque(dragPiece_->GetEffectiveRigidBody()->GetNetWorldTorque()*1.0f);
+
+
+
+	//limit rotational velocity on dragpiece
+	dragPiece_->GetEffectiveRigidBody()->AddWorldTorque(-dragPiece_->GetEffectiveRigidBody()->GetAngularVelocity()*0.1f);
+
+
 	}
 
 
@@ -650,6 +741,47 @@ void ManipulationTool::formGatherContraption(bool onlyOne)
 			allGatherPieces_.push_back(piece);
 			piece->GetNode()->GetDerivedComponents<PiecePoint>(allGatherPiecePoints_, true, false);
 		}
+	}
+}
+
+void ManipulationTool::updateKinematicsControllerPos(bool forceUpdate)
+{
+	if (!gatherPiecePoint_)
+		return;
+
+	if (forceUpdate)
+	{
+		kinamaticConstraintTimerFireCount_ = 10;
+		kinamaticConstraintUpdateTimer_.Reset();
+	}
+
+
+	bool doUpdate = false;
+	if (forceUpdate)
+		doUpdate = true;
+
+	if (kinamaticConstraintUpdateTimer_.GetMSec(false) >= kinamaticConstraintUpdateTimerTimeout_)
+	{
+		if (kinamaticConstraintTimerFireCount_ > 0) {
+			doUpdate = true;
+			kinamaticConstraintUpdateTimer_.Reset();
+			kinamaticConstraintTimerFireCount_--;
+		}
+		else
+			kinamaticConstraintTimerFireCount_ = 0;
+	}
+
+	if (doUpdate) {
+
+		if (!kinamaticConstriant_.Expired()) {
+
+			kinamaticConstriant_->SetOwnWorldPosition(gatherPiecePoint_->GetNode()->GetWorldPosition());
+			kinamaticConstriant_->SetOwnWorldRotation(gatherPiecePoint_->GetNode()->GetWorldRotation());
+		}
+		else
+		{
+		}
+
 	}
 }
 
@@ -699,24 +831,3 @@ void ManipulationTool::OnNodeSet(Node* node)
 
 
 
-
-
-
-
-
-
-
-
-
-void Tool::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
-{
-	//draw forward vector
-	debug->AddLine(node_->GetWorldPosition(), node_->GetWorldPosition() + node_->GetDirection() * 10.0f, Color::GREEN, depthTest);
-}
-
-void Tool::HandleUpdate(StringHash eventType, VariantMap& eventData)
-{
-	if (pointAtNode_) {
-		node_->LookAt(pointAtNode_->GetWorldPosition(), Vector3::UP, TS_WORLD);
-	}
-}

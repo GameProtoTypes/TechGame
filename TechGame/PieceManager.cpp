@@ -171,9 +171,9 @@ Piece* PieceManager::GetClosestAimPiece(Vector3& worldPos, Node* lookNode)
 	Node* node = lookNode;
 
 	Octree* octree = GetScene()->GetComponent<Octree>();
-	RayOctreeQuery querry(Ray(node->GetWorldPosition(), node->GetDirection()));
+	RayOctreeQuery querry(Ray(node->GetWorldPosition(), node->GetWorldDirection()));
 
-	GetSubsystem<VisualDebugger>()->AddLine(node->GetWorldPosition(), node->GetWorldPosition() + node->GetDirection()* 10.0f, Color::GREEN, false);
+	GetSubsystem<VisualDebugger>()->AddLine(node->GetWorldPosition(), node->GetWorldPosition() + node->GetWorldDirection()* 10.0f, Color::GREEN, false);
 
 	octree->Raycast(querry);
 

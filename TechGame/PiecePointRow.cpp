@@ -537,35 +537,26 @@ bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)
 	ea::vector<PiecePoint*> points = row->GetPoints();
 	PieceManager* pieceManager = row->GetScene()->GetComponent<PieceManager>();
 
-	bool fullyOccupied = true;
-	for (PiecePoint* point : points)
-	{
-		fullyOccupied &= (bool)point->occupiedPoint_;
-	}
+	bool fullyOccupied = (row->numOccupiedPoints_ == row->points_.size());
 
 
 
 	if ((row->GetGeneralRowType() == RowTypeGeneral_Rod))
 	{
 
-		URHO3D_LOGINFO("is fully occupied: " + ea::to_string(fullyOccupied));
+		//URHO3D_LOGINFO("is fully occupied: " + ea::to_string(fullyOccupied));
 
-		if (fullyOccupied && !row->isOccupiedOptimized_)
+		if (fullyOccupied && !row->isFullRowOptimized_)
 		{
 			URHO3D_LOGINFO("Optimizing Rod..");
-			for (RowAttachement attachment : row->rowAttachements_)
+			for (RowAttachement& attachment : row->rowAttachements_)
 			{
-
-				float curSliderPos = static_cast<NewtonSliderConstraint*>(attachment.constraint_.Get())->GetSliderPosition();
-
-				curSliderPos = RoundToNearestMultiple(curSliderPos, pieceManager->RowPointDistance());
-
 				row->DetachFrom(attachment.rowOther_, false);
 				AttachRows(row, attachment.rowOther_, attachment.point, attachment.pointOther_, true, false);
 
 
 				bool allPlaner = true;
-				for (RowAttachement attachment2 : row->rowAttachements_)
+				for (RowAttachement& attachment2 : row->rowAttachements_)
 				{
 					allPlaner &= attachment2.rowOther_->GetIsPiecePlaner();
 				}
@@ -573,16 +564,16 @@ bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)
 				//if all pieces are planer - disable collisions between them.
 				if (allPlaner) {
 					URHO3D_LOGINFO("all pieces planer, disabling collisions.");
-					for (RowAttachement attachment2 : row->rowAttachements_)
+					for (RowAttachement& attachment2 : row->rowAttachements_)
 					{
-						attachment.rowOther_->GetPiece()->GetRigidBody()->SetCollisionOverride(attachment2.row_->GetPiece()->GetRigidBody(), false);
+						attachment.row_->GetPiece()->GetRigidBody()->SetCollisionOverride(attachment2.row_->GetPiece()->GetRigidBody(), false);
 					}
 				}
 			}
 
-			row->isOccupiedOptimized_ = true;
+			row->isFullRowOptimized_ = true;
 		}
-		else if (!fullyOccupied && row->isOccupiedOptimized_)
+		else if (!fullyOccupied && row->isFullRowOptimized_)
 		{
 			URHO3D_LOGINFO("Un Optimizing Rod..");
 			for (RowAttachement attachment : row->rowAttachements_)
@@ -591,7 +582,7 @@ bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)
 
 				for (RowAttachement attachment2 : row->rowAttachements_)
 				{
-					attachment.rowOther_->GetPiece()->GetRigidBody()->RemoveCollisionOverride(attachment2.row_->GetPiece()->GetRigidBody());
+					attachment.row_->GetPiece()->GetRigidBody()->RemoveCollisionOverride(attachment2.row_->GetPiece()->GetRigidBody());
 
 
 					row->DetachFrom(attachment.rowOther_, false);
@@ -605,7 +596,7 @@ bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)
 
 
 			}
-			row->isOccupiedOptimized_ = false;
+			row->isFullRowOptimized_ = false;
 		}
 	}
 
@@ -622,6 +613,7 @@ void PiecePointRow::HandleUpdate(StringHash event, VariantMap& eventData)
 {
 
 	UpdatePointOccupancies();
+	UpdateOptimizeFullRow(this);
 	UpdateDynamicDettachement();
 	return;
 }
@@ -630,10 +622,6 @@ void PiecePointRow::UpdatePointOccupancies()
 {
 
 	if (!rowAttachements_.size())
-		return;
-
-	//don't dynamically update occupied points for rows that have no movement allowed
-	if (rowType_ == RowType_RodHard || rowType_ == RowType_HoleTight)
 		return;
 
 	PieceManager* pieceManager = GetScene()->GetComponent<PieceManager>();
@@ -651,7 +639,7 @@ void PiecePointRow::UpdatePointOccupancies()
 		otherPoints.push_back(row.rowOther_->points_);	
 	}
 
-	int numPointsOccupied = 0;
+	numOccupiedPoints_ = 0;
 	for (PiecePoint* point : points_)
 	{
 		int numDuplicatePoints = 0;
@@ -661,32 +649,34 @@ void PiecePointRow::UpdatePointOccupancies()
 			
 			float dist = (point->GetNode()->GetWorldPosition() - otherPoint->GetNode()->GetWorldPosition()).Length();
 			
+			//URHO3D_LOGINFO("dist: " + ea::to_string(dist) + " vs " + ea::to_string(pieceManager->RowPointDistance()*0.5f));
+
 			if (dist < pieceManager->RowPointDistance()*0.5f) {
 
 				point->occupiedPoint_ = otherPoint;
-				numPointsOccupied++;
+				numOccupiedPoints_++;
 			}
 
 		}
 	}
+	//URHO3D_LOGINFO("num occupied: " + ea::to_string(numPointsOccupied));
 }
 
 void PiecePointRow::UpdateDynamicDettachement()
 {
-	bool hasOccupiedPoint = false;
-	for (PiecePoint* point : points_)
-	{
-		if (point->occupiedPoint_)
-			hasOccupiedPoint = true;
-	}
 
 
-	if (!hasOccupiedPoint)
+
+	if (numOccupiedPoints_ <= 0)
 	{
 		if (occupiedCountDown_ <= 0) {
 			occupiedCountDown_ = 0;
 			if (GetScene()->GetComponent<PieceManager>()->GetEnableDynamicRodDetachment())
-				DetachAll();
+			{
+				if(rowAttachements_.size())
+					DetachAll();
+
+			}
 		}
 		occupiedCountDown_--;
 	}

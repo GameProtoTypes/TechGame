@@ -235,18 +235,18 @@ void TechGame::UpdateUIInput(float timestep)
 
 	if (!input->IsMouseGrabbed() || input->IsMouseVisible())
 		return;
-
+	ManipulationTool* manipTool = character_->rightHandNode_->GetComponent<ManipulationTool>();
 
 	if (input->GetMouseButtonPress(Urho3D::MOUSEB_LEFT)) {
 
-		if (character_->rightHandNode_->GetComponent<ManipulationTool>()->IsGathering())
+		if (manipTool->IsGathering())
 		{
-			character_->rightHandNode_->GetComponent<ManipulationTool>()->UnGather(input->GetKeyDown(KEY_SHIFT));
+			manipTool->UnGather(input->GetKeyDown(KEY_SHIFT));
 			crossHairElement_->SetVar("curMode", (int)CrossHairMode::CrossHairMode_Free);
 		}
 		else
 		{
-			bool gatherSuccess = character_->rightHandNode_->GetComponent<ManipulationTool>()->Gather(input->GetKeyDown(KEY_SHIFT));
+			bool gatherSuccess = manipTool->Gather(input->GetKeyDown(KEY_SHIFT));
 			
 			if(gatherSuccess)
 				crossHairElement_->SetVar("curMode", (int)CrossHairMode::CrossHairMode_Busy);
@@ -255,11 +255,29 @@ void TechGame::UpdateUIInput(float timestep)
 
 	if (input->GetMouseButtonPress(Urho3D::MOUSEB_RIGHT))
 	{
-		character_->rightHandNode_->GetComponent<ManipulationTool>()->AimPointForce();
+		if (manipTool->IsGathering()) {
+			manipTool->AimPointForce();
+		}
+		
+	}
+	if (input->GetMouseButtonDown(Urho3D::MOUSEB_RIGHT))
+	{
+		if (!manipTool->IsDragging()) {
+			if(manipTool->BeginDrag())
+				crossHairElement_->SetVar("curMode", (int)CrossHairMode::CrossHairMode_Busy);
+		}
+	}
+	else
+	{
+		if (manipTool->IsDragging()) {
+			manipTool->EndDrag();
+			crossHairElement_->SetVar("curMode", (int)CrossHairMode::CrossHairMode_Free);
+		}
 	}
 
+
 	if (input->GetKeyPress(KEY_R)) {
-		character_->rightHandNode_->GetComponent<ManipulationTool>()->ResetGatherNodeRotation();
+		manipTool->ResetGatherNodeRotation();
 	}
 
 	if (input->GetKeyPress(KEY_M)) {
@@ -358,9 +376,7 @@ void TechGame::CreateScene()
 
 	ManipulationTool* manipTool = character_->rightHandNode_->CreateComponent<ManipulationTool>();
 	
-	if (vrInitialized) {
-		manipTool->SetMoveMode(ManipulationTool::MoveMode_VR);
-	}
+
 
 
 
@@ -592,10 +608,10 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 		ui::Checkbox("Hand Tools", &drawDebugHandTools);
 		if (drawDebugHandTools)
 		{
-			ea::vector<Tool*> components;
-			scene_->GetDerivedComponents<Tool>(components, true);
+			ea::vector<HandTool*> components;
+			scene_->GetDerivedComponents<HandTool>(components, true);
 
-			for (Tool* comp : components)
+			for (HandTool* comp : components)
 			{
 				comp->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), debugDepthTest);
 			}
