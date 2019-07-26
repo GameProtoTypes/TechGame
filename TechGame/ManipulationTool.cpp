@@ -711,7 +711,6 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 
 	//limit rotational velocity on dragpiece
-	dragPiece_->GetEffectiveRigidBody()->AddWorldTorque(-dragPiece_->GetEffectiveRigidBody()->GetAngularVelocity()*0.1f);
 
 
 	}

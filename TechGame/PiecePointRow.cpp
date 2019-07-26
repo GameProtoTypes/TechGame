@@ -322,6 +322,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			constraint->SetOwnRotation(Quaternion(90, Vector3(0, 1, 0)));
 			constraint->SetOtherPosition(theRodPoint->GetNode()->GetPosition());
 			constraint->SetOtherRotation(diffSnap45 * Quaternion(90, Vector3(0, 1, 0)));
+			
 
 		}
 		else if (theRodRow->GetRowType() == PiecePointRow::RowType_RodRound)
@@ -349,18 +350,20 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			holeBody->SetWorldRotation(Quaternion::IDENTITY);
 			rodBody->SetWorldRotation(diffSnap45);
 
+			const float twistFriction = 0.001f;
 			if (!attachAsFullRow) {
 
 				constraint = holeBody->GetNode()->CreateComponent<NewtonSliderConstraint>();
 				static_cast<NewtonSliderConstraint*>(constraint)->SetTwistLowerLimitEnable(false);
 				static_cast<NewtonSliderConstraint*>(constraint)->SetTwistUpperLimitEnable(false);
 				static_cast<NewtonSliderConstraint*>(constraint)->SetEnableSliderLimits(true, true);
+				static_cast<NewtonSliderConstraint*>(constraint)->SetTwistFriction(twistFriction);
 			}
 			else
 			{
 				constraint = holeBody->GetNode()->CreateComponent<NewtonHingeConstraint>();
 				static_cast<NewtonHingeConstraint*>(constraint)->SetEnableLimits(false);
-				static_cast<NewtonHingeConstraint*>(constraint)->SetFriction(0.0f);
+				static_cast<NewtonHingeConstraint*>(constraint)->SetFriction(twistFriction);
 			}
 
 				//compute slide limits
@@ -549,14 +552,14 @@ bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)
 		if (fullyOccupied && !row->isFullRowOptimized_)
 		{
 			URHO3D_LOGINFO("Optimizing Rod..");
-			for (RowAttachement& attachment : row->rowAttachements_)
+			for (RowAttachement attachment : row->rowAttachements_)
 			{
 				row->DetachFrom(attachment.rowOther_, false);
 				AttachRows(row, attachment.rowOther_, attachment.point, attachment.pointOther_, true, false);
 
 
 				bool allPlaner = true;
-				for (RowAttachement& attachment2 : row->rowAttachements_)
+				for (RowAttachement attachment2 : row->rowAttachements_)
 				{
 					allPlaner &= attachment2.rowOther_->GetIsPiecePlaner();
 				}
@@ -564,7 +567,7 @@ bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)
 				//if all pieces are planer - disable collisions between them.
 				if (allPlaner) {
 					URHO3D_LOGINFO("all pieces planer, disabling collisions.");
-					for (RowAttachement& attachment2 : row->rowAttachements_)
+					for (RowAttachement attachment2 : row->rowAttachements_)
 					{
 						attachment.row_->GetPiece()->GetRigidBody()->SetCollisionOverride(attachment2.row_->GetPiece()->GetRigidBody(), false);
 					}

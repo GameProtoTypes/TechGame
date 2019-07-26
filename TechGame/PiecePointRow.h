@@ -152,7 +152,7 @@ protected:
 	bool isFullRowOptimized_ = false;
 
 	int numOccupiedPoints_ = 0;
-	int occupiedCountDownCount_ = 500;
+	int occupiedCountDownCount_ = 50;
 	int occupiedCountDown_ = 1;
 	Vector2 oldSliderLimits_;
 
