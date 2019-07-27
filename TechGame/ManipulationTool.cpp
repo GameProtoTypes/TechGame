@@ -702,8 +702,17 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 	dragPiece_->GetEffectiveRigidBody()->ResetForces();
 
+	//float mRatio = dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass() / dragMassTotal_;
 
-	dragPiece_->GetEffectiveRigidBody()->AddWorldForce(finalWorldForce * dragMassTotal_ * 100.0f, dragPoint_->GetWorldPosition());
+	Vector3 netForceOnAllJoints;
+	for(NewtonConstraint* c : dragPiece_->GetEffectiveRigidBody()->GetConnectedContraints())
+	{
+		netForceOnAllJoints += c->GetOwnForce();
+	}
+
+	Vector3 calculatedForce = finalWorldForce * dragMassTotal_ * 100.0f;
+
+	dragPiece_->GetEffectiveRigidBody()->AddWorldForce(calculatedForce, dragPoint_->GetWorldPosition());
 
 
 	dragPiece_->GetEffectiveRigidBody()->SetNetWorldTorque(dragPiece_->GetEffectiveRigidBody()->GetNetWorldTorque()*1.0f);

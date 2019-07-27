@@ -59,10 +59,18 @@ void TechGame::Start()
 	GetSubsystem<Engine>()->SetMaxFps(1000);
 	GetSubsystem<Engine>()->SetMinFps(90);
 
+
+	const int alphaVersion = 1;
+	const int betaVersion = 0;
+	const int releaseVersion = 0;
+	GetSubsystem<Graphics>()->SetWindowTitle("Mechanism " + ea::to_string(releaseVersion)
+		+ "." + ea::to_string(betaVersion) + "." + ea::to_string(alphaVersion));
+
+
 	// Create the scene content
 	CreateScene();
 
-	
+	CreateInstructions();
 
 	CreateGameUI();
 
@@ -176,6 +184,20 @@ void TechGame::UpdateGameUI()
 	crossHairElementOuter_->SetImageRect(IntRect(xOffset, 3 * 64, 64, 64));
 
 
+	ManipulationTool* manipTool = character_->rightHandNode_->GetComponent<ManipulationTool>();
+
+	if (manipTool->IsGathering())
+	{
+		instructionText_->SetText("\"Q\" or \"E\" + [\"Shift\"] Rotates Object \n \"R\" Resets Rotation \n  \"Scroll\" to change attachment point. \n  \"Shift\" + \"Left Click\" freezes pieces in mid-air");
+	}
+	else if (manipTool->IsDragging())
+	{
+		instructionText_->SetText("Drag the piece around...");
+	}
+	else
+	{
+		instructionText_->SetText("\"Left Click\" to grab pieces and attach them.\n \"Shift + Left Click\" to remove individual pieces.\n \"Right Click\" to drag pieces.");
+	}
 
 }
 
@@ -349,7 +371,7 @@ void TechGame::CreateScene()
 	scene_->CreateComponent<Octree>();
 	NewtonPhysicsWorld* physicsWorld = scene_->CreateComponent<NewtonPhysicsWorld>();	
 	physicsWorld->SetGravity(Vector3(0, -9.81, 0));
-	
+	physicsWorld->SetIterationCount(8);
 	
 
 	context_->RegisterSubsystem<VisualDebugger>();
@@ -463,7 +485,7 @@ void TechGame::CreateScene()
 		Node* prevPiece = nullptr;
 
 		ea::vector<Piece*> pieces;
-		int numDiffPieces = 19;
+		int numDiffPieces = 21;
 		for (int y = 0; y < numDiffPieces*20; y += 1) {
 
 			Node* pieceNode;
@@ -507,7 +529,10 @@ void TechGame::CreateScene()
 				pieceNode = CreatePiece(scene_, "gear_extra_large", false);
 			else if (rnd == 18)
 				pieceNode = CreatePiece(scene_, "rod_round_1", false);
-
+			else if (rnd == 19)
+				pieceNode = CreatePiece(scene_, "rod_hard_1", false);
+			else if (rnd == 20)
+				pieceNode = CreatePiece(scene_, "corner_hard_1", false);
 
 
 			pieceNode->SetWorldPosition(Vector3(Random(-10,10), y * .05, Random(-10,10)));

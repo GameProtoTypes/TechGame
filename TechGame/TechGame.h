@@ -24,6 +24,24 @@ public:
 	void SetupViewport();
 	void SubscribeToEvents();
 
+	void CreateInstructions()
+	{
+		auto* cache = GetSubsystem<ResourceCache>();
+		auto* ui = GetSubsystem<UI>();
+
+		// Construct new Text object, set string to display and font to use
+		instructionText_ = ui->GetRoot()->CreateChild<Text>();
+		instructionText_->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 15);
+		instructionText_->SetTextAlignment(HA_CENTER);
+
+		// Position the text relative to the screen center
+		instructionText_->SetHorizontalAlignment(HA_CENTER);
+		instructionText_->SetVerticalAlignment(VA_CENTER);
+		instructionText_->SetPosition(0, ui->GetRoot()->GetHeight() / 4);
+	}
+
+
+
 	/// Read input and moves the camera.
 	void UpdateUIInput(float timestep);
 
@@ -91,6 +109,9 @@ protected:
 
 	//updates all game ui
 	void UpdateGameUI();
+
+
+	WeakPtr<Text> instructionText_;
 
 	BorderImage* crossHairElement_ = nullptr;
 	BorderImage* crossHairElementOuter_ = nullptr;

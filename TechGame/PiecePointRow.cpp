@@ -351,25 +351,30 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			rodBody->SetWorldRotation(diffSnap45);
 
 			const float twistFriction = 0.001f;
-			if (!attachAsFullRow) {
+			//if (!attachAsFullRow) {
 
 				constraint = holeBody->GetNode()->CreateComponent<NewtonSliderConstraint>();
 				static_cast<NewtonSliderConstraint*>(constraint)->SetTwistLowerLimitEnable(false);
 				static_cast<NewtonSliderConstraint*>(constraint)->SetTwistUpperLimitEnable(false);
 				static_cast<NewtonSliderConstraint*>(constraint)->SetEnableSliderLimits(true, true);
 				static_cast<NewtonSliderConstraint*>(constraint)->SetTwistFriction(twistFriction);
-			}
-			else
-			{
-				constraint = holeBody->GetNode()->CreateComponent<NewtonHingeConstraint>();
-				static_cast<NewtonHingeConstraint*>(constraint)->SetEnableLimits(false);
-				static_cast<NewtonHingeConstraint*>(constraint)->SetFriction(twistFriction);
-			}
+				//constraint->SetSolveMode(SOLVE_MODE_ITERATIVE);
+			//}
+			//else
+			//{
+			//	constraint = holeBody->GetNode()->CreateComponent<NewtonHingeConstraint>();
+			//	static_cast<NewtonHingeConstraint*>(constraint)->SetEnableLimits(false);
+			//	static_cast<NewtonHingeConstraint*>(constraint)->SetFriction(twistFriction);
+			//}
 
 				//compute slide limits
 				Vector2 slideLimits;
 				
 				float totalSlideAmount = (float(theHoleRow->Count() + theRodRow->Count() - 2))*pieceManager->RowPointDistance();
+
+				//if (attachAsFullRow)
+				//	totalSlideAmount = pieceManager->RowPointDistance()*0.5f;
+
 				slideLimits.x_ = -totalSlideAmount * 0.5f;
 				slideLimits.y_ = totalSlideAmount * 0.5f;
 
@@ -430,10 +435,11 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 				
 
 				const float slopDist = 0.005f;
-				if (!attachAsFullRow) {
+				//if (!attachAsFullRow) {
 					static_cast<NewtonSliderConstraint*>(constraint)->SetSliderLimits(slideLimits.x_ - slopDist, slideLimits.y_ + slopDist);
-					static_cast<NewtonSliderConstraint*>(constraint)->SetSliderFriction(0.01f);
-				}
+					static_cast<NewtonSliderConstraint*>(constraint)->SetSliderFriction(0.001f);
+				//}
+
 
 
 				constraint->SetOtherBody(rodBody);

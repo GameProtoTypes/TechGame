@@ -805,6 +805,117 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 
 
 		}
+		if (name == "rod_hard_1")
+		{
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/rod_hard_1.mdl");
+			Vector3 offset(0, 0, 0);
+
+			//make shapes
+			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Cylinder>();
+			shape1->SetScaleFactor(Vector3(0.5, 0.5, 0.5)*scaleFactor);
+
+			//shape1->SetRadius(0.25*scaleFactor);
+			//shape1->SetLength(4 * scaleFactor);
+
+			shape1->SetRotationOffset(Quaternion(90, Vector3(0, 1, 0)));
+
+			PiecePointRow* pointRow = root->CreateComponent<PiecePointRow>();
+
+			for (int p = 0; p < 2; p++)
+			{
+				Node* point = root->CreateChild();
+				point->SetPosition(Vector3(0, 0, (p*0.5f - 0.5*0.5f)*scaleFactor));
+				PiecePoint* piecePoint = point->CreateComponent<PiecePoint>();
+
+				pointRow->PushBack(piecePoint);
+
+
+
+				if (p == 0 || p == 1)
+					piecePoint->isEndCap_ = true;
+
+			}
+			pointRow->Finalize();
+			pointRow->SetRowType(PiecePointRow::RowType_RodHard);
+
+			//body->SetUseInertiaHack(true);
+
+			staticMdl->SetModel(pieceModel);
+
+
+		}
+
+		if (name == "corner_hard_1")
+		{
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/corner_hard_1.mdl");
+			Vector3 offset(0, 0, 0);
+
+			//make shapes
+			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Box>();
+			shape1->SetScaleFactor(Vector3(0.5, 0.5, 0.5)*scaleFactor);
+
+			auto* shape2 = root->CreateComponent<NewtonCollisionShape_Box>();
+			shape2->SetScaleFactor(Vector3(1.0, 0.5, 0.5)*scaleFactor);
+
+			shape1->SetPositionOffset(Vector3(0, 0, 0.5f)*scaleFactor);
+			shape2->SetPositionOffset(Vector3(0.25, 0 , 0)*scaleFactor);
+			//shape1->SetRadius(0.25*scaleFactor);
+			//shape1->SetLength(4 * scaleFactor);
+
+			
+
+			PiecePointRow* pointRow1 = root->CreateComponent<PiecePointRow>();
+
+			for (int p = 1; p < 2; p++)
+			{
+				Node* point = root->CreateChild();
+				point->SetPosition(Vector3(0, 0, (p*0.5f + 0.25)*scaleFactor));
+				PiecePoint* piecePoint = point->CreateComponent<PiecePoint>();
+
+				pointRow1->PushBack(piecePoint);
+
+				if (p == 0 || p == 1)
+					piecePoint->isEndCap_ = true;
+
+			}
+			pointRow1->SetRowDirectionLocal(Vector3(0, 0, 1));
+			pointRow1->Finalize();
+			pointRow1->SetRowType(PiecePointRow::RowType_RodHard);
+
+
+
+			PiecePointRow* pointRow2 = root->CreateComponent<PiecePointRow>();
+
+			for (int p = 1; p < 2; p++)
+			{
+				Node* point = root->CreateChild();
+				point->SetPosition(Vector3((p*0.5f + 0.25)*scaleFactor, 0, 0));
+				point->SetRotation(Quaternion(0, 90, 0));
+				PiecePoint* piecePoint = point->CreateComponent<PiecePoint>();
+				
+				pointRow2->PushBack(piecePoint);
+
+				if (p == 0 || p == 1)
+					piecePoint->isEndCap_ = true;
+
+			}
+			pointRow2->SetRowDirectionLocal(Vector3(1, 0, 0));
+			pointRow2->Finalize();
+			pointRow2->SetRowType(PiecePointRow::RowType_RodHard);
+
+
+
+			//body->SetUseInertiaHack(true);
+
+			staticMdl->SetModel(pieceModel);
+
+
+		}
+
+
+
+
+
 
 
 		if (name == "rod_round_4")

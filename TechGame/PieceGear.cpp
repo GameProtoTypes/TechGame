@@ -90,7 +90,7 @@ void PieceGear::ReEvalConstraints()
 
 
 
-		const float epsilon = 0.05f;
+		const float epsilon = 0.02f;
 		bool alignmentCheck = true;
 
 		//gears must be correct distance apart
