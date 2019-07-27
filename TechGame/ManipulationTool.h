@@ -31,7 +31,7 @@ public:
 
 
 	bool BeginDrag();
-	void EndDrag();
+	void EndDrag(bool freeze);
 	bool IsDragging() { return isDragging_; }
 
 	bool Gather(bool grabOne = false);

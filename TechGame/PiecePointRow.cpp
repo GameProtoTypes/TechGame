@@ -274,9 +274,18 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 	Piece* theHolePiece = theHoleRow->GetPiece();
 	Piece* theRodPiece = theRodRow->GetPiece();
 
+	if (theHolePiece->GetEffectiveRigidBody() != theHolePiece->GetRigidBody() || theRodPiece->GetEffectiveRigidBody() != theRodPiece->GetRigidBody())
+	{
+		URHO3D_LOGWARNING("PiecePointRow::AttachRows: Cannot AttachRows pieces have abstracted rigid bodies.");
+		return false;
+	}
 	
 	NewtonRigidBody* holeBody = theHolePiece->GetRigidBody();
 	NewtonRigidBody* rodBody = theRodPiece->GetRigidBody();
+
+
+
+
 
 
 	URHO3D_LOGINFO("PiecePointRow::AttachRows holebody enabled: " + ea::to_string(holeBody->IsEnabledEffective()));
@@ -623,7 +632,7 @@ void PiecePointRow::HandleUpdate(StringHash event, VariantMap& eventData)
 
 	UpdatePointOccupancies();
 	UpdateOptimizeFullRow(this);
-	UpdateDynamicDettachement();
+	//UpdateDynamicDettachement();
 	return;
 }
 

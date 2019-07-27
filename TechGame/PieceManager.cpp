@@ -443,6 +443,13 @@ PieceSolidificationGroup* PieceManager::FormSolidGroup(Piece* startingPiece)
 		newGroup->GetNode()->SetWorldPosition(startingPiece->GetNode()->GetWorldPosition());
 		for (Piece* pc : pieces) {
 			MovePieceToSolidGroup(pc, newGroup);
+
+			//if part of the contraption was frozen - make the new group frozen too.
+			if (pc->GetRigidBody()->GetMassScale() <= 0.0f) {
+				newGroup->GetRigidBody()->SetMassScale(0.0f);
+				URHO3D_LOGINFO("setting  new group mass scale to 0 because a piece already had a mass scale of 0");
+			}
+
 		}
 		return newGroup;
 	}
@@ -453,6 +460,8 @@ void PieceManager::FormSolidGroupsOnContraption(Piece* startingPiece)
 {
 	ea::vector<Piece*> pieces;
 	startingPiece->GetAttachedPieces(pieces, true);
+
+
 
 	for (Piece* pc : pieces)
 	{

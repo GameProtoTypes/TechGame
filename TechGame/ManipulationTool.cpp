@@ -36,6 +36,12 @@ bool ManipulationTool::BeginDrag()
 	dragPoint_ = aimPiece->GetNode()->CreateChild("DragPoint");
 	dragPoint_->SetWorldPosition(worldHitPos);
 
+	if (dragPiece_->GetEffectiveRigidBody()->GetMassScale() <= 0.0f) {
+		dragPiece_->GetEffectiveRigidBody()->SetMassScale(1.0);
+		node_->GetScene()->GetComponent<NewtonPhysicsWorld>()->ForceBuild();
+	}
+	
+
 	URHO3D_LOGINFO("beginning drag.");
 
 	isDragging_ = true;
@@ -52,13 +58,20 @@ bool ManipulationTool::BeginDrag()
 
 }
 
-void ManipulationTool::EndDrag()
+void ManipulationTool::EndDrag(bool freeze)
 {
 	URHO3D_LOGINFO("ending drag.");
 	//kinamaticConstriant_->Remove();
 
 	dragPiece_->GetEffectiveRigidBody()->ResetForces();
 	dragPoint_->Remove();
+
+	if (freeze) {
+		node_->GetScene()->GetComponent<NewtonPhysicsWorld>()->WaitForUpdateFinished();
+		dragPiece_->GetRigidBody()->SetMassScale(0);
+		
+	}
+
 
 	isDragging_ = false;
 }
@@ -150,6 +163,8 @@ bool ManipulationTool::Gather(bool grabOne)
 		{
 			//create a new group and move all pieces to the newGroup.
 			PieceSolidificationGroup* newGroup = pieceManager_->CreateGroupNode(GetScene())->GetComponent<PieceSolidificationGroup>();
+			//newGroup->GetNode()->SetWorldPosition(gatheredPiece_->GetNode()->GetWorldPosition());
+
 
 			pieceManager_->MovePiecesToSolidGroup(allGatherPieces_, newGroup);
 			gatheredPieceGroup_ = newGroup;
@@ -195,7 +210,19 @@ void ManipulationTool::UnGather(bool freeze)
 		goodToDrop = false;
 	
 
+
+
+
 	if (goodToDrop) {
+
+		//bool attachingToFrozenObject = false;
+		//for (PieceAttachmentStager::AttachmentPair* attachment : attachStager_->GetFinalAttachments())
+		//{
+		//	if (attachment->pieceB->GetEffectiveRigidBody()->GetMassScale() <= 0.0f)
+		//		attachingToFrozenObject = true;
+		//}
+
+
 
 		//check collisions
 		drop(freeze, hasAttachement);
@@ -204,12 +231,10 @@ void ManipulationTool::UnGather(bool freeze)
 
 void ManipulationTool::drop(bool freeze, bool hadAttachement)
 {
-	if (!gatheredPieceGroup_.Expired() && hadAttachement) {
-		GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPieceGroup_);
-	}
 
 	GetScene()->GetComponent<PieceManager>()->RemoveSolidGroup(gatheredPieceGroup_);
 		
+
 
 	gatheredPieceGroup_ = nullptr;
 
@@ -238,7 +263,7 @@ void ManipulationTool::drop(bool freeze, bool hadAttachement)
 
 		PieceSolidificationGroup* group = gatheredPiece_->GetPieceGroup();
 		
-		if (freeze && group)
+		if ((freeze) && group)
 		{
 			group->GetRigidBody()->SetMassScale(0);
 		}
@@ -251,6 +276,7 @@ void ManipulationTool::drop(bool freeze, bool hadAttachement)
 
 	GetScene()->GetComponent<PieceManager>()->CleanAll();
 	GetScene()->GetComponent<PieceManager>()->RebuildSolidifies();
+
 
 	//restore move mode to camera so that the next picked up piece will get picked up in camera mode.
 	SetMoveMode(MoveMode_Camera);

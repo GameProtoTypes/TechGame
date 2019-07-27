@@ -192,7 +192,7 @@ void TechGame::UpdateGameUI()
 	}
 	else if (manipTool->IsDragging())
 	{
-		instructionText_->SetText("Drag the piece around...");
+		instructionText_->SetText("Drag the piece around. \n Hold \"Shift\" and release to freeze object.");
 	}
 	else
 	{
@@ -292,7 +292,7 @@ void TechGame::UpdateUIInput(float timestep)
 	else
 	{
 		if (manipTool->IsDragging()) {
-			manipTool->EndDrag();
+			manipTool->EndDrag(input->GetQualifierDown(QUAL_SHIFT));
 			crossHairElement_->SetVar("curMode", (int)CrossHairMode::CrossHairMode_Free);
 		}
 	}
@@ -712,7 +712,8 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 
 		ui::End();
 
-
+		Vector3 worldPos;
+		Piece* piece = scene_->GetComponent<PieceManager>()->GetClosestAimPiece(worldPos, character_->headNode_);
 
 
 		ui::Begin("Utils");
@@ -740,8 +741,6 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 
 		if (ui::Button("Form PieceSolidificationGroup"))
 		{
-			Vector3 worldPos;
-			Piece* piece = scene_->GetComponent<PieceManager>()->GetClosestAimPiece(worldPos, character_->headNode_);
 			if (piece) {
 
 				URHO3D_LOGINFO("FORMING MANUAL GROUP...");
@@ -750,8 +749,6 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 		}
 		if (ui::Button("Remove PieceSolidificationGroup"))
 		{
-			Vector3 worldPos;
-			Piece* piece = scene_->GetComponent<PieceManager>()->GetClosestAimPiece(worldPos, character_->headNode_);
 			if (piece) {
 				scene_->GetComponent<PieceManager>()->RemoveSolidGroup(piece->GetPieceGroup());
 			}
@@ -774,6 +771,24 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 		ui::Text(("Character Node Position: " + character_->GetNode()->GetWorldPosition().ToString()).c_str());
 
 		ui::End();
+
+
+		ui::Begin("Hovered Piece Stats:");
+		if (piece)
+		{
+			ui::Text(("rigbody: " + ea::to_string((unsigned)(void*)piece->GetRigidBody())).c_str());
+			ui::Text(("rigbody mass: " + ea::to_string(piece->GetRigidBody()->GetEffectiveMass())).c_str());
+			ui::Text(("rigbody world transform: " + piece->GetRigidBody()->GetWorldTransform().ToString()).c_str());
+			if (piece->GetEffectiveRigidBody() != piece->GetRigidBody()) {
+				ui::Text(("rigbody effective: " + ea::to_string((unsigned)(void*)piece->GetEffectiveRigidBody())).c_str());
+				ui::Text(("rigbody effective mass: " + ea::to_string(piece->GetEffectiveRigidBody()->GetEffectiveMass())).c_str());
+			}
+		}
+		ui::End();
+
+
+
+		
 
 	}
 

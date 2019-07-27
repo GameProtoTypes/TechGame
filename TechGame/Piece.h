@@ -69,6 +69,11 @@ public:
 	//returns the rigid body that is enabled and is actually controlling this rigid body
 	NewtonRigidBody* GetEffectiveRigidBody()
 	{
+		if (GetPieceGroup())
+		{
+			return GetPieceGroup()->GetRigidBody();
+		}
+
 		ea::vector<NewtonRigidBody*> bodies;
 		GetRootRigidBodies(bodies, node_, false);
 		for (int i = 0; i < bodies.size(); i++)
