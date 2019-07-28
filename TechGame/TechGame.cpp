@@ -105,7 +105,7 @@ void TechGame::CreateCharacter()
 	auto* cache = GetSubsystem<ResourceCache>();
 
 	Node* playerNode = scene_->CreateChild("player");
-	playerNode->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
+	playerNode->SetPosition(Vector3(0.0f, 0.0f, -10.0f));
 
 
 	character_ = playerNode->CreateComponent<Character>();
@@ -196,7 +196,7 @@ void TechGame::UpdateGameUI()
 	}
 	else
 	{
-		instructionText_->SetText("\"Left Click\" to grab pieces and attach them.\n \"Shift + Left Click\" to remove individual pieces.\n \"Right Click\" to drag pieces. \n \"C\" Duplicates a piece.");
+		instructionText_->SetText("\"Left Click\" to grab pieces and attach them.\n \"Shift + Left Click\" to remove individual pieces.\n \"Right Click\" to drag pieces. \n \"C\" Duplicates a piece. \n \"R\" Removes a piece.");
 	}
 
 }
@@ -494,14 +494,14 @@ void TechGame::CreateScene()
 
 		PieceManager* pm = scene_->GetComponent<PieceManager>();
 		
-		pm->CreatePiece("gear_medium", false)->SetWorldPosition(Vector3(-1,0,0));
-		pm->CreatePiece("8_piece_Cshape", false)->SetWorldPosition(Vector3(1, 0, 0));
+		//pm->CreatePiece("gear_medium", false)->SetWorldPosition(Vector3(-1,0,0));
+		//pm->CreatePiece("8_piece_Cshape", false)->SetWorldPosition(Vector3(1, 0, 0));
 
 		Node* prevPiece = nullptr;
 
 		ea::vector<Piece*> pieces;
 		int numDiffPieces = 21;
-		for (int y = 0; y < numDiffPieces*20; y += 1) {
+		for (int y = 0; y < numDiffPieces*2; y += 1) {
 
 			Node* pieceNode;
 
@@ -550,7 +550,7 @@ void TechGame::CreateScene()
 				pieceNode = pm->CreatePiece("corner_hard_1", false);
 
 
-			pieceNode->SetWorldPosition(Vector3(Random(-10,10), y * .05, Random(-10,10)));
+			pieceNode->SetWorldPosition(Vector3(Random(-2,2), y * .05, Random(-2,2)));
 
 			Color color;
 			float colorBaseHue = Color::BLUE.Hue();

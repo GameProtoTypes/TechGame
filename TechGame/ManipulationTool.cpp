@@ -287,7 +287,8 @@ void ManipulationTool::InstantDuplicatePiece()
 
 	Node* pieceNode = node_->GetScene()->GetComponent<PieceManager>()->CreatePiece(pieceName, false);
 
-	pieceNode->SetWorldPosition(gatherNode_->GetWorldPosition() + Vector3(0, 2.0f, 0));
+	pieceNode->SetWorldPosition(aimPiece->GetNode()->GetWorldPosition() + Vector3(0, 1.0f, 0));
+	pieceNode->GetComponent<Piece>()->SetPrimaryColor(aimPiece->GetPrimaryColor());
 
 }
 

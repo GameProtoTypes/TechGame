@@ -50,6 +50,7 @@ public:
 		primaryColor_ = color;
 		RefreshVisualMaterial();
 	}
+	Color GetPrimaryColor() const { return primaryColor_; }
 
 	void SetEnableDynamicDetachment(bool enable);
 	bool GetEnableDynamicDetachment() const { return enableDynamicDetachment_; }
