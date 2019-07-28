@@ -162,8 +162,7 @@ bool ManipulationTool::Gather(bool grabOne)
 		else
 		{
 			//create a new group and move all pieces to the newGroup.
-			PieceSolidificationGroup* newGroup = pieceManager_->CreateGroupNode(GetScene())->GetComponent<PieceSolidificationGroup>();
-			//newGroup->GetNode()->SetWorldPosition(gatheredPiece_->GetNode()->GetWorldPosition());
+			PieceSolidificationGroup* newGroup = pieceManager_->CreateGroupNode(GetScene(), gatheredPiece_->GetNode()->GetWorldPosition())->GetComponent<PieceSolidificationGroup>();
 
 
 			pieceManager_->MovePiecesToSolidGroup(allGatherPieces_, newGroup);
@@ -714,44 +713,44 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 	{
 		
 
-	//kinamaticConstriant_->SetOtherWorldPosition(gatherNode_->GetWorldPosition());
-	//kinamaticConstriant_->SetOtherWorldRotation(gatherNode_->GetWorldRotation());
+		//kinamaticConstriant_->SetOtherWorldPosition(gatherNode_->GetWorldPosition());
+		//kinamaticConstriant_->SetOtherWorldRotation(gatherNode_->GetWorldRotation());
 
 
-	Vector3 displacement = (gatherNode_->GetWorldPosition() - dragPoint_->GetWorldPosition());
+		Vector3 displacement = (gatherNode_->GetWorldPosition() - dragPoint_->GetWorldPosition());
 
-	Vector3 worldVel = dragPiece_->GetEffectiveRigidBody()->GetLinearVelocity(TS_WORLD);
+		Vector3 worldVel = dragPiece_->GetEffectiveRigidBody()->GetLinearVelocity(TS_WORLD);
 
-	Vector3 finalWorldForce = (Urho3D::Ln<float>(displacement.Length() + 1) * 1.0f * displacement.Normalized()) + worldVel*-0.1f;
+		Vector3 finalWorldForce = (Urho3D::Ln<float>(displacement.Length() + 1) * 1.0f * displacement.Normalized()) + worldVel*-0.1f;
 
-	//finalWorldForce -= GetScene()->GetComponent<NewtonPhysicsWorld>()->GetGravity() * dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass();
+		//finalWorldForce -= GetScene()->GetComponent<NewtonPhysicsWorld>()->GetGravity() * dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass();
 
-	dragPiece_->GetEffectiveRigidBody()->ResetForces();
+		dragPiece_->GetEffectiveRigidBody()->ResetForces();
 
-	//float mRatio = dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass() / dragMassTotal_;
+		//float mRatio = dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass() / dragMassTotal_;
 
-	Vector3 netForceOnAllJoints;
-	for(NewtonConstraint* c : dragPiece_->GetEffectiveRigidBody()->GetConnectedContraints())
-	{
-		netForceOnAllJoints += c->GetOwnForce();
-	}
+		Vector3 netForceOnAllJoints;
+		for(NewtonConstraint* c : dragPiece_->GetEffectiveRigidBody()->GetConnectedContraints())
+		{
+			netForceOnAllJoints += c->GetOwnForce();
+		}
 
-	Vector3 calculatedForce = finalWorldForce * dragMassTotal_ * 100.0f;
+		Vector3 calculatedForce = finalWorldForce * dragMassTotal_ * 100.0f;
 
-	dragPiece_->GetEffectiveRigidBody()->AddWorldForce(calculatedForce, dragPoint_->GetWorldPosition());
-
-
-
-
-	//limit rotational velocity on drag piece
-	float dragPieceMass = dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass();
-	Vector3 worldRotVel = dragPiece_->GetEffectiveRigidBody()->GetAngularVelocity(TS_WORLD);
-	Vector3 worldLinearVel = dragPiece_->GetEffectiveRigidBody()->GetLinearVelocity(TS_WORLD);
+		dragPiece_->GetEffectiveRigidBody()->AddWorldForce(calculatedForce, dragPoint_->GetWorldPosition());
 
 
 
 
-	dragPiece_->GetEffectiveRigidBody()->AddWorldTorque(-worldRotVel.Normalized() * (worldRotVel.LengthSquared() * 0.1f * dragPieceMass));
+		//limit rotational velocity on drag piece
+		float dragPieceMass = dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass();
+		Vector3 worldRotVel = dragPiece_->GetEffectiveRigidBody()->GetAngularVelocity(TS_WORLD);
+		Vector3 worldLinearVel = dragPiece_->GetEffectiveRigidBody()->GetLinearVelocity(TS_WORLD);
+
+
+
+
+		dragPiece_->GetEffectiveRigidBody()->AddWorldTorque(-worldRotVel.Normalized() * (worldRotVel.LengthSquared() * 0.1f * dragPieceMass));
 
 
 	}

@@ -73,8 +73,8 @@ public:
 
 
 
-	///create a new node with group component
-	Node* CreateGroupNode(Node* parent);
+	///create a new node with group component as child of parent at worldPosition
+	Node* CreateGroupNode(Node* parent, Vector3 worldPosition);
 
 
 

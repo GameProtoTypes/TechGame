@@ -238,9 +238,10 @@ void PieceManager::GetPointsAroundPoints(ea::vector<PiecePoint*>& inPieces, ea::
 
 
 
-Urho3D::Node* PieceManager::CreateGroupNode(Node* parent)
+Urho3D::Node* PieceManager::CreateGroupNode(Node* parent, Vector3 worldPosition)
 {
 	Node* node = parent->CreateChild();
+	node->SetWorldPosition(worldPosition);
 	node->CreateComponent<PieceSolidificationGroup>();
 
 	RebuildSolidifies();
@@ -439,8 +440,7 @@ PieceSolidificationGroup* PieceManager::FormSolidGroup(Piece* startingPiece)
 	GetRigidlyConnectedPieces(startingPiece, pieces);
 
 	if (pieces.size() > 1) {
-		PieceSolidificationGroup* newGroup = CreateGroupNode(GetScene())->GetComponent<PieceSolidificationGroup>();
-		newGroup->GetNode()->SetWorldPosition(startingPiece->GetNode()->GetWorldPosition());
+		PieceSolidificationGroup* newGroup = CreateGroupNode(GetScene(), startingPiece->GetNode()->GetWorldPosition())->GetComponent<PieceSolidificationGroup>();
 		for (Piece* pc : pieces) {
 			MovePieceToSolidGroup(pc, newGroup);
 

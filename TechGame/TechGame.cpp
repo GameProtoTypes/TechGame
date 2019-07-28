@@ -779,6 +779,7 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 			ui::Text(("rigbody: " + ea::to_string((unsigned)(void*)piece->GetRigidBody())).c_str());
 			ui::Text(("rigbody mass: " + ea::to_string(piece->GetRigidBody()->GetEffectiveMass())).c_str());
 			ui::Text(("rigbody world transform: " + piece->GetRigidBody()->GetWorldTransform().ToString()).c_str());
+			ui::Text(("rigbody world position: " + piece->GetRigidBody()->GetWorldPosition().ToString()).c_str());
 			if (piece->GetEffectiveRigidBody() != piece->GetRigidBody()) {
 				ui::Text(("rigbody effective: " + ea::to_string((unsigned)(void*)piece->GetEffectiveRigidBody())).c_str());
 				ui::Text(("rigbody effective mass: " + ea::to_string(piece->GetEffectiveRigidBody()->GetEffectiveMass())).c_str());
