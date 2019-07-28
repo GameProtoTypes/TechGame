@@ -89,8 +89,9 @@ protected:
 	bool isDragging_ = false;
 	WeakPtr<Node> dragPoint_;
 	WeakPtr<Piece> dragPiece_;
+	ea::vector<bool> pieceDynDetachSaves_;
 	float dragMassTotal_ = 0.0f;
-
+	bool dragUseKinematicJoint_ = true;
 
 	WeakPtr<Node> gatherNode_;
 	MoveMode moveMode_ = MoveMode_Camera;

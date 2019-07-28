@@ -49,6 +49,20 @@ void Piece::GetAttachedPieces(ea::vector<Piece*>& pieces, bool recursive)
 	pieces.erase_at(pieces.index_of(this));
 }
 
+void Piece::SetEnableDynamicDetachment(bool enable)
+{
+	enableDynamicDetachment_ = enable;
+
+	if (enable == true) {
+		ea::vector<PiecePointRow*> rows;
+		GetPointRows(rows);
+		for (PiecePointRow* row : rows)
+		{
+			row->ResetOccupiedPointsCountDown();
+		}
+	}
+}
+
 void Piece::SetGhostingEffect(bool enable)
 {
 	if (enable != ghostingEffectOn_)

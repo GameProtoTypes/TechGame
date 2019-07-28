@@ -51,6 +51,8 @@ public:
 		RefreshVisualMaterial();
 	}
 
+	void SetEnableDynamicDetachment(bool enable);
+	bool GetEnableDynamicDetachment() const { return enableDynamicDetachment_; }
 
 	void SetGhostingEffect(bool enable);
 
@@ -94,6 +96,8 @@ protected:
 	Color primaryColor_;
 
 	Matrix3x4 lastRigBodyTransform_;
+
+	bool enableDynamicDetachment_ = true;
 
 	virtual void OnNodeSet(Node* node) override;
 

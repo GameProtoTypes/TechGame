@@ -56,6 +56,33 @@ bool ManipulationTool::BeginDrag()
 	}
 
 
+	{
+		ea::vector<Piece*> allContraptionPieces;
+		dragPiece_->GetAttachedPieces(allContraptionPieces, true);
+		allContraptionPieces.push_back(dragPiece_);
+		for (Piece* pc : allContraptionPieces)
+		{
+			pieceDynDetachSaves_.push_back(pc->GetEnableDynamicDetachment());
+			pc->SetEnableDynamicDetachment(false);
+		}
+	}
+
+	if (dragUseKinematicJoint_)
+	{
+
+		kinamaticConstriant_ = dragPiece_->GetEffectiveRigidBody()->GetNode()->CreateComponent<NewtonKinematicsControllerConstraint>();
+		kinamaticConstriant_->SetLimitRotationalVelocity(false);
+
+		float acceleration = Clamp<float>(dragMassTotal_*10000.0f, 100.0f, 1000000.0f);
+
+		kinamaticConstriant_->SetLinearFrictionalAcceleration(acceleration);
+		kinamaticConstriant_->SetAngularFrictionalAcceleration(acceleration);
+		
+	}
+
+
+
+
 }
 
 void ManipulationTool::EndDrag(bool freeze)
@@ -71,6 +98,23 @@ void ManipulationTool::EndDrag(bool freeze)
 		dragPiece_->GetRigidBody()->SetMassScale(0);
 		
 	}
+	if (dragUseKinematicJoint_)
+	{
+		kinamaticConstriant_->Remove();
+	}
+
+
+	{
+		ea::vector<Piece*> allContrationPieces;
+		dragPiece_->GetAttachedPieces(allContrationPieces, true);
+		allContrationPieces.push_back(dragPiece_);
+		for (int i = 0; i < allContrationPieces.size(); i++)
+		{
+			Piece* pc = allContrationPieces[i];
+			pc->SetEnableDynamicDetachment(pieceDynDetachSaves_[i]);
+		}
+	}
+
 
 
 	isDragging_ = false;
@@ -712,46 +756,46 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 	else if(IsDragging())
 	{
 		
-
-		//kinamaticConstriant_->SetOtherWorldPosition(gatherNode_->GetWorldPosition());
-		//kinamaticConstriant_->SetOtherWorldRotation(gatherNode_->GetWorldRotation());
-
-
-		Vector3 displacement = (gatherNode_->GetWorldPosition() - dragPoint_->GetWorldPosition());
-
-		Vector3 worldVel = dragPiece_->GetEffectiveRigidBody()->GetLinearVelocity(TS_WORLD);
-
-		Vector3 finalWorldForce = (Urho3D::Ln<float>(displacement.Length() + 1) * 1.0f * displacement.Normalized()) + worldVel*-0.1f;
-
-		//finalWorldForce -= GetScene()->GetComponent<NewtonPhysicsWorld>()->GetGravity() * dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass();
-
-		dragPiece_->GetEffectiveRigidBody()->ResetForces();
-
-		//float mRatio = dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass() / dragMassTotal_;
-
-		Vector3 netForceOnAllJoints;
-		for(NewtonConstraint* c : dragPiece_->GetEffectiveRigidBody()->GetConnectedContraints())
-		{
-			netForceOnAllJoints += c->GetOwnForce();
+		if (dragUseKinematicJoint_) {
+			kinamaticConstriant_->SetOtherWorldPosition(gatherNode_->GetWorldPosition());
+			kinamaticConstriant_->SetOtherWorldRotation(gatherNode_->GetWorldRotation());
 		}
+		else
+		{
+			Vector3 displacement = (gatherNode_->GetWorldPosition() - dragPoint_->GetWorldPosition());
 
-		Vector3 calculatedForce = finalWorldForce * dragMassTotal_ * 100.0f;
+			Vector3 worldVel = dragPiece_->GetEffectiveRigidBody()->GetLinearVelocity(TS_WORLD);
 
-		dragPiece_->GetEffectiveRigidBody()->AddWorldForce(calculatedForce, dragPoint_->GetWorldPosition());
+			Vector3 finalWorldForce = (Urho3D::Ln<float>(displacement.Length() + 1) * 1.0f * displacement.Normalized()) + worldVel * -0.1f;
 
+			//finalWorldForce -= GetScene()->GetComponent<NewtonPhysicsWorld>()->GetGravity() * dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass();
 
+			dragPiece_->GetEffectiveRigidBody()->ResetForces();
 
+			//float mRatio = dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass() / dragMassTotal_;
 
-		//limit rotational velocity on drag piece
-		float dragPieceMass = dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass();
-		Vector3 worldRotVel = dragPiece_->GetEffectiveRigidBody()->GetAngularVelocity(TS_WORLD);
-		Vector3 worldLinearVel = dragPiece_->GetEffectiveRigidBody()->GetLinearVelocity(TS_WORLD);
+			Vector3 netForceOnAllJoints;
+			for (NewtonConstraint* c : dragPiece_->GetEffectiveRigidBody()->GetConnectedContraints())
+			{
+				netForceOnAllJoints += c->GetOwnForce();
+			}
 
+			Vector3 calculatedForce = finalWorldForce * dragMassTotal_ * 100.0f;
 
+			if (calculatedForce.Length() > 10.0f)
+			{
+				calculatedForce = calculatedForce.Normalized()*10.0f;
+			}
 
+			dragPiece_->GetEffectiveRigidBody()->AddWorldForce(calculatedForce, dragPoint_->GetWorldPosition());
 
-		dragPiece_->GetEffectiveRigidBody()->AddWorldTorque(-worldRotVel.Normalized() * (worldRotVel.LengthSquared() * 0.1f * dragPieceMass));
+			//limit rotational velocity on drag piece
+			float dragPieceMass = dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass();
+			Vector3 worldRotVel = dragPiece_->GetEffectiveRigidBody()->GetAngularVelocity(TS_WORLD);
+			Vector3 worldLinearVel = dragPiece_->GetEffectiveRigidBody()->GetLinearVelocity(TS_WORLD);
 
+			//dragPiece_->GetEffectiveRigidBody()->AddWorldTorque(-worldRotVel.Normalized() * (worldRotVel.LengthSquared() * 0.1f * dragPieceMass));
+		}
 
 	}
 

@@ -24,11 +24,11 @@ public:
 	};
 
 	struct RowAttachement {
-		SharedPtr<PiecePoint> pointOther_;
-		SharedPtr<PiecePoint> point;
-		SharedPtr<PiecePointRow> rowOther_ ;
-		SharedPtr<PiecePointRow> row_ ;
-		SharedPtr<NewtonConstraint> constraint_ ;
+		WeakPtr<PiecePoint> pointOther_;
+		WeakPtr<PiecePoint> point;
+		WeakPtr<PiecePointRow> rowOther_ ;
+		WeakPtr<PiecePointRow> row_ ;
+		WeakPtr<NewtonConstraint> constraint_ ;
 	};
 
 
@@ -116,6 +116,9 @@ public:
 
 	bool IsEndPoint(PiecePoint* point);
 
+	//returns true if there is at least one endcap in the row.
+	bool HasAnEndCap();
+
 	int Count() { return points_.size(); }
 
 	///return the next point going inside the row from the given endPoint.
@@ -135,6 +138,13 @@ public:
 	bool DetachFrom(PiecePointRow* otherRow, bool updateOccupiedPoints);
 
 	bool DetachAll();
+
+
+	void ResetOccupiedPointsCountDown() {
+		occupiedCountDown_ = occupiedCountDownCount_;
+	}
+
+
 
 	Piece* GetPiece();
 

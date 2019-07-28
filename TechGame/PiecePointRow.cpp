@@ -124,6 +124,16 @@ bool PiecePointRow::IsEndPoint(PiecePoint* point)
 		return false;
 }
 
+bool PiecePointRow::HasAnEndCap()
+{
+	for (PiecePoint* pnt : points_)
+	{
+		if (pnt->isEndCap_)
+			return true;
+	}
+	return false;
+}
+
 PiecePoint* PiecePointRow::GetPointNextToEndPoint(PiecePoint* endPoint)
 {
 	if (!endPoint->isEndCap_)
@@ -185,7 +195,7 @@ bool PiecePointRow::DetachFrom(PiecePointRow* otherRow, bool updateOccupiedPoint
 		if (rowAttachements_[i].rowOther_ == otherRow)
 		{
 
-				rowAttachements_[i].constraint_->Remove();
+			rowAttachements_[i].constraint_->Remove();
 			
 			rowAttachements_.erase_at(i);
 			detached = true;
@@ -221,8 +231,6 @@ bool PiecePointRow::DetachAll()
 	for (int i = 0; i < rowAttachementsCopy.size(); i++) {
 		DetachFrom(rowAttachementsCopy[i].rowOther_, true);
 	}
-
-	rowAttachements_.clear();
 
 	return true;
 }
@@ -688,16 +696,32 @@ void PiecePointRow::UpdatePointOccupancies()
 void PiecePointRow::UpdateDynamicDettachement()
 {
 
-
-
 	if (numOccupiedPoints_ <= 0)
 	{
 		if (occupiedCountDown_ <= 0) {
 			occupiedCountDown_ = 0;
 			if (GetScene()->GetComponent<PieceManager>()->GetEnableDynamicRodDetachment())
 			{
-				if(rowAttachements_.size())
-					DetachAll();
+				if (rowAttachements_.size())
+				{
+					ea::vector<RowAttachement> rowAttachementsCopy = rowAttachements_;
+					for (int i = 0; i < rowAttachementsCopy.size(); i++) 
+					{
+						
+						if (rowAttachementsCopy[i].pointOther_->GetPiece()->GetEnableDynamicDetachment() && GetPiece()->GetEnableDynamicDetachment()) {
+							
+							
+							if (!rowAttachementsCopy[i].row_->HasAnEndCap() && !rowAttachementsCopy[i].rowOther_->HasAnEndCap())
+							{
+								DetachFrom(rowAttachementsCopy[i].rowOther_, true);
+
+							}
+
+						}
+					}
+
+					
+				}
 
 			}
 		}
