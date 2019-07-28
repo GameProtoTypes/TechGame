@@ -184,13 +184,12 @@ bool PiecePointRow::DetachFrom(PiecePointRow* otherRow, bool updateOccupiedPoint
 		
 		if (rowAttachements_[i].rowOther_ == otherRow)
 		{
-			if (!rowAttachements_[i].constraint_.Expired())
-			{
-				rowAttachements_[i].constraint_->Remove();
-			}
 
+				rowAttachements_[i].constraint_->Remove();
+			
 			rowAttachements_.erase_at(i);
 			detached = true;
+			break;
 		}
 	}
 	for (int i = 0; i < otherRow->rowAttachements_.size(); i++) {
@@ -199,6 +198,7 @@ bool PiecePointRow::DetachFrom(PiecePointRow* otherRow, bool updateOccupiedPoint
 		{
 			otherRow->rowAttachements_.erase_at(i);
 			detached = true;
+			break;
 		}
 	}
 
@@ -359,7 +359,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			holeBody->SetWorldRotation(Quaternion::IDENTITY);
 			rodBody->SetWorldRotation(diffSnap45);
 
-			const float twistFriction = 0.001f;
+			const float twistFriction = 0.01f;
 			//if (!attachAsFullRow) {
 
 				constraint = holeBody->GetNode()->CreateComponent<NewtonSliderConstraint>();
@@ -552,6 +552,8 @@ bool PiecePointRow::RowsHaveDegreeOfFreedom(PiecePointRow* rowA, PiecePointRow* 
 
 bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)
 {
+	return false;//#TODO!
+
 	ea::vector<PiecePoint*> points = row->GetPoints();
 	PieceManager* pieceManager = row->GetScene()->GetComponent<PieceManager>();
 
@@ -567,14 +569,17 @@ bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)
 		if (fullyOccupied && !row->isFullRowOptimized_)
 		{
 			URHO3D_LOGINFO("Optimizing Rod..");
-			for (RowAttachement attachment : row->rowAttachements_)
+			for (auto attachment : row->rowAttachements_)
 			{
+				if (!attachment.rowOther_)
+					continue;
+
 				row->DetachFrom(attachment.rowOther_, false);
 				AttachRows(row, attachment.rowOther_, attachment.point, attachment.pointOther_, true, false);
 
 
 				bool allPlaner = true;
-				for (RowAttachement attachment2 : row->rowAttachements_)
+				for (auto attachment2 : row->rowAttachements_)
 				{
 					allPlaner &= attachment2.rowOther_->GetIsPiecePlaner();
 				}
@@ -582,9 +587,9 @@ bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)
 				//if all pieces are planer - disable collisions between them.
 				if (allPlaner) {
 					URHO3D_LOGINFO("all pieces planer, disabling collisions.");
-					for (RowAttachement attachment2 : row->rowAttachements_)
+					for (auto attachment2 : row->rowAttachements_)
 					{
-						attachment.row_->GetPiece()->GetRigidBody()->SetCollisionOverride(attachment2.row_->GetPiece()->GetRigidBody(), false);
+						attachment.row_->GetPiece()->GetRigidBody()->SetCollisionOverride(attachment2.rowOther_->GetPiece()->GetRigidBody(), false);
 					}
 				}
 			}
@@ -594,13 +599,13 @@ bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)
 		else if (!fullyOccupied && row->isFullRowOptimized_)
 		{
 			URHO3D_LOGINFO("Un Optimizing Rod..");
-			for (RowAttachement attachment : row->rowAttachements_)
+			for (auto attachment : row->rowAttachements_)
 			{
 
 
-				for (RowAttachement attachment2 : row->rowAttachements_)
+				for (auto attachment2 : row->rowAttachements_)
 				{
-					attachment.row_->GetPiece()->GetRigidBody()->RemoveCollisionOverride(attachment2.row_->GetPiece()->GetRigidBody());
+					attachment.row_->GetPiece()->GetRigidBody()->RemoveCollisionOverride(attachment2.rowOther_->GetPiece()->GetRigidBody());
 
 
 					row->DetachFrom(attachment.rowOther_, false);
@@ -632,7 +637,7 @@ void PiecePointRow::HandleUpdate(StringHash event, VariantMap& eventData)
 
 	UpdatePointOccupancies();
 	UpdateOptimizeFullRow(this);
-	//UpdateDynamicDettachement();
+	UpdateDynamicDettachement();
 	return;
 }
 

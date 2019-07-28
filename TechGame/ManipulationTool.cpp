@@ -741,11 +741,17 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 	dragPiece_->GetEffectiveRigidBody()->AddWorldForce(calculatedForce, dragPoint_->GetWorldPosition());
 
 
-	dragPiece_->GetEffectiveRigidBody()->SetNetWorldTorque(dragPiece_->GetEffectiveRigidBody()->GetNetWorldTorque()*1.0f);
+
+
+	//limit rotational velocity on drag piece
+	float dragPieceMass = dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass();
+	Vector3 worldRotVel = dragPiece_->GetEffectiveRigidBody()->GetAngularVelocity(TS_WORLD);
+	Vector3 worldLinearVel = dragPiece_->GetEffectiveRigidBody()->GetLinearVelocity(TS_WORLD);
 
 
 
-	//limit rotational velocity on dragpiece
+
+	dragPiece_->GetEffectiveRigidBody()->AddWorldTorque(-worldRotVel.Normalized() * (worldRotVel.LengthSquared() * 0.1f * dragPieceMass));
 
 
 	}

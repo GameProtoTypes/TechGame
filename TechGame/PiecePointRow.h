@@ -24,11 +24,11 @@ public:
 	};
 
 	struct RowAttachement {
-		WeakPtr<PiecePoint> pointOther_;
-		WeakPtr<PiecePoint> point ;
-		WeakPtr<PiecePointRow> rowOther_ ;
-		WeakPtr<PiecePointRow> row_ ;
-		WeakPtr<NewtonConstraint> constraint_ ;
+		SharedPtr<PiecePoint> pointOther_;
+		SharedPtr<PiecePoint> point;
+		SharedPtr<PiecePointRow> rowOther_ ;
+		SharedPtr<PiecePointRow> row_ ;
+		SharedPtr<NewtonConstraint> constraint_ ;
 	};
 
 
