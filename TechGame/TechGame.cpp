@@ -188,7 +188,7 @@ void TechGame::UpdateGameUI()
 
 	if (manipTool->IsGathering())
 	{
-		instructionText_->SetText("\"Q\" or \"E\" + [\"Shift\"] Rotates Object \n \"R\" Resets Rotation \n  \"Scroll\" to change attachment point. \n  \"Shift\" + \"Left Click\" freezes pieces in mid-air");
+		instructionText_->SetText("\"Q\" or \"E\" + [\"Shift\"] Rotates Object \n \"R\" Resets Rotation \n  \"Scroll\" to change attachment point. \n  \"Shift\" + \"Left Click\" freezes pieces in mid-air.");
 	}
 	else if (manipTool->IsDragging())
 	{
@@ -196,7 +196,7 @@ void TechGame::UpdateGameUI()
 	}
 	else
 	{
-		instructionText_->SetText("\"Left Click\" to grab pieces and attach them.\n \"Shift + Left Click\" to remove individual pieces.\n \"Right Click\" to drag pieces.");
+		instructionText_->SetText("\"Left Click\" to grab pieces and attach them.\n \"Shift + Left Click\" to remove individual pieces.\n \"Right Click\" to drag pieces. \n \"C\" Duplicates a piece.");
 	}
 
 }
@@ -298,8 +298,20 @@ void TechGame::UpdateUIInput(float timestep)
 	}
 
 
+	//piece duplication
+	if (input->GetKeyPress(KEY_C))
+	{
+		manipTool->InstantDuplicatePiece();
+	}
+
 	if (input->GetKeyPress(KEY_R)) {
-		manipTool->ResetGatherNodeRotation();
+		if (manipTool->IsGathering() || manipTool->IsDragging()) {
+			manipTool->ResetGatherNodeRotation();
+		}
+		else
+		{
+			manipTool->InstantRemovePiece();
+		}
 	}
 
 	if (input->GetKeyPress(KEY_M)) {
@@ -371,7 +383,7 @@ void TechGame::CreateScene()
 	scene_->CreateComponent<Octree>();
 	NewtonPhysicsWorld* physicsWorld = scene_->CreateComponent<NewtonPhysicsWorld>();	
 	physicsWorld->SetGravity(Vector3(0, -9.81, 0));
-	physicsWorld->SetIterationCount(8);
+	//physicsWorld->SetIterationCount(8);
 	
 
 	context_->RegisterSubsystem<VisualDebugger>();
@@ -479,8 +491,11 @@ void TechGame::CreateScene()
 	auto* shape = floorNode->CreateComponent<NewtonCollisionShape_Box>();
 
 	{
-		CreatePiece(scene_, "gear_medium", false)->SetWorldPosition(Vector3(-1,0,0));
-		CreatePiece(scene_, "8_piece_Cshape", false)->SetWorldPosition(Vector3(1, 0, 0));
+
+		PieceManager* pm = scene_->GetComponent<PieceManager>();
+		
+		pm->CreatePiece("gear_medium", false)->SetWorldPosition(Vector3(-1,0,0));
+		pm->CreatePiece("8_piece_Cshape", false)->SetWorldPosition(Vector3(1, 0, 0));
 
 		Node* prevPiece = nullptr;
 
@@ -492,47 +507,47 @@ void TechGame::CreateScene()
 
 			int rnd = y % numDiffPieces;// Random(0, numDiffPieces);
 			if (rnd == 0)
-				pieceNode = CreatePiece(scene_, "8_piece_Cshape", false);
+				pieceNode = pm->CreatePiece("8_piece_Cshape", false);
 			else if (rnd == 1)
-				pieceNode = CreatePiece(scene_, "rod_hard_4", false);
+				pieceNode = pm->CreatePiece( "rod_hard_4", false);
 			else if (rnd == 2)
-				pieceNode = CreatePiece(scene_, "rod_round_4", false);
+				pieceNode = pm->CreatePiece( "rod_round_4", false);
 			else if (rnd == 3)
-				pieceNode = CreatePiece(scene_, "6_piece_thin", false);
+				pieceNode = pm->CreatePiece( "6_piece_thin", false);
 			else if (rnd == 4)
-				pieceNode = CreatePiece(scene_, "2_sleeve", false);
+				pieceNode = pm->CreatePiece("2_sleeve", false);
 			else if (rnd == 5)
-				pieceNode = CreatePiece(scene_, "1_cap_small", false);
+				pieceNode = pm->CreatePiece( "1_cap_small", false);
 			else if (rnd == 6)
-				pieceNode = CreatePiece(scene_, "rod_round_no_caps_4", false);
+				pieceNode = pm->CreatePiece( "rod_round_no_caps_4", false);
 			else if (rnd == 7)
-				pieceNode = CreatePiece(scene_, "6_piece_thick", false);
+				pieceNode = pm->CreatePiece( "6_piece_thick", false);
 			else if (rnd == 8)
-				pieceNode = CreatePiece(scene_, "5_piece_thick", false);
+				pieceNode = pm->CreatePiece( "5_piece_thick", false);
 			else if (rnd == 9)
-				pieceNode = CreatePiece(scene_, "4_piece_thick", false);
+				pieceNode = pm->CreatePiece( "4_piece_thick", false);
 			else if (rnd == 10)
-				pieceNode = CreatePiece(scene_, "3_piece_thick", false);
+				pieceNode = pm->CreatePiece("3_piece_thick", false);
 			else if (rnd == 11)
-				pieceNode = CreatePiece(scene_, "2_piece_thick", false);
+				pieceNode = pm->CreatePiece( "2_piece_thick", false);
 			else if (rnd == 12)
-				pieceNode = CreatePiece(scene_, "4x4_piece_thin", false);
+				pieceNode = pm->CreatePiece("4x4_piece_thin", false);
 			else if (rnd == 13)
-				pieceNode = CreatePiece(scene_, "4x8_piece_thin", false);
+				pieceNode = pm->CreatePiece("4x8_piece_thin", false);
 			else if (rnd == 14)
-				pieceNode = CreatePiece(scene_, "gear_large", false);
+				pieceNode = pm->CreatePiece( "gear_large", false);
 			else if (rnd == 15)
-				pieceNode = CreatePiece(scene_, "gear_medium", false);
+				pieceNode = pm->CreatePiece( "gear_medium", false);
 			else if (rnd == 16)
-				pieceNode = CreatePiece(scene_, "gear_small", false);
+				pieceNode = pm->CreatePiece( "gear_small", false);
 			else if (rnd == 17)
-				pieceNode = CreatePiece(scene_, "gear_extra_large", false);
+				pieceNode = pm->CreatePiece( "gear_extra_large", false);
 			else if (rnd == 18)
-				pieceNode = CreatePiece(scene_, "rod_round_1", false);
+				pieceNode = pm->CreatePiece("rod_round_1", false);
 			else if (rnd == 19)
-				pieceNode = CreatePiece(scene_, "rod_hard_1", false);
+				pieceNode = pm->CreatePiece( "rod_hard_1", false);
 			else if (rnd == 20)
-				pieceNode = CreatePiece(scene_, "corner_hard_1", false);
+				pieceNode = pm->CreatePiece("corner_hard_1", false);
 
 
 			pieceNode->SetWorldPosition(Vector3(Random(-10,10), y * .05, Random(-10,10)));

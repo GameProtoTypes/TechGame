@@ -83,8 +83,8 @@ void PiecePointRow::FormPointDirectionsOnEndPoints()
 
 void PiecePointRow::PushBack(PiecePoint* point)
 {
-	if (!points_.contains(point)) {
-		points_.push_back(point);
+	if (!points_.contains(SharedPtr<PiecePoint>(point))) {
+		points_.push_back(SharedPtr<PiecePoint>(point));
 		point->row_ = WeakPtr<PiecePointRow>(this);
 	}
 }
@@ -194,8 +194,8 @@ bool PiecePointRow::DetachFrom(PiecePointRow* otherRow, bool updateOccupiedPoint
 		
 		if (rowAttachements_[i].rowOther_ == otherRow)
 		{
-
-			rowAttachements_[i].constraint_->Remove();
+			if(!rowAttachements_[i].constraint_.Expired())
+				rowAttachements_[i].constraint_->Remove();
 			
 			rowAttachements_.erase_at(i);
 			detached = true;
@@ -229,7 +229,8 @@ bool PiecePointRow::DetachAll()
 {
 	ea::vector<RowAttachement> rowAttachementsCopy = rowAttachements_;
 	for (int i = 0; i < rowAttachementsCopy.size(); i++) {
-		DetachFrom(rowAttachementsCopy[i].rowOther_, true);
+		if(!rowAttachementsCopy[i].rowOther_.Expired())
+			DetachFrom(rowAttachementsCopy[i].rowOther_, true);
 	}
 
 	return true;
@@ -562,7 +563,7 @@ bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)
 {
 	return false;//#TODO!
 
-	ea::vector<PiecePoint*> points = row->GetPoints();
+	ea::vector<SharedPtr<PiecePoint>> points = row->GetPoints();
 	PieceManager* pieceManager = row->GetScene()->GetComponent<PieceManager>();
 
 	bool fullyOccupied = (row->numOccupiedPoints_ == row->points_.size());
@@ -655,16 +656,15 @@ void PiecePointRow::UpdatePointOccupancies()
 	if (!rowAttachements_.size())
 		return;
 
-	PieceManager* pieceManager = GetScene()->GetComponent<PieceManager>();
 
 	//clear occupancies on points
-	for (PiecePoint* point : points_)
+	for (SharedPtr<PiecePoint> point : points_)
 	{
 		point->occupiedPointPrev_ = point->occupiedPoint_;
 		point->occupiedPoint_ = nullptr;
 	}
 
-	ea::vector<PiecePoint*> otherPoints;
+	ea::vector<SharedPtr<PiecePoint>> otherPoints;
 	for (RowAttachement& row : rowAttachements_)
 	{
 		otherPoints.push_back(row.rowOther_->points_);	
@@ -682,7 +682,7 @@ void PiecePointRow::UpdatePointOccupancies()
 			
 			//URHO3D_LOGINFO("dist: " + ea::to_string(dist) + " vs " + ea::to_string(pieceManager->RowPointDistance()*0.5f));
 
-			if (dist < pieceManager->RowPointDistance()*0.5f) {
+			if (dist < pieceManager_->RowPointDistance()*0.5f) {
 
 				point->occupiedPoint_ = otherPoint;
 				numOccupiedPoints_++;
@@ -732,4 +732,16 @@ void PiecePointRow::UpdateDynamicDettachement()
 		occupiedCountDown_ = occupiedCountDownCount_;
 	}
 
+}
+
+void PiecePointRow::OnNodeSet(Node* node)
+{
+	if (node)
+	{
+		pieceManager_ = GetScene()->GetComponent<PieceManager>();
+	}
+	else
+	{
+		points_.clear();
+	}
 }

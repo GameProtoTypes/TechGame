@@ -1,4 +1,3 @@
-#include "TechGame.h"
 #include "PiecePoint.h"
 #include "Piece.h"
 #include "PiecePointRow.h"
@@ -8,7 +7,7 @@
 #include "PieceGear.h"
 
 
-Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
+Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 {
 	Node* root;
 
@@ -16,12 +15,12 @@ Node* TechGame::CreatePiece(Node* parent, ea::string name, bool loadExisting)
 	{
 		SharedPtr<File> file = SharedPtr<File>(new File(context_));
 		file->Open(name + ".xml", FILE_READ);
-		root = scene_->InstantiateXML(*file, Vector3::ZERO, Quaternion::IDENTITY);
+		root = GetScene()->InstantiateXML(*file, Vector3::ZERO, Quaternion::IDENTITY);
 	}
 	else {
-		root = parent->CreateChild();
-		
-		float scaleFactor = scene_->GetComponent<PieceManager>()->GetScaleFactor();
+		root = GetScene()->CreateChild();
+		root->SetVar("PieceName", name);
+		float scaleFactor = GetScene()->GetComponent<PieceManager>()->GetScaleFactor();
 
 		auto* body = root->CreateComponent<NewtonRigidBody>();
 		Node* visualNode = root->CreateChild("visualNode");

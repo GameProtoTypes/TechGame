@@ -59,8 +59,6 @@ public:
 
 	void CreateCharacter();
 
-	Node* CreatePiece(Node* parent, ea::string name, bool loadExisting);
-
 protected:
 	/// Scene.
 	SharedPtr<Scene> scene_;

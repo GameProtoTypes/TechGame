@@ -41,8 +41,20 @@ public:
 
 
 
+	//piece creation
+
+	Node* CreatePiece(ea::string name, bool loadExisting);
+
+
+
+
 	//contraption utils
 	void GetAllPointsInContraption(Piece* pieceInContraption, ea::vector<PiecePoint*>& points);
+
+
+
+
+
 
 
 

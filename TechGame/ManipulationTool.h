@@ -38,6 +38,10 @@ public:
 	bool IsGathering();
 	void UnGather(bool freeze);
 
+
+	void InstantDuplicatePiece();
+	void InstantRemovePiece();
+
 	void AdvanceGatherPoint(bool forward = true);
 
 	void RotateGatherNode(Quaternion rotation)
@@ -114,7 +118,7 @@ protected:
 	int kinamaticConstraintTimerFireCount_ = false;
 
 
-	ea::vector<PiecePoint*> recentPointList_;
+	ea::vector<WeakPtr<PiecePoint>> recentPointList_;
 
 	bool useGrid_ = false;
 

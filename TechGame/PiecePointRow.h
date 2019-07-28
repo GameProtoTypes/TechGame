@@ -2,9 +2,11 @@
 #include "Urho3D/Urho3DAll.h"
 
 #include "NewtonConstraint.h"
+#include "PieceManager.h"
 
 class PiecePoint;
 class Piece;
+
 
 class PiecePointRow : public Component
 {
@@ -124,7 +126,7 @@ public:
 	///return the next point going inside the row from the given endPoint.
 	PiecePoint* GetPointNextToEndPoint(PiecePoint* endPoint);
 
-	const ea::vector<PiecePoint*>& GetPoints() { return points_; }
+	const ea::vector<SharedPtr<PiecePoint>>& GetPoints() { return points_; }
 
 	Vector3 GetLocalCenter();
 
@@ -148,7 +150,7 @@ public:
 
 	Piece* GetPiece();
 
-	ea::vector<PiecePoint*> points_;
+	ea::vector<SharedPtr<PiecePoint>> points_;
 
 	ea::vector<RowAttachement> rowAttachements_;//row attachments where rowA is the "other row" and robB is this row. (same with points)
 protected:
@@ -174,6 +176,11 @@ protected:
 	RowTypeGeneral rowTypeGeneral_ = RowTypeGeneral_Hole;
 
 	bool isPiecePlaner_ = true;//true if the whole piece geometry is on the plane that is perpendicular to the row.
+
+	SharedPtr<PieceManager> pieceManager_;
+
+	virtual void OnNodeSet(Node* node) override;
+
 };
 
 

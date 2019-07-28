@@ -272,6 +272,45 @@ void ManipulationTool::UnGather(bool freeze)
 	}
 }
 
+void ManipulationTool::InstantDuplicatePiece()
+{
+	if (IsDragging() || IsGathering())
+		return;
+
+	Vector3 worldHitPos;
+	Piece* aimPiece = node_->GetScene()->GetComponent<PieceManager>()->GetClosestAimPiece(worldHitPos, GetEffectiveLookNode());
+
+	if (!aimPiece)
+		return;
+
+	ea::string pieceName = aimPiece->GetNode()->GetVar("PieceName").ToString();
+
+	Node* pieceNode = node_->GetScene()->GetComponent<PieceManager>()->CreatePiece(pieceName, false);
+
+	pieceNode->SetWorldPosition(gatherNode_->GetWorldPosition() + Vector3(0, 2.0f, 0));
+
+}
+
+void ManipulationTool::InstantRemovePiece()
+{
+	if (IsDragging() || IsGathering())
+		return;
+
+	Vector3 worldHitPos;
+	Piece* aimPiece = node_->GetScene()->GetComponent<PieceManager>()->GetClosestAimPiece(worldHitPos, GetEffectiveLookNode());
+
+	if (!aimPiece)
+		return;
+
+	
+	Node* pieceNode = aimPiece->GetNode();
+
+	aimPiece->DetachAll();
+
+	pieceNode->Remove();
+
+}
+
 void ManipulationTool::drop(bool freeze, bool hadAttachement)
 {
 
@@ -617,8 +656,9 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 
 		//reset all recent colored indicators
-		for (PiecePoint* point : recentPointList_) {
-			point->SetShowColorIndicator(false, Color::BLUE);
+		for (WeakPtr<PiecePoint> point : recentPointList_) {
+			if(!point.Expired())
+				point->SetShowColorIndicator(false, Color::BLUE);
 		}
 		recentPointList_.clear();
 

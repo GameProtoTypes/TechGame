@@ -13,15 +13,15 @@ public:
 
 	struct AttachmentPair
 	{
-		PiecePoint* pointA = nullptr;
-		PiecePoint* pointB = nullptr;
+		WeakPtr<PiecePoint> pointA = nullptr;
+		WeakPtr<PiecePoint> pointB = nullptr;
 
 
-		PiecePointRow* rowA = nullptr;
-		PiecePointRow* rowB = nullptr;
+		WeakPtr<PiecePointRow> rowA = nullptr;
+		WeakPtr<PiecePointRow> rowB = nullptr;
 
-		Piece* pieceA = nullptr;
-		Piece* pieceB = nullptr;
+		WeakPtr<Piece> pieceA = nullptr;
+		WeakPtr<Piece> pieceB = nullptr;
 	};
 
 
