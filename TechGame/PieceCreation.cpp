@@ -1027,9 +1027,9 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 		
 
 
-		SharedPtr<File> file = SharedPtr<File>(new File(context_));
-		file->Open(name + ".xml", FILE_WRITE);
-		root->SaveXML(*file);
+		//SharedPtr<File> file = SharedPtr<File>(new File(context_));
+		//file->Open(name + ".xml", FILE_WRITE);
+		//root->SaveXML(*file);
 	}
 
 

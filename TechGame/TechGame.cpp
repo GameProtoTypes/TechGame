@@ -31,7 +31,7 @@ void TechGame::Setup()
 	
 	// Resource prefix path is a list of semicolon-separated paths which will be checked for containing resource directories. They are relative to application executable file.
 #if _WIN32
-	engineParameters_[EP_RESOURCE_PREFIX_PATHS] = "../../../bin";
+	engineParameters_[EP_RESOURCE_PREFIX_PATHS] = "../../../bin;../bin;./bin";
 #else
 	engineParameters_[EP_RESOURCE_PREFIX_PATHS] = ".";
 #endif

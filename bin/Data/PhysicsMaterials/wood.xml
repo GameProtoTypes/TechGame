@@ -1,6 +1,0 @@
-<physicsmaterial>
-	<KineticFriction value="0.4"/>
-	<StaticFriction value="0.5"/>
-	<Softness value="0.2f"/>
-	<Elasticity value="0.5"/>
-</physicsmaterial>
