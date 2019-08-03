@@ -368,7 +368,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			holeBody->SetWorldRotation(Quaternion::IDENTITY);
 			rodBody->SetWorldRotation(diffSnap45);
 
-			const float twistFriction = 0.01f;
+			const float twistFriction = 0.001f;
 			//if (!attachAsFullRow) {
 
 				constraint = holeBody->GetNode()->CreateComponent<NewtonSliderConstraint>();
@@ -636,10 +636,98 @@ bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)
 	return true;
 }
 
+void PiecePointRow::RegisterObject(Context* context)
+{
+	context->RegisterFactory<PiecePointRow>();
+	URHO3D_COPY_BASE_ATTRIBUTES(Component);
+}
+
 Piece* PiecePointRow::GetPiece()
 {
 	return node_->GetComponent<Piece>();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+bool PiecePointRow::SaveXML(XMLElement& dest) const
+{
+	Component::SaveXML(dest);
+	XMLElement el = dest.CreateChild("PointsData");
+
+	VariantVector vec;
+	for(PiecePoint* point : points_)
+		vec.push_back(point->GetID());
+
+	el.SetVariantVector(vec);
+
+	return true;
+}
+
+
+bool PiecePointRow::LoadXML(const XMLElement& source)
+{
+	Component::LoadXML(source);
+
+
+
+
+	XMLElement el = source.GetChild("PointsData");
+
+	VariantVector vec = el.GetVariantVector();
+
+	for (Variant variant : vec)
+	{
+		unsigned componentId = variant.GetUInt();
+		pointIds_.push_back(componentId);
+	}
+	return true;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void PiecePointRow::ApplyAttributes()
+{
+	//resolve point ids
+	URHO3D_LOGINFO("Applying Attributes");
+	for (unsigned id : pointIds_)
+	{
+		points_.push_back(SharedPtr<PiecePoint>(GetScene()->GetComponent<PiecePoint>(id)));
+	}
+}
+
 
 void PiecePointRow::HandleUpdate(StringHash event, VariantMap& eventData)
 {

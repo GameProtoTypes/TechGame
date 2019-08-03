@@ -22,6 +22,8 @@ public:
 
 		WeakPtr<Piece> pieceA = nullptr;
 		WeakPtr<Piece> pieceB = nullptr;
+
+		bool goodAttachment_ = true;
 	};
 
 
@@ -46,7 +48,7 @@ public:
 
 
 	
-	void AnalyzeAndFix()
+	void Analyze()
 	{
 		if (scene_ == nullptr) {
 			URHO3D_LOGERROR("PieceAttachementStager: Set the active scene (SetScene) before AnalyzeAndFix!");
@@ -59,33 +61,30 @@ public:
 		isValid_ = false;
 
 
-		if (!checkDistances()) {
-			URHO3D_LOGINFO("PieceAttachmentStager: Distance Check Failed");
-			return;
-		}
+		checkDistances();
 
 		collectRows();
 
-		if (!checkRowBasicCompatability())
-		{
-			URHO3D_LOGINFO("PieceAttachmentStager: Rows did not pass basic compatability test.");
-			return;
+		checkRowBasicCompatability();
+
+		checkAllEndPointRules();
+
+		checkPointDirections();
+
+
+		for (AttachmentPair* pair : potentialAttachments_) {
+
+			if (pair->goodAttachment_)
+				goodAttachments_.push_back(pair);
+			else
+				badAttachments_.push_back(pair);
+
 		}
-
-		if (!checkEndPointRules()) {
-			URHO3D_LOGINFO("PieceAttachmentStager: End Point Check Failed");
-			return;
-		}
-
-		
-
-
-		finalAttachments_ = potentialAttachments_;
 
 		//URHO3D_LOGINFO("final attachment size " + ea::to_string(finalAttachments_.size()));
 
 		needsAnalyzed_ = false;
-		isValid_ = true;
+		isValid_ = (badAttachments_.size() == 0);
 	}
 
 	
@@ -116,24 +115,27 @@ public:
 		rowsA.clear();
 		rowsB.clear();
 
-		finalAttachments_.clear();
+		goodAttachments_.clear();
+		badAttachments_.clear();
 
 		needsAnalyzed_ = true;
 		isValid_ = false;
 	}
 
 	ea::vector<AttachmentPair*>& GetPotentialAttachments() { return potentialAttachments_; }
-	ea::vector<AttachmentPair*>& GetFinalAttachments() { return finalAttachments_; }
+	ea::vector<AttachmentPair*>& GetGoodAttachments() { return goodAttachments_; }
+	ea::vector<AttachmentPair*>& GetBadAttachments() { return badAttachments_; }
 
 protected:
 
-	bool checkDistances();
+	void checkDistances();
 	bool collectRows();
 
-	bool checkRowBasicCompatability();
-	bool checkEndPointRules();
-	bool endPointRulePass(AttachmentPair* attachPair);
+	void checkRowBasicCompatability();
+	void checkAllEndPointRules();
+	void checkEndPointRules(AttachmentPair* attachPair);
 
+	void checkPointDirections();
 	
 	ea::hash_map<PiecePoint*, AttachmentPair*> potentialAttachmentMapA_;
 	ea::hash_map<PiecePoint*, AttachmentPair*> potentialAttachmentMapB_;
@@ -143,7 +145,10 @@ protected:
 	ea::vector<PiecePointRow*> rowsA;
 	ea::vector<PiecePointRow*> rowsB;
 
-	ea::vector<AttachmentPair*> finalAttachments_;
+	ea::vector<AttachmentPair*> goodAttachments_;
+	ea::vector<AttachmentPair*> badAttachments_;
+
+
 
 	bool needsAnalyzed_ = true;
 	bool isValid_ = false;

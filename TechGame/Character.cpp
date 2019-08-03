@@ -23,6 +23,7 @@
 #include "Urho3D/Graphics/Camera.h"
 #include "Urho3D/Audio/SoundListener.h"
 #include "Urho3D/Audio/Audio.h"
+#include "NodeTools.h"
 
 Character::Character(Context* context) :
 	LogicComponent(context),
@@ -194,76 +195,67 @@ void Character::updatePhysics(float timeStep)
 
 }
 
+void Character::ResolveNodes()
+{
+	//create/resolve nodes
+	groundNode_ = GetOrCreateChildNode(node_, "groundNode");
+
+	//headnode with camera:
+	headNode_ = GetOrCreateChildNode(groundNode_, "Head");
+
+	auto* camera = headNode_->GetOrCreateComponent<Camera>();
+	camera->SetFarClip(500.0f);
+
+	SoundListener* soundListener = headNode_->GetOrCreateComponent<SoundListener>();
+
+	// Get a pointer to the Audio subsystem.
+	Audio *audio_subsys = GetSubsystem<Audio>();
+
+	// Set the listener for that audio subsystem
+	audio_subsys->SetListener(soundListener);
+
+
+
+
+	leftHandNode_ = GetOrCreateChildNode(groundNode_, "LeftHand");
+	rightHandNode_ = GetOrCreateChildNode(groundNode_, "RightHand");
+
+	leftHandNode_->SetPosition(Vector3(-0.5f, 0.5f, 0));
+	rightHandNode_->SetPosition(Vector3(0.5f, 0.5f, 0));
+
+
+	// Create rigidbody, and set non-zero mass so that the body becomes dynamic
+	auto* body = node_->GetOrCreateComponent<NewtonRigidBody>();
+	body->SetCollisionLayer(1);
+	body->SetMassScale(1.0f);
+	body->SetAutoSleep(false);
+
+
+	// Set zero angular factor so that physics doesn't turn the character on its own.
+	// Instead we will control the character yaw manually
+	//body->SetAngularFactor(Vector3::ZERO);
+
+	// Set the rigidbody to signal collision also when in rest, so that we get ground collisions properly
+	body->SetCollisionEventMode(NewtonRigidBody::COLLISION_ALL);
+
+	// Set a capsule shape for collision
+	auto* shape = node_->GetOrCreateComponent<NewtonCollisionShape_Capsule>();
+	shape->SetRotationOffset(Quaternion(0, 0, 90));
+	shape->SetPositionOffset(Vector3(0, 0.9, 0));
+	shape->SetElasticity(0.0f);
+
+	//create 6dof constraint to limit angles
+	NewtonSixDofConstraint* constraint = node_->GetOrCreateComponent<NewtonSixDofConstraint>();
+	constraint->SetPitchLimits(0, 0);
+	constraint->SetYawLimits(0, 0);
+	constraint->SetRollLimits(0, 0);
+}
+
 void Character::OnNodeSet(Node* node)
 {
 	if (node)
 	{
-		//create nodes
-
-		groundNode_ = node->CreateChild();
-
-		//headnode with camera:
-		headNode_ = groundNode_->CreateChild("Head");
-		auto* camera = headNode_->CreateComponent<Camera>();
-		camera->SetFarClip(500.0f);
-
-		SoundListener* soundListener = headNode_->CreateComponent<SoundListener>();
-
-		// Get a pointer to the Audio subsystem.
-		Audio *audio_subsys = GetSubsystem<Audio>();
-
-		// Set the listener for that audio subsystem
-		audio_subsys->SetListener(soundListener);
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		leftHandNode_ = groundNode_->CreateChild("LeftHand");
-		rightHandNode_ = groundNode_->CreateChild("RightHand");
-
-		leftHandNode_->SetPosition(Vector3(-0.5f, 0.5f, 0));
-		rightHandNode_->SetPosition(Vector3(0.5f, 0.5f, 0));
-
-
-
-		// Create rigidbody, and set non-zero mass so that the body becomes dynamic
-		auto* body = node->CreateComponent<NewtonRigidBody>();
-		body->SetCollisionLayer(1);
-		body->SetMassScale(1.0f);
-		body->SetAutoSleep(false);
-
-
-		// Set zero angular factor so that physics doesn't turn the character on its own.
-		// Instead we will control the character yaw manually
-		//body->SetAngularFactor(Vector3::ZERO);
-
-		// Set the rigidbody to signal collision also when in rest, so that we get ground collisions properly
-		body->SetCollisionEventMode(NewtonRigidBody::COLLISION_ALL);
-
-		// Set a capsule shape for collision
-		auto* shape = node->CreateComponent<NewtonCollisionShape_Capsule>();
-		shape->SetRotationOffset(Quaternion(0, 0, 90));
-		shape->SetPositionOffset(Vector3(0, 0.9, 0));
-		shape->SetElasticity(0.0f);
-
-		//create 6dof constraint to limit angles
-		NewtonSixDofConstraint* constraint = node->CreateComponent<NewtonSixDofConstraint>();
-		constraint->SetPitchLimits(0, 0);
-		constraint->SetYawLimits(0, 0);
-		constraint->SetRollLimits(0, 0);
-
-
-
-
-
-
 
 	}
 	else

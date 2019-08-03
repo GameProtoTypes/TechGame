@@ -15,6 +15,13 @@
 class PiecePoint;
 class PiecePointRow;
 class PieceSolidificationGroup;
+
+#define PIECE_ATTRIB_PRIMARY_COLOR "Primary Color"
+#define PIECE_ATTRIB_PRIMARY_GHOST "Ghosting Effect"
+#define PIECE_ATTRIB_PRIMARY_DYNAMIC_ATTACH "Dynamic Detachement"
+
+
+
 class Piece : public Component {
 	URHO3D_OBJECT(Piece, Component);
 public:
@@ -45,17 +52,20 @@ public:
 
 	Node* GetVisualNode() { return node_->GetChild("visualNode"); }
 
-	void SetPrimaryColor(Color color)
-	{
-		primaryColor_ = color;
-		RefreshVisualMaterial();
-	}
+
+
+
+	void SetPrimaryColor(Color color);
 	Color GetPrimaryColor() const { return primaryColor_; }
 
+
+	void SetEnableDynamicDetachmentAttrib(bool enable);
 	void SetEnableDynamicDetachment(bool enable);
 	bool GetEnableDynamicDetachment() const { return enableDynamicDetachment_; }
 
-	void SetGhostingEffect(bool enable);
+	void SetGhostingEffectEnabled(bool enable);
+	bool GetGhostingEffectEnabled() const { return ghostingEffectOn_; }
+
 
 	void RefreshVisualMaterial();
 
@@ -91,19 +101,34 @@ public:
 
 	
 
+
+	virtual void ApplyAttributes() override;
+
+
+
 protected:
 
+
+
 	bool ghostingEffectOn_ = false;
+
 	Color primaryColor_;
+	bool visualsDirty_ = false;
 
 	Matrix3x4 lastRigBodyTransform_;
 
 	bool enableDynamicDetachment_ = true;
 
+
+
+
+
+
 	virtual void OnNodeSet(Node* node) override;
 
 	void GetAttachedPiecesRec(ea::vector<Piece*>& pieces, bool recursive);
 
+	void HandleUpdate(StringHash eventType, VariantMap& eventData);
 	void HandlePhysicsPostStep(StringHash eventType, VariantMap& eventData);
 
 	void HandleNodeCollisionStart(StringHash eventType, VariantMap& eventData);

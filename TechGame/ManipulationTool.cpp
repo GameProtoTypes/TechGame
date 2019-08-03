@@ -80,6 +80,8 @@ bool ManipulationTool::BeginDrag()
 		
 	}
 
+	//set gatherNode position to dragpoint position so reference distance is maintained.
+	gatherNode_->SetWorldPosition(dragPoint_->GetWorldPosition());
 
 
 
@@ -95,7 +97,7 @@ void ManipulationTool::EndDrag(bool freeze)
 
 	if (freeze) {
 		node_->GetScene()->GetComponent<NewtonPhysicsWorld>()->WaitForUpdateFinished();
-		dragPiece_->GetRigidBody()->SetMassScale(0);
+		dragPiece_->GetEffectiveRigidBody()->SetMassScale(0);
 		
 	}
 	if (dragUseKinematicJoint_)
@@ -179,7 +181,7 @@ bool ManipulationTool::Gather(bool grabOne)
 
 	//apply ghosting effect to contraption
 	for (Piece* pc : allGatherPieces_) {
-		pc->SetGhostingEffect(true);
+		pc->SetGhostingEffectEnabled(true);
 		
 		if (pc->GetNode()->HasComponent<PieceGear>()) {
 			pc->GetNode()->GetComponent<PieceGear>()->SetEnabled(false);
@@ -324,7 +326,7 @@ void ManipulationTool::drop(bool freeze, bool hadAttachement)
 	for (Piece* gatheredPiece : allGatherPieces_)
 	{
 		gatheredPiece->GetEffectiveRigidBody()->SetNoCollideOverride(false);
-		gatheredPiece->SetGhostingEffect(false);
+		gatheredPiece->SetGhostingEffectEnabled(false);
 		gatheredPiece->GetRigidBody()->SetMassScale(1.0f*float(!freeze));
 
 
@@ -679,9 +681,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 			float dist = (otherPoint->GetNode()->GetWorldPosition() - gatherNode_->GetWorldPosition()).Length();
 
-			if (otherPoint && (dist < 0.1f) && !allGatherPiecePoints_.contains(otherPoint) &&
-				otherPoint->OccupancyCompatible(gatherPiecePoint_) && 
-				gatherPiecePoint_->OccupancyCompatible(otherPoint)) {
+			if (otherPoint && (dist < 0.1f) && !allGatherPiecePoints_.contains(otherPoint)) {
 
 				otherPiecePoint_ = otherPoint;
 				
@@ -760,20 +760,21 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 
 
-						attachStager_->AnalyzeAndFix();
+						attachStager_->Analyze();
 
 
 
-						//update colors on potential attachments.
-						ea::vector<PieceAttachmentStager::AttachmentPair*>& attachments = attachStager_->GetPotentialAttachments();
+						//update colors on good and bad attachments.
+						ea::vector<PieceAttachmentStager::AttachmentPair*>& attachments = attachStager_->GetBadAttachments();
 						for (auto* pair : attachments) {
-							pair->pointB->SetShowColorIndicator(true, Color::YELLOW);
+							pair->pointB->SetShowColorIndicator(true, Color::RED);
 							recentPointList_.push_back(pair->pointB);
 						}
 						
-						attachments = attachStager_->GetFinalAttachments();
+						attachments = attachStager_->GetGoodAttachments();
 						for (auto* pair : attachments) {
 							pair->pointB->SetShowColorIndicator(true, Color::GREEN);
+							recentPointList_.push_back(pair->pointB);
 						}
 					}
 				}

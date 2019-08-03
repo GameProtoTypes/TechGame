@@ -62,7 +62,7 @@ bool PieceAttachmentStager::RemovePotentialAttachment(PiecePoint* pointA, PieceP
 	return false;
 }
 
-bool PieceAttachmentStager::checkDistances()
+void PieceAttachmentStager::checkDistances()
 {
 	for (AttachmentPair* pair : potentialAttachments_)
 	{
@@ -72,23 +72,17 @@ bool PieceAttachmentStager::checkDistances()
 		float thresh = scene_->GetComponent<PieceManager>()->GetAttachPointThreshold();
 
 		if ((posA - posB).Length() > thresh) {
-			//URHO3D_LOGINFO(ea::to_string((posA - posB).Length()));
-			return false;
+			
+			pair->goodAttachment_ = false;
 		}
 	}
-
-	return true;
 }
 
-bool PieceAttachmentStager::checkEndPointRules()
+void PieceAttachmentStager::checkAllEndPointRules()
 {
-
-	bool allPass = true;
 	for (AttachmentPair* pair : potentialAttachments_) {
-		allPass &= endPointRulePass(pair);
+		checkEndPointRules(pair);
 	}
-
-	return allPass;
 }
 
 bool PieceAttachmentStager::collectRows()
@@ -116,25 +110,28 @@ bool PieceAttachmentStager::collectRows()
 	return true;
 }
 
-bool PieceAttachmentStager::checkRowBasicCompatability()
+void PieceAttachmentStager::checkRowBasicCompatability()
 {
-	bool allPass = true;
 	for (AttachmentPair* pair : potentialAttachments_)
 	{
-		allPass &= PiecePointRow::RowsAttachCompatable(pair->rowA, pair->rowB);
+		if (!PiecePointRow::RowsAttachCompatable(pair->rowA, pair->rowB))
+		{
+			pair->goodAttachment_ = false;
 	}
-	return allPass;
+	}
 }
 
-bool PieceAttachmentStager::endPointRulePass(AttachmentPair* attachPair)
+void PieceAttachmentStager::checkEndPointRules(AttachmentPair* attachPair)
 {
 
 	PiecePoint* pointA = attachPair->pointA;
 	PiecePoint* pointB = attachPair->pointB;
 
-	bool pass = true;
+	bool overallPass = true;
 
 	for (int i = 0; i < 2; i++) {
+
+		bool pass = true;
 
 		if (pointA->isEndCap_) {
 			if (pointB->row_) {
@@ -188,32 +185,45 @@ bool PieceAttachmentStager::endPointRulePass(AttachmentPair* attachPair)
 
 
 
-
-
-
 		//swap and try from other point of view.
 		PiecePoint* tmp;
 		tmp = pointB;
 		pointB = pointA;
 		pointA = tmp;
+
+		overallPass &= pass;
+	}
+
+	if (!overallPass)
+	{
+		attachPair->goodAttachment_ = false;
 	}
 
 
-
-	return pass;
-
 }
+
+void PieceAttachmentStager::checkPointDirections()
+{
+	for (AttachmentPair* pair : potentialAttachments_)
+	{
+		if (pair->pointA->GetDirectionWorld().CrossProduct(pair->pointB->GetDirectionWorld()).LengthSquared() >= 0.001f)
+		{
+			pair->goodAttachment_ = false;
+		}
+	}
+}
+
 bool PieceAttachmentStager::AttachAll()
 {
 	if (!IsValid())
 		return false;
 
-	if(finalAttachments_.size() == 0)
+	if(goodAttachments_.size() == 0)
 		return false;
 
 
 	ea::vector<Piece*> allPieces;
-	for (AttachmentPair* pair : finalAttachments_)
+	for (AttachmentPair* pair : goodAttachments_)
 	{
 		if(!allPieces.contains(pair->pieceA))
 			allPieces.push_back(pair->pieceA);
@@ -241,7 +251,7 @@ bool PieceAttachmentStager::AttachAll()
 
 
 	bool allAttachSuccess = true;
-	for (AttachmentPair* pair : finalAttachments_)
+	for (AttachmentPair* pair : goodAttachments_)
 	{
 		if (!pair->rowA->AttachedToRow(pair->rowB) && !pair->rowB->AttachedToRow(pair->rowA)) {
 

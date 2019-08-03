@@ -159,6 +159,8 @@ void PieceGear::ReEvalConstraints()
 			{
 				constraint->SetGearRatio(ratio);
 			}
+
+
 		}
 		else if (constraintAlreadyExists && (!alignmentCheck || !IsEnabledEffective()))
 		{

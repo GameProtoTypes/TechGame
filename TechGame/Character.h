@@ -57,6 +57,8 @@ public:
 	SharedPtr<Node> rightHandNode_;
 	SharedPtr<Node> leftHandNode_;
 
+	void ResolveNodes();
+
 
 private:
 	/// Handle physics collision event.
@@ -76,6 +78,9 @@ private:
 
 
 	bool isVR_ = false;
+
+
+	
 
 protected:
 	virtual void OnNodeSet(Node* node) override;

@@ -72,3 +72,27 @@ Urho3D::Vector3 GetNodePositionAverage(ea::vector<Node*>& nodes)
 	return pos;
 }
 
+void SetNodeHeirarchyTemporary(Node* rootNode, bool enable, bool recursive/* = true*/)
+{
+	ea::vector<Node*> children;
+	rootNode->GetChildren(children, true);
+	children.push_back(rootNode);
+
+	for (Node* node : children) {
+		node->SetTemporary(enable);
+	}
+}
+
+Node* GetOrCreateChildNode(Node* parent, const ea::string& name)
+{
+	Node* node = parent->GetChild(name);
+	if (!node)
+	{
+		return parent->CreateChild(name);
+	}
+	else
+	{
+		return node;
+	}
+}
+

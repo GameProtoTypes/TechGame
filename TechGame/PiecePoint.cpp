@@ -1,7 +1,7 @@
 #include "PiecePoint.h"
 #include "Piece.h"
 #include "PieceManager.h"
-
+#include "PiecePointRow.h"
 
 
 
@@ -76,6 +76,36 @@ void PiecePoint::SetShowColorIndicator(bool enable, Color color)
 		colorIndicatorStMdl_->SetEnabled(showColorIndicator_);
 	}
 }
+
+bool PiecePoint::SaveXML(XMLElement& dest) const
+{
+	bool s = Component::SaveXML(dest);
+	s &= dest.SetUInt("ParentRowId", row_->GetID());
+	return s;
+}
+
+bool PiecePoint::LoadXML(const XMLElement& source)
+{
+	bool s = Component::LoadXML(source);
+
+	rowId_ = source.GetUInt("ParentRowId");
+	if (rowId_ == 0)
+		s = false;
+	
+	
+	return s;
+}
+
+void PiecePoint::ApplyAttributes()
+{
+	SceneResolver sceneResolver;
+	Component* comp = GetScene()->GetComponent(rowId_);
+	sceneResolver.AddComponent(rowId_, comp);
+	sceneResolver.Resolve();
+	row_ = GetScene()->GetComponent<PiecePointRow>(comp->GetID());
+}
+
+
 
 void PiecePoint::OnNodeSet(Node* node)
 {

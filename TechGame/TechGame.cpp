@@ -56,7 +56,7 @@ void TechGame::Setup()
 void TechGame::Start()
 {
 
-	GetSubsystem<Engine>()->SetMaxFps(1000);
+	GetSubsystem<Engine>()->SetMaxFps(200);
 	GetSubsystem<Engine>()->SetMinFps(90);
 
 
@@ -68,7 +68,7 @@ void TechGame::Start()
 
 
 	// Create the scene content
-	CreateScene();
+	DefaultCreateScene();
 
 	CreateInstructions();
 
@@ -106,9 +106,10 @@ void TechGame::CreateCharacter()
 
 	Node* playerNode = scene_->CreateChild("player");
 	playerNode->SetPosition(Vector3(0.0f, 0.0f, -10.0f));
-
+	
 
 	character_ = playerNode->CreateComponent<Character>();
+
 
 }
 
@@ -372,7 +373,7 @@ void TechGame::UpdateUIInput(float timestep)
 
 }
 
-void TechGame::CreateScene()
+void TechGame::DefaultCreateScene()
 {
 	auto* cache = GetSubsystem<ResourceCache>();
 
@@ -388,31 +389,21 @@ void TechGame::CreateScene()
 
 	context_->RegisterSubsystem<VisualDebugger>();
 
-
-	CreateCharacter();
-
-	
-
 	VR::RegisterObject(context_);
 
 	VR* vr = context_->GetSubsystem<VR>();
 
 
+	CreateCharacter();
+	character_->ResolveNodes();
 	
 	bool vrInitialized = vr->InitializeVR(character_->GetNode());
 
 
 
 
-
-
-
-
 	ManipulationTool* manipTool = character_->rightHandNode_->CreateComponent<ManipulationTool>();
 	
-
-
-
 
 
 	Node* zoneNode = scene_->CreateChild("Zone");
@@ -430,6 +421,7 @@ void TechGame::CreateScene()
 	lightNode->SetDirection(Vector3(0.6f, -1.0f, 0.8f));
 	auto* light = lightNode->CreateComponent<Light>();
 	light->SetLightType(LIGHT_DIRECTIONAL);
+	light->SetBrightness(1.50f);
 	light->SetCastShadows(true);
 	light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
 	// Set cascade splits at 10, 50 and 200 world units, fade shadows out at 80% of maximum shadow distance
@@ -447,31 +439,25 @@ void TechGame::CreateScene()
 
 
 
-
-	//for (int x = -50; x <= 50; x++)
-	//{
-	//	for (int z = -50; z <= 50; z++)
-	//	{
-			Node* floorPiece = scene_->CreateChild();
-			StaticModel* stmdl = floorPiece->CreateComponent<StaticModel>();
-			stmdl->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
-			floorPiece->Rotate(Quaternion(90, Vector3(1, 0, 0)));
-			//float scaleFactor = 0.025 / 0.1;
+	Node* floorPiece = scene_->CreateChild();
+	StaticModel* stmdl = floorPiece->CreateComponent<StaticModel>();
+	stmdl->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
+	floorPiece->Rotate(Quaternion(90, Vector3(1, 0, 0)));
+	//float scaleFactor = 0.025 / 0.1;
 
 
-			floorPiece->SetWorldPosition(Vector3(0 , -0.5, 0 ));
-			floorPiece->SetScale(Vector3(100, 100, 1.0));
+	floorPiece->SetWorldPosition(Vector3(0 , -0.5, 0 ));
+	floorPiece->SetScale(Vector3(100, 100, 1.0));
 
 
-			Material* mat = GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/Piece2.xml");
-			SharedPtr<Material> clonedMat = mat->Clone();
-			//clonedMat->SetShaderParameter("MatDiffColor", Vector4(0.3f + Random() / 8, 0.3f + Random() / 8, 0.3f + Random() / 8, 0.0f));
-			clonedMat->SetShaderParameter("UOffset", Vector4(100.0f, 0.0f, 1.0f, 1.0f));
-			clonedMat->SetShaderParameter("VOffset", Vector4(0.0f, 100.0f, 1.0f, 1.0f));
-			stmdl->SetMaterial(clonedMat);
+	Material* mat = GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/repeatingGround.xml");
+	//SharedPtr<Material> clonedMat = mat->Clone();
+	//clonedMat->SetShaderParameter("MatDiffColor", Vector4(0.3f + Random() / 8, 0.3f + Random() / 8, 0.3f + Random() / 8, 0.0f));
+	mat->SetShaderParameter("UOffset", Vector4(100.0f, 0.0f, 1.0f, 1.0f));
+	mat->SetShaderParameter("VOffset", Vector4(0.0f, 100.0f, 1.0f, 1.0f));
+	stmdl->SetMaterial(mat);
 
-		//}
-	//}
+
 	// Create a floor object, 1000 x 1000 world units. Adjust position so that the ground is at zero Y
 	Node* floorNode = scene_->CreateChild("Floor");
 	floorNode->SetPosition(Vector3(0.0f, -5, 0.0f));
@@ -587,6 +573,23 @@ void TechGame::CreateScene()
 
 
 
+void TechGame::SetupSceneAfterLoad()
+{
+
+	//resolve character that should be in the scene.
+	Node* playerNode = scene_->GetChild("player", true);
+
+	character_ = playerNode->GetComponent<Character>();
+	character_->ResolveNodes();
+
+
+
+	VR* vr = context_->GetSubsystem<VR>();
+	vr->SetReferenceNode(character_->GetNode());
+
+	SetupViewport();
+}
+
 void TechGame::HandleUpdate(StringHash eventType, VariantMap& eventData)
 {
 	using namespace Update;
@@ -617,7 +620,6 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 {
 	// If draw debug mode is enabled, draw physics debug geometry. Use depth test to make the result easier to interpret
 	if (drawDebug_) {
-
 
 		ui::Begin("Debug Drawing");
 
@@ -742,7 +744,31 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 			SharedPtr<File> outFile = SharedPtr<File>(new File(context_, "sceneSave.xml", Urho3D::FILE_WRITE));
 			
 			bool saveSuccess = scene_->SaveXML(*outFile);
+
+			if (saveSuccess)
+				URHO3D_LOGINFO(outFile->GetName() + " Sucessfully Saved.");
 		}
+
+		if (ui::Button("Load Scene..."))
+		{
+			ea::string filePath = "sceneSave.xml";
+
+
+			SharedPtr<File> inFile = SharedPtr<File>(new File(context_, "sceneSave.xml", Urho3D::FILE_READ));
+			
+			scene_->Clear(true, true);
+			bool loadSuccess = scene_->LoadXML(*inFile);
+
+			if (loadSuccess)
+				URHO3D_LOGINFO(inFile->GetName() + " Sucessfully Loaded.");
+
+			SetupSceneAfterLoad();
+			ui::End();
+			return;
+		}
+
+
+
 		ui::Checkbox("DebugHud", &drawDebugHud);
 		if (drawDebugHud)
 		{

@@ -9,12 +9,21 @@
 
 Piece::Piece(Context* context) : Component(context)
 {
+	SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(Piece, HandleUpdate));
 	SubscribeToEvent(E_NEWTON_PHYSICSPOSTSTEP, URHO3D_HANDLER(Piece, HandlePhysicsPostStep));
 }
 
 void Piece::RegisterObject(Context* context)
 {
 	context->RegisterFactory<Piece>();
+
+	URHO3D_COPY_BASE_ATTRIBUTES(Component);
+	URHO3D_ACCESSOR_ATTRIBUTE(PIECE_ATTRIB_PRIMARY_GHOST, GetGhostingEffectEnabled, SetGhostingEffectEnabled, bool, false, AM_DEFAULT);
+	URHO3D_ACCESSOR_ATTRIBUTE(PIECE_ATTRIB_PRIMARY_COLOR, GetPrimaryColor, SetPrimaryColor, Color, Color::BLUE, AM_DEFAULT);
+	URHO3D_ACCESSOR_ATTRIBUTE(PIECE_ATTRIB_PRIMARY_DYNAMIC_ATTACH, GetEnableDynamicDetachment, SetEnableDynamicDetachmentAttrib, bool, true, AM_DEFAULT);
+
+
+
 }
 
 void Piece::GetPointRows(ea::vector<PiecePointRow*>& rows)
@@ -49,9 +58,23 @@ void Piece::GetAttachedPieces(ea::vector<Piece*>& pieces, bool recursive)
 	pieces.erase_at(pieces.index_of(this));
 }
 
+void Piece::SetPrimaryColor(Color color)
+{
+	if (primaryColor_ != color) {
+		primaryColor_ = color;
+		visualsDirty_ = true;
+	}
+}
+
+void Piece::SetEnableDynamicDetachmentAttrib(bool enable)
+{
+	enableDynamicDetachment_ = enable;
+}
+
 void Piece::SetEnableDynamicDetachment(bool enable)
 {
 	enableDynamicDetachment_ = enable;
+
 
 	if (enable == true) {
 		ea::vector<PiecePointRow*> rows;
@@ -63,13 +86,11 @@ void Piece::SetEnableDynamicDetachment(bool enable)
 	}
 }
 
-void Piece::SetGhostingEffect(bool enable)
+void Piece::SetGhostingEffectEnabled(bool enable)
 {
-	if (enable != ghostingEffectOn_)
-	{
+	if (ghostingEffectOn_ != enable) {
 		ghostingEffectOn_ = enable;
-
-		RefreshVisualMaterial();
+		visualsDirty_ = true;
 	}
 }
 
@@ -127,6 +148,14 @@ void Piece::GetAttachedPiecesRec(ea::vector<Piece*>& pieces, bool recursive)
 	}
 }
 
+
+void Piece::HandleUpdate(StringHash eventType, VariantMap& eventData)
+{
+	if (visualsDirty_) {
+		RefreshVisualMaterial();
+		visualsDirty_ = false;
+	}
+}
 void Piece::HandlePhysicsPostStep(StringHash eventType, VariantMap& eventData)
 {
 
@@ -177,6 +206,11 @@ bool Piece::IsPartOfPieceGroup(PieceSolidificationGroup* group)
 		return true;
 
 	return false;
+}
+
+void Piece::ApplyAttributes()
+{
+
 }
 
 void Piece::OnNodeSet(Node* node)

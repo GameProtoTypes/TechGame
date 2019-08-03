@@ -45,7 +45,8 @@ public:
 	bool showBasisIndicator_ = false;
 	bool showColorIndicator_ = false;
 
-	WeakPtr<PiecePointRow> row_;
+	WeakPtr<PiecePointRow> row_;//#todo serialize
+	unsigned rowId_ = 0;
 
 	WeakPtr<PiecePoint> occupiedPoint_;//other point that is "occupying the space of this point"
 	WeakPtr<PiecePoint> occupiedPointPrev_;
@@ -55,6 +56,15 @@ public:
 	WeakPtr<Node> basisIndicatorNode_;
 	WeakPtr<Node> colorIndicatorNode_;
 	Color colorIndicatorColor_;
+
+
+	virtual bool SaveXML(XMLElement& dest) const override;
+	virtual bool LoadXML(const XMLElement& source) override;
+
+
+	virtual void ApplyAttributes() override;
+
+
 
 protected:
 	virtual void OnNodeSet(Node* node) override;

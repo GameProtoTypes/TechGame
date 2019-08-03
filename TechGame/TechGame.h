@@ -2,6 +2,7 @@
 
 // This include pulls in all engine headers. It is used for simplicity here, but overusing this may slow down your builds. Use with care!
 #include <Urho3D/Urho3DAll.h>
+#include "Character.h"
 
 // This is probably always OK.
 using namespace Urho3D;
@@ -17,8 +18,8 @@ public:
 	void Stop() override;
 
 
-	void CreateScene();
-
+	void DefaultCreateScene();
+	void SetupSceneAfterLoad();
 
 
 	void SetupViewport();

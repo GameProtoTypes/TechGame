@@ -52,17 +52,12 @@ public:
 	static bool UpdateOptimizeFullRow(PiecePointRow* row);
 
 
-	static void RegisterObject(Context* context) {
-		context->RegisterFactory<PiecePointRow>();
-	}
+	static void RegisterObject(Context* context);
 
 	virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
 
 
-
-
 	bool Finalize() {
-
 
 		if (!CheckValid())
 			return false;
@@ -146,13 +141,25 @@ public:
 		occupiedCountDown_ = occupiedCountDownCount_;
 	}
 
-
-
 	Piece* GetPiece();
 
 	ea::vector<SharedPtr<PiecePoint>> points_;
+	ea::vector<unsigned> pointIds_;
 
 	ea::vector<RowAttachement> rowAttachements_;//row attachments where rowA is the "other row" and robB is this row. (same with points)
+
+
+
+
+
+	virtual bool SaveXML(XMLElement& dest) const override;
+	virtual bool LoadXML(const XMLElement& source) override;
+
+
+
+	virtual void ApplyAttributes() override;
+
+
 protected:
 
 	void HandleUpdate(StringHash event, VariantMap& eventData);
