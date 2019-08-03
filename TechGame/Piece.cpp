@@ -184,7 +184,7 @@ void Piece::DetachAll()
 	}
 
 	//restore rigid body properties:
-	GetRigidBody()->ClearCollisionExceptions();
+	GetRigidBody()->ClearCollisionOverrides();
 }
 
 

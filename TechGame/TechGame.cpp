@@ -817,12 +817,61 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 		ui::Begin("Hovered Piece Stats:");
 		if (piece)
 		{
-			ui::Text(("rigbody: " + ea::to_string((unsigned)(void*)piece->GetRigidBody())).c_str());
-			ui::Text(("rigbody mass: " + ea::to_string(piece->GetRigidBody()->GetEffectiveMass())).c_str());
-			ui::Text(("rigbody world transform: " + piece->GetRigidBody()->GetWorldTransform().ToString()).c_str());
-			ui::Text(("rigbody world position: " + piece->GetRigidBody()->GetWorldPosition().ToString()).c_str());
+			NewtonRigidBody* bodyToPrint = piece->GetRigidBody();
+			bool repeat = false;
+			do 
+			{
+			
+				if (repeat) {
+					ui::Separator();
+					ui::Text("Effective Rigid Body:");
+				}
+
+
+				ui::Text(("rigbody (ID: " + ea::to_string(bodyToPrint->GetID()) + "): " + ea::to_string((unsigned)(void*)piece->GetRigidBody())).c_str());
+				ui::Text(("rigbody mass: " + ea::to_string(bodyToPrint->GetEffectiveMass())).c_str());
+				ui::Text(("rigbody world transform: " + bodyToPrint->GetWorldTransform().ToString()).c_str());
+				ui::Text(("rigbody world position: " + bodyToPrint->GetWorldPosition().ToString()).c_str());
+				
+
+				ea::vector<NewtonRigidBody::CollisionOverrideEntry> overrides;
+				bodyToPrint->GetCollisionOverrides(overrides);
+				if (overrides.size()) {
+					if (ui::CollapsingHeader("Collision Exceptions")) {
+
+
+						for (auto entry : overrides)
+						{
+							ea::string label = "colliding";
+							if (!entry.enableCollisions_)
+								label = "no colliding";
+
+							ui::Text(("rigbody (ID: " + ea::to_string(entry.rigidBodyComponentId_) + "): " + label).c_str());
+						}
+					}
+				}
+
+
+				if (piece->GetEffectiveRigidBody() != bodyToPrint)
+				{
+					repeat = true;
+					bodyToPrint = piece->GetEffectiveRigidBody();
+				}
+				else
+				{
+					repeat = false;
+				}
+
+
+			} while (repeat);
+
+
+
+
+			
+			
 			if (piece->GetEffectiveRigidBody() != piece->GetRigidBody()) {
-				ui::Text(("rigbody effective: " + ea::to_string((unsigned)(void*)piece->GetEffectiveRigidBody())).c_str());
+				ui::Text(("rigbody effective (ID: " + ea::to_string(piece->GetEffectiveRigidBody()->GetID()) + "):: " + ea::to_string((unsigned)(void*)piece->GetEffectiveRigidBody())).c_str());
 				ui::Text(("rigbody effective mass: " + ea::to_string(piece->GetEffectiveRigidBody()->GetEffectiveMass())).c_str());
 			}
 		}
