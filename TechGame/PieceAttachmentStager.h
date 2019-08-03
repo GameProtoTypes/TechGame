@@ -95,9 +95,12 @@ public:
 		if (potentialAttachments_.size() == 0)
 			return true;
 
-
 		if (needsAnalyzed_)
 			return false;
+
+		if (goodAttachments_.size() == 0 && badAttachments_.size() == 0)
+			return true;
+
 
 		return isValid_;
 	}

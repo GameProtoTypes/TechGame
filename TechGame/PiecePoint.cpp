@@ -102,7 +102,7 @@ void PiecePoint::ApplyAttributes()
 	Component* comp = GetScene()->GetComponent(rowId_);
 	sceneResolver.AddComponent(rowId_, comp);
 	sceneResolver.Resolve();
-	row_ = GetScene()->GetComponent<PiecePointRow>(comp->GetID());
+	row_ = dynamic_cast<PiecePointRow*>(GetScene()->GetComponent(comp->GetID()));
 }
 
 

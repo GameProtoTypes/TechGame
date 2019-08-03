@@ -720,11 +720,17 @@ bool PiecePointRow::LoadXML(const XMLElement& source)
 
 void PiecePointRow::ApplyAttributes()
 {
-	//resolve point ids
-	URHO3D_LOGINFO("Applying Attributes");
-	for (unsigned id : pointIds_)
+
 	{
-		points_.push_back(SharedPtr<PiecePoint>(GetScene()->GetComponent<PiecePoint>(id)));
+		SceneResolver sceneResolver;
+		sceneResolver.Resolve();
+		for (unsigned id : pointIds_)
+		{
+			Component* comp = GetScene()->GetComponent(id);
+			sceneResolver.AddComponent(id, comp);
+			sceneResolver.Resolve();
+			points_.push_back(SharedPtr<PiecePoint>(dynamic_cast<PiecePoint*>(comp)));
+		}
 	}
 }
 
