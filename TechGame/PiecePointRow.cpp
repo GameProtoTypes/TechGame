@@ -12,9 +12,6 @@
 #include "MathExtras.h"
 
 
-#define PiecePointRowDefaultRowType RowType_Hole
-#define PiecePointRowDefaultGeneralRowType RowTypeGeneral_Hole
-
 
 bool PiecePointRow::RowsAttachCompatable(PiecePointRow* rowA, PiecePointRow* rowB)
 {
@@ -653,8 +650,8 @@ void PiecePointRow::RegisterObject(Context* context)
 
 
 
-	URHO3D_ENUM_ATTRIBUTE("rowtype", rowType_, RowTypeNames, PiecePointRowDefaultRowType, AM_DEFAULT);
-	URHO3D_ENUM_ATTRIBUTE("rowtypegeneral", rowTypeGeneral_, RowTypeGeneralNames, PiecePointRowDefaultGeneralRowType, AM_DEFAULT);
+	URHO3D_ENUM_ATTRIBUTE("rowtype", rowType_, RowTypeNames, DefaultRowType, AM_DEFAULT);
+	URHO3D_ENUM_ATTRIBUTE("rowtypegeneral", rowTypeGeneral_, RowTypeGeneralNames, DefaultGeneralRowType, AM_DEFAULT);
 
 
 

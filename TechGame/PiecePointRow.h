@@ -42,6 +42,11 @@ public:
 		RowTypeGeneral_Rod
 	};
 
+
+	static const RowType DefaultRowType = RowType_Hole;
+	static const RowTypeGeneral DefaultGeneralRowType = RowTypeGeneral_Hole;
+
+
 	struct RowAttachement {
 		WeakPtr<PiecePoint> pointOther_;
 		WeakPtr<PiecePoint> point;
