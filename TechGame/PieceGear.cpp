@@ -22,7 +22,7 @@ void PieceGear::HandleUpdate(StringHash event, VariantMap& eventData)
 	refreshCounter_--;
 	if (refreshCounter_ <= 0) {
 
-		ReEvalConstraints();
+		//ReEvalConstraints();
 
 		refreshCounter_ = PIECEGEAR_REFRESH_CNT + Random(0, PIECEGEAR_REFRESH_CNT);
 	}

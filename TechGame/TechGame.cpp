@@ -834,7 +834,7 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 				ui::Text(("rigbody world position: " + bodyToPrint->GetWorldPosition().ToString()).c_str());
 				
 
-				ea::vector<NewtonRigidBody::CollisionOverrideEntry> overrides;
+				/*ea::vector<NewtonRigidBody::CollisionOverrideEntry> overrides;
 				bodyToPrint->GetCollisionOverrides(overrides);
 				if (overrides.size()) {
 					if (ui::CollapsingHeader("Collision Exceptions")) {
@@ -849,7 +849,7 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 							ui::Text(("rigbody (ID: " + ea::to_string(entry.rigidBodyComponentId_) + "): " + label).c_str());
 						}
 					}
-				}
+				}*/
 
 
 				if (piece->GetEffectiveRigidBody() != bodyToPrint)

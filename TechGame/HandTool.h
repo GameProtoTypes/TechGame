@@ -44,14 +44,11 @@ public:
 
 	}
 
-
-
 	virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
 
 protected:
 
 	void HandleUpdate(StringHash eventType, VariantMap& eventData);
 	WeakPtr<Node> pointAtNode_;
-	WeakPtr<Node> headNode_;
 };
 
