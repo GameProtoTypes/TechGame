@@ -8,6 +8,23 @@ class PiecePoint;
 class Piece;
 
 
+
+static const char* RowTypeNames[] =
+{
+	"RowType_Hole",
+	"RowType_HoleTight",
+	"RowType_RodHard",
+	"RowType_RodRound",
+	nullptr
+};
+static const char* RowTypeGeneralNames[] =
+{
+	"RowTypeGeneral_Hole",
+	"RowTypeGeneral_Rod",
+	nullptr
+};
+
+
 class PiecePointRow : public Component
 {
 	URHO3D_OBJECT(PiecePointRow, Component);

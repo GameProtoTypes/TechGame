@@ -11,6 +11,11 @@
 
 #include "MathExtras.h"
 
+
+#define PiecePointRowDefaultRowType RowType_Hole
+#define PiecePointRowDefaultGeneralRowType RowTypeGeneral_Hole
+
+
 bool PiecePointRow::RowsAttachCompatable(PiecePointRow* rowA, PiecePointRow* rowB)
 {
 	if (rowA->rowType_ == RowType_Hole && rowB->rowType_ == RowType_Hole)
@@ -640,6 +645,19 @@ void PiecePointRow::RegisterObject(Context* context)
 {
 	context->RegisterFactory<PiecePointRow>();
 	URHO3D_COPY_BASE_ATTRIBUTES(Component);
+
+	URHO3D_ATTRIBUTE("localDirection", Vector3, localDirection_, Vector3::ZERO, AM_DEFAULT);
+	URHO3D_ATTRIBUTE("isPiecePlaner_", bool, isPiecePlaner_, false, AM_DEFAULT);
+
+	URHO3D_ATTRIBUTE("isFullRowOptimized_", bool, isFullRowOptimized_, false, AM_FILE);
+
+
+
+	URHO3D_ENUM_ATTRIBUTE("rowtype", rowType_, RowTypeNames, PiecePointRowDefaultRowType, AM_DEFAULT);
+	URHO3D_ENUM_ATTRIBUTE("rowtypegeneral", rowTypeGeneral_, RowTypeGeneralNames, PiecePointRowDefaultGeneralRowType, AM_DEFAULT);
+
+
+
 }
 
 Piece* PiecePointRow::GetPiece()
