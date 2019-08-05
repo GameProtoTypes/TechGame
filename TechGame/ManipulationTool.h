@@ -97,6 +97,7 @@ protected:
 	float dragMassTotal_ = 0.0f;
 	bool dragUseKinematicJoint_ = false;
 
+
 	WeakPtr<Node> gatherNode_;
 	MoveMode moveMode_ = MoveMode_Camera;
 	WeakPtr<PieceSolidificationGroup> gatheredPieceGroup_;

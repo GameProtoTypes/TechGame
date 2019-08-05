@@ -915,8 +915,11 @@ void ManipulationTool::OnNodeSet(Node* node)
 	if (node) {
 		pieceManager_ = GetScene()->GetComponent<PieceManager>();
 		
-		gatherNode_ = GetScene()->CreateChild();
+		gatherNode_ = GetScene()->CreateChild("gatherNode");
+		gatherNode_->SetTemporary(true);
+		
 		Node* gatherNodeVis = gatherNode_->CreateChild();
+		gatherNodeVis->SetTemporary(true);
 		gatherNodeVis->SetScale(0.1f);
 
 		StaticModel* stMdl = gatherNodeVis->CreateComponent<StaticModel>();
