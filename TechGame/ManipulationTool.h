@@ -40,6 +40,7 @@ public:
 
 
 	void InstantDuplicatePiece();
+
 	void InstantRemovePiece();
 
 	void AdvanceGatherPoint(bool forward = true);
@@ -78,9 +79,7 @@ public:
 
 protected:
 
-
 	void HandleUpdate(StringHash eventType, VariantMap& eventData);
-
 
 	virtual void OnNodeSet(Node* node) override;
 

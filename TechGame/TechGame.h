@@ -19,6 +19,9 @@ public:
 
 
 	void DefaultCreateScene();
+
+	void ResolveTools(Character* character);
+
 	void SetupSceneAfterLoad();
 
 

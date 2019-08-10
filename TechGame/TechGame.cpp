@@ -396,14 +396,12 @@ void TechGame::DefaultCreateScene()
 
 	CreateCharacter();
 	character_->ResolveNodes();
-	
+	ResolveTools(character_);
+
 	bool vrInitialized = vr->InitializeVR(character_->GetNode());
 
-
-
-
-	ManipulationTool* manipTool = character_->rightHandNode_->CreateComponent<ManipulationTool>();
 	
+
 
 
 	Node* zoneNode = scene_->CreateChild("Zone");
@@ -573,6 +571,14 @@ void TechGame::DefaultCreateScene()
 
 
 
+void TechGame::ResolveTools(Character* character)
+{
+	ManipulationTool* manipTool = character->rightHandNode_->GetOrCreateComponent<ManipulationTool>();
+	manipTool->SetMoveMode(manipTool->GetMoveMode());
+
+	character->rightHandNode_->GetOrCreateComponent<HandTool>();
+}
+
 void TechGame::SetupSceneAfterLoad()
 {
 
@@ -581,7 +587,7 @@ void TechGame::SetupSceneAfterLoad()
 
 	character_ = playerNode->GetComponent<Character>();
 	character_->ResolveNodes();
-
+	ResolveTools(character_);
 
 
 	VR* vr = context_->GetSubsystem<VR>();
@@ -612,7 +618,80 @@ void TechGame::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 void TechGame::HandlePostUpdate(StringHash eventType, VariantMap& eventData)
 {
+	Vector3 worldPos;
+	Piece* piece = scene_->GetComponent<PieceManager>()->GetClosestAimPiece(worldPos, character_->headNode_);
 
+
+
+	ui::Begin("Utils");
+
+	if (ui::Button("Save Scene..."))
+	{
+		ea::string filePath = "sceneSave.xml";
+
+		GetSubsystem<FileSystem>()->Delete(filePath);
+
+		SharedPtr<File> outFile = SharedPtr<File>(new File(context_, "sceneSave.xml", Urho3D::FILE_WRITE));
+
+		bool saveSuccess = scene_->SaveXML(*outFile);
+
+		if (saveSuccess)
+			URHO3D_LOGINFO(outFile->GetName() + " Sucessfully Saved.");
+	}
+
+	if (ui::Button("Load Scene..."))
+	{
+		ea::string filePath = "sceneSave.xml";
+
+
+		SharedPtr<File> inFile = SharedPtr<File>(new File(context_, "sceneSave.xml", Urho3D::FILE_READ));
+
+		scene_->Clear(true, true);
+		bool loadSuccess = scene_->LoadXML(*inFile);
+
+		if (loadSuccess)
+			URHO3D_LOGINFO(inFile->GetName() + " Sucessfully Loaded.");
+
+		SetupSceneAfterLoad();
+		ui::End();
+		return;
+	}
+
+
+
+	ui::Checkbox("DebugHud", &drawDebugHud);
+	if (drawDebugHud)
+	{
+		GetSubsystem<DebugHud>()->SetMode(DebugHudMode::DEBUGHUD_SHOW_ALL);
+	}
+	else
+	{
+		GetSubsystem<DebugHud>()->SetMode(DebugHudMode::DEBUGHUD_SHOW_NONE);
+	}
+
+
+	if (ui::Button("Form PieceSolidificationGroup"))
+	{
+		if (piece) {
+
+			URHO3D_LOGINFO("FORMING MANUAL GROUP...");
+			scene_->GetComponent<PieceManager>()->FormSolidGroup(piece);
+		}
+	}
+	if (ui::Button("Remove PieceSolidificationGroup"))
+	{
+		if (piece) {
+			scene_->GetComponent<PieceManager>()->RemoveSolidGroup(piece->GetPieceGroup());
+		}
+	}
+
+	ui::Checkbox("DynamicRodDetachment", &scene_->GetComponent<PieceManager>()->enableDynamicRodDetach_);
+
+
+
+
+
+	ui::End();
 
 }
 
@@ -733,75 +812,7 @@ void TechGame::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventDat
 		Piece* piece = scene_->GetComponent<PieceManager>()->GetClosestAimPiece(worldPos, character_->headNode_);
 
 
-		ui::Begin("Utils");
-
-		if (ui::Button("Save Scene..."))
-		{
-			ea::string filePath = "sceneSave.xml";
-
-			GetSubsystem<FileSystem>()->Delete(filePath);
-
-			SharedPtr<File> outFile = SharedPtr<File>(new File(context_, "sceneSave.xml", Urho3D::FILE_WRITE));
-			
-			bool saveSuccess = scene_->SaveXML(*outFile);
-
-			if (saveSuccess)
-				URHO3D_LOGINFO(outFile->GetName() + " Sucessfully Saved.");
-		}
-
-		if (ui::Button("Load Scene..."))
-		{
-			ea::string filePath = "sceneSave.xml";
-
-
-			SharedPtr<File> inFile = SharedPtr<File>(new File(context_, "sceneSave.xml", Urho3D::FILE_READ));
-			
-			scene_->Clear(true, true);
-			bool loadSuccess = scene_->LoadXML(*inFile);
-
-			if (loadSuccess)
-				URHO3D_LOGINFO(inFile->GetName() + " Sucessfully Loaded.");
-
-			SetupSceneAfterLoad();
-			ui::End();
-			return;
-		}
-
-
-
-		ui::Checkbox("DebugHud", &drawDebugHud);
-		if (drawDebugHud)
-		{
-			GetSubsystem<DebugHud>()->SetMode(DebugHudMode::DEBUGHUD_SHOW_ALL);
-		}
-		else
-		{
-			GetSubsystem<DebugHud>()->SetMode(DebugHudMode::DEBUGHUD_SHOW_NONE);
-		}
-
-
-		if (ui::Button("Form PieceSolidificationGroup"))
-		{
-			if (piece) {
-
-				URHO3D_LOGINFO("FORMING MANUAL GROUP...");
-				scene_->GetComponent<PieceManager>()->FormSolidGroup(piece);
-			}
-		}
-		if (ui::Button("Remove PieceSolidificationGroup"))
-		{
-			if (piece) {
-				scene_->GetComponent<PieceManager>()->RemoveSolidGroup(piece->GetPieceGroup());
-			}
-		}
-
-		ui::Checkbox("DynamicRodDetachment", &scene_->GetComponent<PieceManager>()->enableDynamicRodDetach_);
-
-
-
-
-
-		ui::End();
+		
 
 
 		ui::Begin("Stats");

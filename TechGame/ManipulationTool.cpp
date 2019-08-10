@@ -804,6 +804,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 		}
 		else
 		{
+			URHO3D_LOGINFO(gatherNode_->GetWorldPosition().ToString());
 			Vector3 displacement = (gatherNode_->GetWorldPosition() - dragPoint_->GetWorldPosition());
 
 			Vector3 worldVel = dragPiece_->GetEffectiveRigidBody()->GetLinearVelocity(TS_WORLD);
