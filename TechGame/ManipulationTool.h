@@ -94,6 +94,7 @@ protected:
 	WeakPtr<Piece> dragPiece_;
 	ea::vector<bool> pieceDynDetachSaves_;
 	float dragMassTotal_ = 0.0f;
+	Vector3 dragIntegralAccum_;
 	bool dragUseKinematicJoint_ = false;
 
 
