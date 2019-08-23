@@ -28,8 +28,10 @@ bool ManipulationTool::BeginDrag()
 	Vector3 worldHitPos;
 	Piece* aimPiece = node_->GetScene()->GetComponent<PieceManager>()->GetClosestAimPiece(worldHitPos, GetEffectiveLookNode());
 
-	if (!aimPiece)
+	if (!aimPiece) {
+		URHO3D_LOGINFO("No aim piece");
 		return false;
+	}
 
 	dragPiece_ = aimPiece;
 
@@ -798,46 +800,8 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 	else if(IsDragging())
 	{
 		
-		if (dragUseKinematicJoint_) {
-			kinamaticConstriant_->SetOtherWorldPosition(gatherNode_->GetWorldPosition());
-			kinamaticConstriant_->SetOtherWorldRotation(gatherNode_->GetWorldRotation());
-		}
-		else
-		{
-			Vector3 displacement = (gatherNode_->GetWorldPosition() - dragPoint_->GetWorldPosition());
+	UpdateDragging();
 
-			Vector3 worldVel = dragPiece_->GetEffectiveRigidBody()->GetLinearVelocity(TS_WORLD);
-
-			Vector3 finalWorldForce = (Urho3D::Ln<float>(displacement.Length() + 1) * 1.0f * displacement.Normalized()) + worldVel * -0.1f;
-
-			//finalWorldForce -= GetScene()->GetComponent<NewtonPhysicsWorld>()->GetGravity() * dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass();
-
-			dragPiece_->GetEffectiveRigidBody()->ResetForces();
-
-			//float mRatio = dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass() / dragMassTotal_;
-
-			Vector3 netForceOnAllJoints;
-			for (NewtonConstraint* c : dragPiece_->GetEffectiveRigidBody()->GetConnectedContraints())
-			{
-				netForceOnAllJoints += c->GetOwnForce();
-			}
-
-			Vector3 calculatedForce = finalWorldForce * dragMassTotal_ * 100.0f;
-
-			if (calculatedForce.Length() > 10.0f)
-			{
-				calculatedForce = calculatedForce.Normalized()*10.0f;
-			}
-
-			dragPiece_->GetEffectiveRigidBody()->AddWorldForce(calculatedForce, dragPoint_->GetWorldPosition());
-
-			//limit rotational velocity on drag piece
-			float dragPieceMass = dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass();
-			Vector3 worldRotVel = dragPiece_->GetEffectiveRigidBody()->GetAngularVelocity(TS_WORLD);
-			Vector3 worldLinearVel = dragPiece_->GetEffectiveRigidBody()->GetLinearVelocity(TS_WORLD);
-
-			//dragPiece_->GetEffectiveRigidBody()->AddWorldTorque(-worldRotVel.Normalized() * (worldRotVel.LengthSquared() * 0.1f * dragPieceMass));
-		}
 
 	}
 
@@ -846,6 +810,51 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 
 
+}
+
+void ManipulationTool::UpdateDragging()
+{
+	if (dragUseKinematicJoint_) {
+		kinamaticConstriant_->SetOtherWorldPosition(gatherNode_->GetWorldPosition());
+		kinamaticConstriant_->SetOtherWorldRotation(gatherNode_->GetWorldRotation());
+	}
+	else
+	{
+
+		Vector3 displacement = (gatherNode_->GetWorldPosition() - dragPoint_->GetWorldPosition());
+
+		Vector3 worldVel = dragPiece_->GetEffectiveRigidBody()->GetLinearVelocity(TS_WORLD);
+
+		Vector3 finalWorldForce = (Urho3D::Ln<float>(displacement.Length() + 1) * 1.0f * displacement.Normalized()) + worldVel * -0.1f;
+
+		//finalWorldForce -= GetScene()->GetComponent<NewtonPhysicsWorld>()->GetGravity() * dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass();
+
+		dragPiece_->GetEffectiveRigidBody()->ResetForces();
+
+		//float mRatio = dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass() / dragMassTotal_;
+
+		Vector3 netForceOnAllJoints;
+		for (NewtonConstraint* c : dragPiece_->GetEffectiveRigidBody()->GetConnectedContraints())
+		{
+			netForceOnAllJoints += c->GetOwnForce();
+		}
+
+		Vector3 calculatedForce = finalWorldForce * dragMassTotal_ * 100.0f;
+
+		if (calculatedForce.Length() > 10.0f)
+		{
+			calculatedForce = calculatedForce.Normalized()*10.0f;
+		}
+
+		dragPiece_->GetEffectiveRigidBody()->AddWorldForce(calculatedForce, dragPoint_->GetWorldPosition());
+
+		//limit rotational velocity on drag piece
+		float dragPieceMass = dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass();
+		Vector3 worldRotVel = dragPiece_->GetEffectiveRigidBody()->GetAngularVelocity(TS_WORLD);
+		Vector3 worldLinearVel = dragPiece_->GetEffectiveRigidBody()->GetLinearVelocity(TS_WORLD);
+
+		//dragPiece_->GetEffectiveRigidBody()->AddWorldTorque(-worldRotVel.Normalized() * (worldRotVel.LengthSquared() * 0.1f * dragPieceMass));
+	}
 }
 
 void ManipulationTool::formGatherContraption(bool onlyOne)
@@ -910,26 +919,29 @@ void ManipulationTool::updateKinematicsControllerPos(bool forceUpdate)
 	}
 }
 
+void ManipulationTool::DelayedStart()
+{
+
+	pieceManager_ = GetScene()->GetComponent<PieceManager>();
+		
+	gatherNode_ = GetScene()->CreateChild("gatherNode");
+	gatherNode_->SetTemporary(true);
+		
+	Node* gatherNodeVis = gatherNode_->CreateChild();
+	gatherNodeVis->SetTemporary(true);
+	gatherNodeVis->SetScale(0.1f);
+
+	StaticModel* stMdl = gatherNodeVis->CreateComponent<StaticModel>();
+	stMdl->SetModel(GetSubsystem<ResourceCache>()->GetResource<Model>("Models/LinePrimitives/Basis.mdl"));
+
+	SetMoveMode(moveMode_);
+
+}
+
 void ManipulationTool::OnNodeSet(Node* node)
 {
 	if (node) {
-		pieceManager_ = GetScene()->GetComponent<PieceManager>();
-		
-		gatherNode_ = GetScene()->CreateChild("gatherNode");
-		gatherNode_->SetTemporary(true);
-		
-		Node* gatherNodeVis = gatherNode_->CreateChild();
-		gatherNodeVis->SetTemporary(true);
-		gatherNodeVis->SetScale(0.1f);
 
-		StaticModel* stMdl = gatherNodeVis->CreateComponent<StaticModel>();
-		stMdl->SetModel(GetSubsystem<ResourceCache>()->GetResource<Model>("Models/LinePrimitives/Basis.mdl"));
-		/*Material* mat = GetSubsystem<ResourceCache>()->GetResource<Material>("Models/DefaultMaterial.xml");
-		stMdl->SetMaterial(mat);
-		mat->SetTechnique(0, GetSubsystem<ResourceCache>()->GetResource<Technique>("Techniques/Diff.xml"));
-		mat->SetShaderParameter("MatDiffColor", Vector4(1.0f, 0.0f, 0.0f, 0.0f));*/
-		
-		SetMoveMode(moveMode_);
 	}
 	else
 	{

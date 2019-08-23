@@ -76,10 +76,14 @@ public:
 	virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
 
 
+
+
 protected:
 
 
 	void HandleUpdate(StringHash eventType, VariantMap& eventData);
+
+	void UpdateDragging();
 
 
 	virtual void OnNodeSet(Node* node) override;
@@ -129,5 +133,7 @@ protected:
 	SharedPtr<PieceManager> pieceManager_;
 	SharedPtr<PieceAttachmentStager> attachStager_;
 	
+	virtual void DelayedStart() override;
+
 };
 
