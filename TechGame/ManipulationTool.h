@@ -119,7 +119,7 @@ protected:
 	WeakPtr<NewtonKinematicsControllerConstraint> kinamaticConstriant_;
 
 	Timer kinamaticConstraintUpdateTimer_;
-	int kinamaticConstraintUpdateTimerTimeout_ = 6000;
+	int kinamaticConstraintUpdateTimerTimeout_ = 60;
 	int kinamaticConstraintTimerFireCount_ = false;
 
 
@@ -134,6 +134,8 @@ protected:
 	SharedPtr<PieceAttachmentStager> attachStager_;
 	
 	virtual void DelayedStart() override;
+
+	void CreateGatherNode();
 
 };
 

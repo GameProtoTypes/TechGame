@@ -434,6 +434,10 @@ void ManipulationTool::ToggleUseGrid()
 void ManipulationTool::SetMoveMode(MoveMode mode)
 {
 		moveMode_ = mode;
+
+		//make sure gatherNode is created
+		CreateGatherNode();
+
 		if (mode == MoveMode_Camera)
 		{
 			//set gather node to child and in front of tool
@@ -929,20 +933,28 @@ void ManipulationTool::updateKinematicsControllerPos(bool forceUpdate)
 void ManipulationTool::DelayedStart()
 {
 
+	CreateGatherNode();
+
+	SetMoveMode(moveMode_);
+
+}
+
+void ManipulationTool::CreateGatherNode()
+{
+	if (gatherNode_)
+		return;
+
 	pieceManager_ = GetScene()->GetComponent<PieceManager>();
-		
+
 	gatherNode_ = GetScene()->CreateChild("gatherNode");
 	gatherNode_->SetTemporary(true);
-		
+
 	Node* gatherNodeVis = gatherNode_->CreateChild();
 	gatherNodeVis->SetTemporary(true);
 	gatherNodeVis->SetScale(0.1f);
 
 	StaticModel* stMdl = gatherNodeVis->CreateComponent<StaticModel>();
 	stMdl->SetModel(GetSubsystem<ResourceCache>()->GetResource<Model>("Models/LinePrimitives/Basis.mdl"));
-
-	SetMoveMode(moveMode_);
-
 }
 
 void ManipulationTool::OnNodeSet(Node* node)
