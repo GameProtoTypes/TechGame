@@ -679,13 +679,39 @@ Piece* PiecePointRow::GetPiece()
 bool PiecePointRow::SaveXML(XMLElement& dest) const
 {
 	Component::SaveXML(dest);
-	XMLElement el = dest.CreateChild("PointsData");
 
-	VariantVector vec;
-	for(PiecePoint* point : points_)
-		vec.push_back(point->GetID());
+	{
+		//points data
+		XMLElement el = dest.CreateChild("PointsData");
 
-	el.SetVariantVector(vec);
+		VariantVector vec;
+		for (PiecePoint* point : points_)
+			vec.push_back(point->GetID());
+
+		el.SetVariantVector(vec);
+	}
+
+	{
+		//attachment data
+		
+		for (auto attachment : rowAttachements_)
+		{
+			XMLElement el2 = dest.CreateChild("AttachmentData");
+			VariantVector vec;
+			vec.push_back(attachment.constraint_->GetID());
+			vec.push_back(attachment.point->GetID());
+			vec.push_back(attachment.pointOther_->GetID());
+			vec.push_back(attachment.row_->GetID());
+			vec.push_back(attachment.rowOther_->GetID());
+			el2.SetVariantVector(vec);
+		}
+		
+	}
+
+
+
+
+
 
 	return true;
 }
@@ -695,18 +721,42 @@ bool PiecePointRow::LoadXML(const XMLElement& source)
 {
 	Component::LoadXML(source);
 
-
-
-
-	XMLElement el = source.GetChild("PointsData");
-
-	VariantVector vec = el.GetVariantVector();
-
-	for (Variant variant : vec)
 	{
-		unsigned componentId = variant.GetUInt();
-		pointIds_.push_back(componentId);
+		//points data
+		XMLElement el = source.GetChild("PointsData");
+		VariantVector vec = el.GetVariantVector();
+		for (Variant variant : vec)
+		{
+			unsigned componentId = variant.GetUInt();
+			pointIds_.push_back(componentId);
+		}
 	}
+
+	{
+
+		rowAttachements_.clear();
+
+		//store attachment data node ids for later resolving.
+		XMLElement el2 = source.GetChild("AttachmentData");
+		while (!el2.IsNull())
+		{
+			VariantVector vec = el2.GetVariantVector();
+
+
+			RowAttachement attachment;
+
+			attachment.constraintId_ = vec[0].GetUInt();
+			attachment.pointId = vec[1].GetUInt();
+			attachment.pointOtherId_ = vec[2].GetUInt();
+			attachment.rowId_ = vec[3].GetUInt();
+			attachment.rowOtherId_= vec[4].GetUInt();
+
+			rowAttachements_.push_back(attachment);
+			el2 = el2.GetNext("AttachmentData");
+		}
+
+	}
+
 	return true;
 }
 
@@ -748,6 +798,7 @@ void PiecePointRow::ApplyAttributes()
 		}
 	}
 }
+
 
 
 void PiecePointRow::HandleUpdate(StringHash event, VariantMap& eventData)
@@ -852,5 +903,21 @@ void PiecePointRow::OnNodeSet(Node* node)
 	else
 	{
 		points_.clear();
+	}
+}
+
+void PiecePointRow::DelayedStart()
+{
+	//resolve attachment data
+	{
+		for (RowAttachement& att : rowAttachements_)
+		{
+			att.constraint_ = dynamic_cast<NewtonConstraint*>(GetScene()->GetComponent(att.constraintId_));
+			att.point = dynamic_cast<PiecePoint*>(GetScene()->GetComponent(att.pointId));
+			att.pointOther_ = dynamic_cast<PiecePoint*>(GetScene()->GetComponent(att.pointOtherId_));
+			att.row_ = dynamic_cast<PiecePointRow*>(GetScene()->GetComponent(att.rowId_));
+			att.rowOther_ = dynamic_cast<PiecePointRow*>(GetScene()->GetComponent(att.rowOtherId_));
+		}
+	
 	}
 }

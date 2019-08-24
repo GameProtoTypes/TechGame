@@ -25,9 +25,9 @@ static const char* RowTypeGeneralNames[] =
 };
 
 
-class PiecePointRow : public Component
+class PiecePointRow : public LogicComponent
 {
-	URHO3D_OBJECT(PiecePointRow, Component);
+	URHO3D_OBJECT(PiecePointRow, LogicComponent);
 public:
 
 	enum RowType {
@@ -48,6 +48,12 @@ public:
 
 
 	struct RowAttachement {
+		unsigned pointOtherId_;
+		unsigned pointId;
+		unsigned rowOtherId_;
+		unsigned rowId_;
+		unsigned constraintId_;
+
 		WeakPtr<PiecePoint> pointOther_;
 		WeakPtr<PiecePoint> point;
 		WeakPtr<PiecePointRow> rowOther_ ;
@@ -56,7 +62,7 @@ public:
 	};
 
 
-	PiecePointRow(Context* context) : Component(context)
+	PiecePointRow(Context* context) : LogicComponent(context)
 	{
 		debugColor_ = Color(Random(1.0f), Random(1.0f), Random(1.0f),0.2f);
 
@@ -182,6 +188,8 @@ public:
 	virtual void ApplyAttributes() override;
 
 
+
+
 protected:
 
 	void HandleUpdate(StringHash event, VariantMap& eventData);
@@ -209,6 +217,7 @@ protected:
 	SharedPtr<PieceManager> pieceManager_;
 
 	virtual void OnNodeSet(Node* node) override;
+	virtual void DelayedStart() override;
 
 };
 

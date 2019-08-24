@@ -46,6 +46,8 @@ public:
 		return isVR_;
 	}
 
+	void ResolveNodes();
+
 
 	/// Movement controls. Assigned by the main program each frame.
 	Controls controls_;
@@ -57,7 +59,7 @@ public:
 	SharedPtr<Node> rightHandNode_;
 	SharedPtr<Node> leftHandNode_;
 
-	void ResolveNodes();
+
 
 
 private:
