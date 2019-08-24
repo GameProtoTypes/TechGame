@@ -768,6 +768,15 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 						attachStager_->Analyze();
 
+						//stop rotating the gather node if we hit a good attachment configuration.
+						//if (attachStager_->GetGoodAttachments().size() > 0 && attachStager_->GetBadAttachments().size() == 0)
+						//	gatherNodeIsRotating_ = false;
+						unsigned curSignature = attachStager_->GetCurrentAttachSignature();
+						if (lastAttachSignature_ != curSignature)
+						{
+							gatherNodeIsRotating_ = false;
+							lastAttachSignature_ = curSignature;
+						}
 
 
 						//update colors on good and bad attachments.
@@ -810,7 +819,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 	}
 
 
-
+	UpdateGatherNodeRotation();
 
 
 
@@ -866,6 +875,17 @@ void ManipulationTool::UpdateDragging()
 
 		//dragPiece_->GetEffectiveRigidBody()->AddWorldTorque(-worldRotVel.Normalized() * (worldRotVel.LengthSquared() * 0.1f * dragPieceMass));
 	}
+}
+
+void ManipulationTool::UpdateGatherNodeRotation()
+{
+	if (!gatherNodeIsRotating_)
+		return;
+
+
+	gatherNode_->Rotate(gatherRotationalVel_, TS_PARENT);
+
+
 }
 
 void ManipulationTool::formGatherContraption(bool onlyOne)

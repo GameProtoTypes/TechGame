@@ -129,6 +129,22 @@ public:
 	ea::vector<AttachmentPair*>& GetGoodAttachments() { return goodAttachments_; }
 	ea::vector<AttachmentPair*>& GetBadAttachments() { return badAttachments_; }
 
+	unsigned GetCurrentAttachSignature() { 
+
+		unsigned hash = 0;//NOT A PERFECT HASH! (but should do the job)
+		for (AttachmentPair* pair : goodAttachments_) {
+			hash += (unsigned)(void*)pair->pointA + (unsigned)(void*)pair->pointB;
+		}
+
+		for (AttachmentPair* pair : badAttachments_) {
+			hash += (unsigned)(void*)pair->pointA + (unsigned)(void*)pair->pointB;
+		}
+
+
+		return hash;
+	
+	}
+
 protected:
 
 	void checkDistances();

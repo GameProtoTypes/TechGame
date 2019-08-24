@@ -49,6 +49,16 @@ public:
 	{
 		gatherNode_->Rotate(rotation, TS_PARENT);
 	}
+
+	void StartGatherNodeRotation(Quaternion rotationalVel) {
+		gatherRotationalVel_ = rotationalVel;
+		gatherNodeIsRotating_ = true;
+	}
+
+	void StopGatherNodeRotation() {
+		gatherNodeIsRotating_ = false;
+	}
+
 	void ResetGatherNodeRotation()
 	{
 		if (MoveMode_Camera)
@@ -85,6 +95,7 @@ protected:
 
 	void UpdateDragging();
 
+	void UpdateGatherNodeRotation();
 
 	virtual void OnNodeSet(Node* node) override;
 
@@ -112,6 +123,9 @@ protected:
 	ea::vector<Piece*> allGatherPieces_;
 	
 	Quaternion gatherRotation_;
+	Quaternion gatherRotationalVel_;
+	bool gatherNodeIsRotating_ = false;
+	unsigned lastAttachSignature_ = false;
 
 	Vector3 gatherNodeRefOffset_ = Vector3(0,0,2);
 	float gatherNodeMaxCastDist_ = 5.0f;

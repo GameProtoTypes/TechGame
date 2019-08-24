@@ -357,13 +357,12 @@ void TechGame::UpdateUIInput(float timestep)
 		rotationAxis = Vector3(0, 1, 0);
 
 	if (input->GetKeyPress(KEY_E))
-		character_->rightHandNode_->GetComponent<ManipulationTool>()->RotateGatherNode(Quaternion(-45, rotationAxis));
+		character_->rightHandNode_->GetComponent<ManipulationTool>()->StartGatherNodeRotation(Quaternion(1.0f, rotationAxis));
+	
 	if (input->GetKeyPress(KEY_Q))
-		character_->rightHandNode_->GetComponent<ManipulationTool>()->RotateGatherNode(Quaternion(45, rotationAxis));
+		character_->rightHandNode_->GetComponent<ManipulationTool>()->StartGatherNodeRotation(Quaternion(-1.0f, rotationAxis));
 	
 	
-	if (input->GetKeyPress(KEY_TAB))
-		character_->rightHandNode_->GetComponent<ManipulationTool>()->RotateNextNearest();
 
 
 
