@@ -100,7 +100,7 @@ protected:
 	ea::vector<bool> pieceDynDetachSaves_;
 	float dragMassTotal_ = 0.0f;
 	bool dragUseKinematicJoint_ = false;
-
+	Vector3 dragIntegralAccum_;
 
 	WeakPtr<Node> gatherNode_;
 	MoveMode moveMode_ = MoveMode_Camera;
