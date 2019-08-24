@@ -820,18 +820,24 @@ void ManipulationTool::UpdateDragging()
 	}
 	else
 	{
-
+		//URHO3D_LOGINFO(gatherNode_->GetWorldPosition().ToString());
 		Vector3 displacement = (gatherNode_->GetWorldPosition() - dragPoint_->GetWorldPosition());
 
+		float dragPieceMass = dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass();
+
 		Vector3 worldVel = dragPiece_->GetEffectiveRigidBody()->GetLinearVelocity(TS_WORLD);
+		Vector3 worldAngVel = dragPiece_->GetEffectiveRigidBody()->GetAngularVelocity(TS_WORLD);
 
-		Vector3 finalWorldForce = (Urho3D::Ln<float>(displacement.Length() + 1) * 1.0f * displacement.Normalized()) + worldVel * -0.1f;
+		dragIntegralAccum_ += displacement;
 
-		//finalWorldForce -= GetScene()->GetComponent<NewtonPhysicsWorld>()->GetGravity() * dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass();
+		Vector3 finalWorldForce = (Urho3D::Ln<float>(displacement.Length() + 1) * 1.0f * displacement.Normalized()) + worldVel * -0.1f + dragIntegralAccum_ * 0.01f;
+
+		Vector3 finalWorldTorque = -worldAngVel * 0.07f*dragPieceMass;
+
+
 
 		dragPiece_->GetEffectiveRigidBody()->ResetForces();
 
-		//float mRatio = dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass() / dragMassTotal_;
 
 		Vector3 netForceOnAllJoints;
 		for (NewtonConstraint* c : dragPiece_->GetEffectiveRigidBody()->GetConnectedContraints())
@@ -847,9 +853,10 @@ void ManipulationTool::UpdateDragging()
 		}
 
 		dragPiece_->GetEffectiveRigidBody()->AddWorldForce(calculatedForce, dragPoint_->GetWorldPosition());
+		dragPiece_->GetEffectiveRigidBody()->AddWorldTorque(finalWorldTorque);
 
 		//limit rotational velocity on drag piece
-		float dragPieceMass = dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass();
+
 		Vector3 worldRotVel = dragPiece_->GetEffectiveRigidBody()->GetAngularVelocity(TS_WORLD);
 		Vector3 worldLinearVel = dragPiece_->GetEffectiveRigidBody()->GetLinearVelocity(TS_WORLD);
 
