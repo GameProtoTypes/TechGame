@@ -86,7 +86,7 @@ bool ManipulationTool::BeginDrag()
 	gatherNode_->SetWorldPosition(dragPoint_->GetWorldPosition());
 
 
-
+	return true;
 }
 
 void ManipulationTool::EndDrag(bool freeze)
@@ -894,7 +894,7 @@ void ManipulationTool::updateKinematicsControllerPos(bool forceUpdate)
 	if (forceUpdate)
 		doUpdate = true;
 
-	if (kinamaticConstraintUpdateTimer_.GetMSec(false) >= kinamaticConstraintUpdateTimerTimeout_)
+	if (kinamaticConstraintUpdateTimer_.GetMSec(false) >= (unsigned)kinamaticConstraintUpdateTimerTimeout_)
 	{
 		if (kinamaticConstraintTimerFireCount_ > 0) {
 			doUpdate = true;
