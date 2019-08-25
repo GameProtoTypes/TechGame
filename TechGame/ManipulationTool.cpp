@@ -775,6 +775,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 						if (lastAttachSignature_ != curSignature)
 						{
 							gatherNodeIsRotating_ = false;
+							gatherSlerpParam_ = 0.0f;
 							lastAttachSignature_ = curSignature;
 						}
 
@@ -884,6 +885,18 @@ void ManipulationTool::UpdateGatherNodeRotation()
 
 
 	gatherNode_->Rotate(gatherRotationalVel_, TS_PARENT);
+
+	gatherSlerpParam_ += 0.03f;
+	gatherNode_->SetRotation(gatherStartRotation_.Slerp(gatherTargetRotation_, gatherSlerpParam_));
+
+
+	if (gatherSlerpParam_ >= 1.0f)
+	{
+		gatherSlerpParam_ = 0.0f;
+		gatherNode_->SetRotation(gatherTargetRotation_);
+		gatherNodeIsRotating_ = false;
+	}
+
 
 
 }

@@ -76,7 +76,52 @@ namespace Urho3D {
 		return Plane(Vector3(normal(0), normal(1), normal(2)), centriod);
 	}
 
+	enum Filtering {
+		Filtering_None = 0,
+		Filtering_Bilinear
+	};
 
+
+
+	URHOMATHEXTRAS_API void FindInflectionPoints(ea::vector<Vector2> & values, ea::vector<ea::pair<Vector2,int>> & t)
+	{
+
+		Vector2 lastHighest = { 0.0, -M_LARGE_VALUE };
+		Vector2 lastLowest = { 0.0, M_LARGE_VALUE };
+		int dir = 1;
+		for (Vector2& val : values) {
+
+			if (dir == 1) {
+				if (val.y_ > lastHighest.y_) {
+					lastHighest = val;
+					dir = 1;
+				}
+				else 
+				{
+					//found a high point
+					t.push_back({lastHighest , dir });
+					lastHighest.y_ = -M_LARGE_VALUE;
+					lastLowest = val;
+					dir = -1;
+				}
+			}
+			else if (dir == -1) {
+
+				if (val.y_ < lastLowest.y_) {
+					lastLowest = val;
+					dir = -1;
+				}
+				else
+				{
+					//found a low point
+					t.push_back({ lastLowest, dir });
+					lastLowest.y_ = M_LARGE_VALUE;
+					lastHighest = val;
+					dir = -1;
+				}
+			}
+		}
+	}
 
 
 

@@ -50,8 +50,9 @@ public:
 		gatherNode_->Rotate(rotation, TS_PARENT);
 	}
 
-	void StartGatherNodeRotation(Quaternion rotationalVel) {
-		gatherRotationalVel_ = rotationalVel;
+	void StartGatherNodeRotation(Quaternion rotation) {
+		gatherTargetRotation_ = gatherTargetRotation_ * rotation;
+		gatherStartRotation_ = gatherNode_->GetRotation();
 		gatherNodeIsRotating_ = true;
 	}
 
@@ -124,7 +125,11 @@ protected:
 	
 	Quaternion gatherRotation_;
 	Quaternion gatherRotationalVel_;
+	Quaternion gatherStartRotation_;
+	Quaternion gatherTargetRotation_;
 	bool gatherNodeIsRotating_ = false;
+	float gatherSlerpParam_ = 0.0f;
+	ea::vector<Vector2> gatherNodeRotationMetrics_;
 	unsigned lastAttachSignature_ = false;
 
 	Vector3 gatherNodeRefOffset_ = Vector3(0,0,2);

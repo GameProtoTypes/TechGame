@@ -357,10 +357,10 @@ void TechGame::UpdateUIInput(float timestep)
 		rotationAxis = Vector3(0, 1, 0);
 
 	if (input->GetKeyPress(KEY_E))
-		character_->rightHandNode_->GetComponent<ManipulationTool>()->StartGatherNodeRotation(Quaternion(1.0f, rotationAxis));
+		character_->rightHandNode_->GetComponent<ManipulationTool>()->StartGatherNodeRotation(Quaternion(45, rotationAxis));
 	
 	if (input->GetKeyPress(KEY_Q))
-		character_->rightHandNode_->GetComponent<ManipulationTool>()->StartGatherNodeRotation(Quaternion(-1.0f, rotationAxis));
+		character_->rightHandNode_->GetComponent<ManipulationTool>()->StartGatherNodeRotation(Quaternion(-45, rotationAxis));
 	
 	
 
@@ -383,6 +383,7 @@ void TechGame::DefaultCreateScene()
 	scene_->CreateComponent<Octree>();
 	NewtonPhysicsWorld* physicsWorld = scene_->CreateComponent<NewtonPhysicsWorld>();	
 	physicsWorld->SetGravity(Vector3(0, -9.81, 0));
+	physicsWorld->SetDebugScale(0.25f);
 	//physicsWorld->SetIterationCount(8);
 	
 

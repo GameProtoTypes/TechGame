@@ -72,9 +72,9 @@ void PieceAttachmentStager::checkDistances()
 		float thresh = scene_->GetComponent<PieceManager>()->GetAttachPointThreshold();
 
 		if ((posA - posB).Length() > thresh) {
-			
 			pair->goodAttachment_ = false;
 		}
+		pair->distDiff_ = (posA - posB).Length();
 	}
 }
 
@@ -208,6 +208,7 @@ void PieceAttachmentStager::checkPointDirections()
 	{
 		if (pair->pointA->GetDirectionWorld().CrossProduct(pair->pointB->GetDirectionWorld()).LengthSquared() >= 0.001f)
 		{
+			pair->angleDiff_ = pair->pointA->GetDirectionWorld().Angle(pair->pointB->GetDirectionWorld());
 			pair->goodAttachment_ = false;
 		}
 	}
@@ -273,4 +274,26 @@ bool PieceAttachmentStager::AttachAll()
 
 
 	return allAttachSuccess;
+}
+
+float PieceAttachmentStager::GetCurrentAttachMetric()
+{
+	if (badAttachments_.size())
+		return 0.0f;
+
+	if (goodAttachments_.size() == 0)
+		return 0.0f;
+
+	float totalMetric = 0.0f;
+	for (AttachmentPair* pair : goodAttachments_) {
+
+		float angleMetric = pair->angleDiff_ / 180.0f;
+		float distMetric = pair->angleDiff_ / scene_->GetComponent<PieceManager>()->GetAttachPointThreshold();
+
+		float pairMetric = (angleMetric + distMetric)*0.5f;
+		totalMetric += pairMetric;
+	}
+
+	totalMetric /= float(goodAttachments_.size());
+	return totalMetric;
 }
