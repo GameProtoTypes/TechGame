@@ -206,9 +206,17 @@ void PieceAttachmentStager::checkPointDirections()
 {
 	for (AttachmentPair* pair : potentialAttachments_)
 	{
-		if (pair->pointA->GetDirectionWorld().CrossProduct(pair->pointB->GetDirectionWorld()).LengthSquared() >= 0.001f)
+
+		pair->angleDiff_ = pair->pointA->GetDirectionWorld().Angle(pair->pointB->GetDirectionWorld());
+		
+		float nearestMultiple = RoundToNearestMultiple(pair->angleDiff_, 90.0f);
+
+		float deltaAbs = Abs(nearestMultiple - pair->angleDiff_);
+
+		URHO3D_LOGINFO(ea::to_string(deltaAbs));
+
+		if (deltaAbs > 0.1f)
 		{
-			pair->angleDiff_ = pair->pointA->GetDirectionWorld().Angle(pair->pointB->GetDirectionWorld());
 			pair->goodAttachment_ = false;
 		}
 	}

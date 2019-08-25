@@ -94,6 +94,8 @@ protected:
 
 	void HandleUpdate(StringHash eventType, VariantMap& eventData);
 
+	void UpdateMoveGatherNode();
+
 	void UpdateDragging();
 
 	void UpdateGatherNodeRotation();

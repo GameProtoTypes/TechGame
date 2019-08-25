@@ -47,6 +47,7 @@ bool ManipulationTool::BeginDrag()
 	URHO3D_LOGINFO("beginning drag.");
 
 	isDragging_ = true;
+	dragIntegralAccum_ = Vector3::ZERO;
 
 	ea::vector<Piece*> pieces;
 	aimPiece->GetAttachedPieces(pieces, true);
@@ -542,98 +543,7 @@ void ManipulationTool::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 
 void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 {
-	if (moveMode_ == MoveMode_Global) {
-		//move gather node
-		Input* input = GetSubsystem<Input>();
-		Vector3 translation;
-		float moveSpeed = 0.01f;
-		if (input->GetKeyDown(KEY_SEMICOLON))
-		{
-			translation += Vector3(moveSpeed, 0.0f, 0.0f);
-		}
-		if (input->GetKeyDown(KEY_K))
-		{
-			translation += Vector3(-moveSpeed, 0.0f, 0.0f);
-		}
-		if (input->GetKeyDown(KEY_O))
-		{
-			translation += Vector3(0.0f, 0.0f, moveSpeed);
-		}
-		if (input->GetKeyDown(KEY_PERIOD))
-		{
-			translation += Vector3(0.0f, 0.0f, -moveSpeed);
-		}
-		if (input->GetKeyDown(KEY_P))
-		{
-			translation += Vector3(0.0f, moveSpeed, 0.0f);
-		}
-		if (input->GetKeyDown(KEY_SLASH))
-		{
-			translation += Vector3(0.0f, -moveSpeed, 0.0f);
-		}
-
-		//rotate translation by current camera angle snapped.
-		translation = SnapOrientationEuler(node_->GetWorldRotation(), 45.0f) * translation;
-
-
-		if (input->GetKeyDown(KEY_SHIFT)) {
-			translation *= 2.0f;
-		}
-		else if (input->GetKeyDown(KEY_CTRL)) {
-			translation *= 0.5f;
-		}
-
-
-		gatherNode_->Translate(translation, TS_WORLD);
-	}
-	else if (moveMode_ == MoveMode_Camera)
-	{
-
-		if (IsGathering()) {
-			//cast the gather node forward until it hits something.
-
-			Octree* octree = GetScene()->GetComponent<Octree>();
-			RayOctreeQuery query(Ray(GetEffectiveLookNode()->GetWorldPosition(), GetEffectiveLookNode()->GetWorldDirection()));
-
-			//GetSubsystem<VisualDebugger>()->AddLine(GetEffectiveLookNode()->GetWorldPosition(), GetEffectiveLookNode()->GetWorldPosition() + )
-
-			octree->Raycast(query);
-			Vector3 worldPos;
-			bool foundPos = false;
-			for (int i = 0; i < query.result_.size(); i++)
-			{
-
-				if (query.result_[i].distance_ <= (gatherNodeMaxCastDist_) && query.result_[i].node_->GetName() == "visualNode")
-				{
-					//its a piece..
-					Piece* piece = query.result_[i].node_->GetParent()->GetComponent<Piece>();
-
-					if (piece && !allGatherPieces_.contains(piece))
-					{
-						worldPos = query.result_[i].position_;
-						foundPos = true;
-						break;
-					}
-
-				}
-
-			}
-
-			if (foundPos) {
-				gatherNode_->SetWorldPosition(worldPos);
-			}
-			else
-			{
-				gatherNode_->SetPosition(gatherNodeRefOffset_);
-			}
-		}
-
-	}
-
-
-
-
-
+	UpdateMoveGatherNode();
 
 
 
@@ -824,6 +734,97 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 
 
+}
+
+void ManipulationTool::UpdateMoveGatherNode()
+{
+	if (moveMode_ == MoveMode_Global) {
+		//move gather node
+		Input* input = GetSubsystem<Input>();
+		Vector3 translation;
+		float moveSpeed = 0.01f;
+		if (input->GetKeyDown(KEY_SEMICOLON))
+		{
+			translation += Vector3(moveSpeed, 0.0f, 0.0f);
+		}
+		if (input->GetKeyDown(KEY_K))
+		{
+			translation += Vector3(-moveSpeed, 0.0f, 0.0f);
+		}
+		if (input->GetKeyDown(KEY_O))
+		{
+			translation += Vector3(0.0f, 0.0f, moveSpeed);
+		}
+		if (input->GetKeyDown(KEY_PERIOD))
+		{
+			translation += Vector3(0.0f, 0.0f, -moveSpeed);
+		}
+		if (input->GetKeyDown(KEY_P))
+		{
+			translation += Vector3(0.0f, moveSpeed, 0.0f);
+		}
+		if (input->GetKeyDown(KEY_SLASH))
+		{
+			translation += Vector3(0.0f, -moveSpeed, 0.0f);
+		}
+
+		//rotate translation by current camera angle snapped.
+		translation = SnapOrientationEuler(node_->GetWorldRotation(), 45.0f) * translation;
+
+
+		if (input->GetKeyDown(KEY_SHIFT)) {
+			translation *= 2.0f;
+		}
+		else if (input->GetKeyDown(KEY_CTRL)) {
+			translation *= 0.5f;
+		}
+
+
+		gatherNode_->Translate(translation, TS_WORLD);
+	}
+	else if (moveMode_ == MoveMode_Camera)
+	{
+
+		if (IsGathering()) {
+			//cast the gather node forward until it hits something.
+
+			Octree* octree = GetScene()->GetComponent<Octree>();
+			RayOctreeQuery query(Ray(GetEffectiveLookNode()->GetWorldPosition(), GetEffectiveLookNode()->GetWorldDirection()));
+
+			//GetSubsystem<VisualDebugger>()->AddLine(GetEffectiveLookNode()->GetWorldPosition(), GetEffectiveLookNode()->GetWorldPosition() + )
+
+			octree->Raycast(query);
+			Vector3 worldPos;
+			bool foundPos = false;
+			for (int i = 0; i < query.result_.size(); i++)
+			{
+
+				if (query.result_[i].distance_ <= (gatherNodeMaxCastDist_) && query.result_[i].node_->GetName() == "visualNode")
+				{
+					//its a piece..
+					Piece* piece = query.result_[i].node_->GetParent()->GetComponent<Piece>();
+
+					if (piece && !allGatherPieces_.contains(piece))
+					{
+						worldPos = query.result_[i].position_;
+						foundPos = true;
+						break;
+					}
+
+				}
+
+			}
+
+			if (foundPos) {
+				gatherNode_->SetWorldPosition(worldPos);
+			}
+			else
+			{
+				gatherNode_->SetPosition(gatherNodeRefOffset_);
+			}
+		}
+
+	}
 }
 
 void ManipulationTool::UpdateDragging()

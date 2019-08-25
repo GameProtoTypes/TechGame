@@ -40,7 +40,7 @@ public:
 	bool isEndCap_ = false;//if the point is a rod - indicates the point is a limiting end.  if the point is a hole - indicates the hole is a cap and a rod cannot pass through one side. does not need to have row.
 
 
-	Vector3 direction_;//indicates direction in local space
+	Vector3 direction_ = Vector3::FORWARD;//indicates direction in local space
 
 	bool showBasisIndicator_ = false;
 	bool showColorIndicator_ = false;

@@ -68,10 +68,15 @@ bool PiecePointRow::CheckValid()
 	return true;
 }
 
-void PiecePointRow::FormPointDirectionsOnEndPoints()
+void PiecePointRow::FormPointDirections()
 {
 	if (points_.size() <= 1)
+	{
+		if (points_.size() == 1) {
+			points_[0]->direction_ = localDirection_;
+		}
 		return;
+	}
 
 	//first find center of row in real coords
 	Vector3 center = GetLocalCenter();

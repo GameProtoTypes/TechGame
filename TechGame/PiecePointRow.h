@@ -90,7 +90,7 @@ public:
 		if (!CheckValid())
 			return false;
 
-		FormPointDirectionsOnEndPoints();
+		FormPointDirections();
 
 		if (GetRowDirectionLocal().Length() <= 0.0f)
 		{
@@ -103,7 +103,7 @@ public:
 	
 	bool CheckValid();
 
-	void FormPointDirectionsOnEndPoints();
+	void FormPointDirections();
 
 	void SetRowType(RowType type) {
 		rowType_ = type;
@@ -207,7 +207,7 @@ protected:
 
 	Color debugColor_;
 
-	Vector3 localDirection_ = Vector3::ZERO;
+	Vector3 localDirection_ = Vector3::FORWARD;
 
 	RowType rowType_ = RowType_Hole;
 	RowTypeGeneral rowTypeGeneral_ = RowTypeGeneral_Hole;
