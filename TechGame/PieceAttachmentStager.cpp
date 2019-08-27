@@ -62,7 +62,7 @@ bool PieceAttachmentStager::RemovePotentialAttachment(PiecePoint* pointA, PieceP
 	return false;
 }
 
-void PieceAttachmentStager::checkDistances()
+void PieceAttachmentStager::checkPointDistances()
 {
 	for (AttachmentPair* pair : potentialAttachments_)
 	{
@@ -73,8 +73,33 @@ void PieceAttachmentStager::checkDistances()
 
 		if ((posA - posB).Length() > thresh) {
 			pair->goodAttachment_ = false;
+			URHO3D_LOGINFO("checkPointDistances fail");
 		}
 		pair->distDiff_ = (posA - posB).Length();
+
+		URHO3D_LOGINFO("Dist Diff: " + ea::to_string(pair->distDiff_));
+	}
+}
+
+void PieceAttachmentStager::checkPointDirections()
+{
+	for (AttachmentPair* pair : potentialAttachments_)
+	{
+
+		pair->angleDiff_ = pair->pointA->GetDirectionWorld().Angle(pair->pointB->GetDirectionWorld());
+		
+		float nearestMultiple = RoundToNearestMultiple(pair->angleDiff_, 90.0f);
+
+		float deltaAbs = Abs(nearestMultiple - pair->angleDiff_);
+
+		URHO3D_LOGINFO("Angle Diff: " + ea::to_string(deltaAbs));
+		URHO3D_LOGINFO("nearestMultiple: " + ea::to_string(nearestMultiple));
+
+		if (deltaAbs > 0.1f || (Abs(nearestMultiple) == 90.0f))
+		{
+			pair->goodAttachment_ = false;
+			URHO3D_LOGINFO("checkPointDirections fail");
+		}
 	}
 }
 
@@ -117,7 +142,8 @@ void PieceAttachmentStager::checkRowBasicCompatability()
 		if (!PiecePointRow::RowsAttachCompatable(pair->rowA, pair->rowB))
 		{
 			pair->goodAttachment_ = false;
-	}
+			URHO3D_LOGINFO("checkRowBasicCompatability fail");
+		}
 	}
 }
 
@@ -197,29 +223,9 @@ void PieceAttachmentStager::checkEndPointRules(AttachmentPair* attachPair)
 	if (!overallPass)
 	{
 		attachPair->goodAttachment_ = false;
+		URHO3D_LOGINFO("checkEndPointRules fail");
 	}
 
-
-}
-
-void PieceAttachmentStager::checkPointDirections()
-{
-	for (AttachmentPair* pair : potentialAttachments_)
-	{
-
-		pair->angleDiff_ = pair->pointA->GetDirectionWorld().Angle(pair->pointB->GetDirectionWorld());
-		
-		float nearestMultiple = RoundToNearestMultiple(pair->angleDiff_, 90.0f);
-
-		float deltaAbs = Abs(nearestMultiple - pair->angleDiff_);
-
-		URHO3D_LOGINFO(ea::to_string(deltaAbs));
-
-		if (deltaAbs > 0.1f)
-		{
-			pair->goodAttachment_ = false;
-		}
-	}
 }
 
 bool PieceAttachmentStager::AttachAll()

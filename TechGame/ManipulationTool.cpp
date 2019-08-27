@@ -226,6 +226,7 @@ bool ManipulationTool::Gather(bool grabOne)
 	NewtonRigidBody* rigBody = gatheredPieceGroup_->GetRigidBody();
 	rigBody->SetNoCollideOverride(true);
 	rigBody->SetMassScale(1.0f);
+	rigBody->SetIsKinematic(true);
 
 	kinamaticConstriant_ = rigBody->GetNode()->CreateComponent<NewtonKinematicsControllerConstraint>();
 	kinamaticConstriant_->SetLimitRotationalVelocity(false);
@@ -678,16 +679,33 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 						attachStager_->Analyze();
 
+
+
+
+
+
+
 						//stop rotating the gather node if we hit a good attachment configuration.
 						//if (attachStager_->GetGoodAttachments().size() > 0 && attachStager_->GetBadAttachments().size() == 0)
 						//	gatherNodeIsRotating_ = false;
 						unsigned curSignature = attachStager_->GetCurrentAttachSignature();
-						if (lastAttachSignature_ != curSignature)
+						unsigned curNumGoodAttachements = attachStager_->GetGoodAttachments().size();
+						unsigned curNumBadAttachements = attachStager_->GetBadAttachments().size();
+						
+
+						if ((curNumGoodAttachements >= lastNumGoodAttachments_) && (curNumGoodAttachements > 0) && (lastAttachSignature_ != curSignature))
 						{
 							gatherNodeIsRotating_ = false;
 							gatherSlerpParam_ = 0.0f;
 							lastAttachSignature_ = curSignature;
 						}
+
+						lastNumGoodAttachments_ = curNumGoodAttachements;
+						lastNumBadAttachmnets_ = curNumBadAttachements;
+
+
+
+
 
 
 						//update colors on good and bad attachments.

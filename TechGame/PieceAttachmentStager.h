@@ -63,7 +63,7 @@ public:
 		isValid_ = false;
 
 
-		checkDistances();
+		checkPointDistances();
 
 		collectRows();
 
@@ -155,7 +155,7 @@ public:
 
 protected:
 
-	void checkDistances();
+	void checkPointDistances();
 	bool collectRows();
 
 	void checkRowBasicCompatability();

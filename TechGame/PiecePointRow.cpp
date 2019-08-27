@@ -26,10 +26,6 @@ bool PiecePointRow::RowsAttachCompatable(PiecePointRow* rowA, PiecePointRow* row
 
 
 
-	//check that the row directions agree within tolerance of 45 degrees.
-	if (!(rowA->GetRowDirectionWorld().CrossProduct(rowB->GetRowDirectionWorld()).Length() <= 0.25f))
-		return false;
-
 	return true;
 }
 

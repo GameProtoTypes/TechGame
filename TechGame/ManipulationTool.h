@@ -133,6 +133,8 @@ protected:
 	float gatherSlerpParam_ = 0.0f;
 	ea::vector<Vector2> gatherNodeRotationMetrics_;
 	unsigned lastAttachSignature_ = false;
+	unsigned lastNumGoodAttachments_ = 0;
+	unsigned lastNumBadAttachmnets_ = 0;
 
 	Vector3 gatherNodeRefOffset_ = Vector3(0,0,2);
 	float gatherNodeMaxCastDist_ = 5.0f;
