@@ -1041,3 +1041,105 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 	return root;
 }
 
+ea::vector<Piece*> PieceManager::CreatePieceAssembly(ea::string name, bool loadExisting)
+{
+	ea::vector<Piece*> pieces;
+	
+	if (loadExisting)
+	{
+		Node* root;
+		SharedPtr<File> file = SharedPtr<File>(new File(context_));
+		file->Open(name + ".xml", FILE_READ);
+		root = GetScene()->InstantiateXML(*file, Vector3::ZERO, Quaternion::IDENTITY);
+	}
+	else {
+		
+
+		if (name == "Motor") {
+			Node* root;
+
+
+			root = GetScene()->CreateChild();
+			root->SetVar("PieceName", name);
+			float scaleFactor = GetScene()->GetComponent<PieceManager>()->GetScaleFactor();
+
+			auto* body = root->CreateComponent<NewtonRigidBody>();
+			Node* visualNode = root->CreateChild("visualNode");
+			StaticModel* staticMdl = visualNode->CreateComponent<StaticModel>();
+			visualNode->SetScale(scaleFactor / 0.25f);
+			Color color;
+
+
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/outerhousing.mdl");
+			Vector3 offset(0, 0, 0);
+
+			//make shapes
+			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Box>();
+			shape1->SetScaleFactor(Vector3(2, 2 - 2 * 0.25f, 3) * scaleFactor);
+			shape1->SetRotationOffset(Quaternion(90, Vector3(1, 0, 0)));
+
+			auto* shape2 = root->CreateComponent<NewtonCollisionShape_Box>();
+			shape2->SetScaleFactor(Vector3(2, 2 - 2 * 0.25f, 3) * scaleFactor);
+			//shape2->SetRotationOffset(Quaternion(0, Vector3(0, 1, 0)));
+
+
+
+			PiecePointRow* pointRow = root->CreateComponent<PiecePointRow>();
+
+			for (int i = 0; i < 4; i++) {
+				
+				float x, y = 0;
+				if (i == 0 || i == 1) {
+					if (i == 0) {
+						x = 1; y = 0;
+					}
+					if (i == 1) {
+						x = -1; y = 0;
+					}
+				}
+				if (i == 2 || i == 3) {
+					if (i == 2) {
+						x = 0; y = -1;
+					}
+					if (i == 3) {
+						x = 0; y = 1;
+					}
+				}
+				
+				for (int p = 0; p < 4; p++)
+				{
+
+					Node* point = root->CreateChild();
+					point->SetPosition(Vector3((p*0.5f - 1.5*0.5f)*scaleFactor, x*scaleFactor, y*scaleFactor));
+					PiecePoint* piecePoint = point->CreateComponent<PiecePoint>();
+					pointRow->PushBack(piecePoint);
+				}
+			}
+
+
+			//body->SetUseInertiaHack(true);
+			pointRow->Finalize();
+			pointRow->SetRowType(PiecePointRow::RowType_RodHard);
+
+			staticMdl->SetModel(pieceModel);
+
+			staticMdl->SetCastShadows(true);
+
+			Piece* piece = root->CreateComponent<Piece>();
+
+			pieces.push_back(piece);
+
+		}
+		else
+		{
+			URHO3D_LOGINFO("no piece with name: " + name + " found");
+		}
+
+		//SharedPtr<File> file = SharedPtr<File>(new File(context_));
+		//file->Open(name + ".xml", FILE_WRITE);
+		//root->SaveXML(*file);
+	}
+
+
+	return pieces;
+}

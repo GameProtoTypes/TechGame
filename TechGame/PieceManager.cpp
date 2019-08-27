@@ -31,6 +31,8 @@ PiecePoint* PieceManager::GetClosestPiecePoint(Vector3 worldPosition, Piece* pie
 	}
 }
 
+
+
 void PieceManager::GetAllPointsInContraption(Piece* pieceInContraption, ea::vector<PiecePoint*>& points)
 {
 	ea::vector<Piece*> pieces;

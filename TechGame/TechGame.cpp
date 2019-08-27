@@ -481,10 +481,12 @@ void TechGame::DefaultCreateScene()
 		//pm->CreatePiece("gear_medium", false)->SetWorldPosition(Vector3(-1,0,0));
 		//pm->CreatePiece("8_piece_Cshape", false)->SetWorldPosition(Vector3(1, 0, 0));
 
+		pm->CreatePieceAssembly("motor", false);
+
 		Node* prevPiece = nullptr;
 
 		ea::vector<Piece*> pieces;
-		int numDiffPieces = 21;
+		int numDiffPieces = 22;
 		for (int y = 0; y < numDiffPieces*2; y += 1) {
 
 			Node* pieceNode;
@@ -493,45 +495,47 @@ void TechGame::DefaultCreateScene()
 			if (rnd == 0)
 				pieceNode = pm->CreatePiece("8_piece_Cshape", false);
 			else if (rnd == 1)
-				pieceNode = pm->CreatePiece( "rod_hard_4", false);
+				pieceNode = pm->CreatePiece("rod_hard_4", false);
 			else if (rnd == 2)
-				pieceNode = pm->CreatePiece( "rod_round_4", false);
+				pieceNode = pm->CreatePiece("rod_round_4", false);
 			else if (rnd == 3)
-				pieceNode = pm->CreatePiece( "6_piece_thin", false);
+				pieceNode = pm->CreatePiece("6_piece_thin", false);
 			else if (rnd == 4)
 				pieceNode = pm->CreatePiece("2_sleeve", false);
 			else if (rnd == 5)
-				pieceNode = pm->CreatePiece( "1_cap_small", false);
+				pieceNode = pm->CreatePiece("1_cap_small", false);
 			else if (rnd == 6)
-				pieceNode = pm->CreatePiece( "rod_round_no_caps_4", false);
+				pieceNode = pm->CreatePiece("rod_round_no_caps_4", false);
 			else if (rnd == 7)
-				pieceNode = pm->CreatePiece( "6_piece_thick", false);
+				pieceNode = pm->CreatePiece("6_piece_thick", false);
 			else if (rnd == 8)
-				pieceNode = pm->CreatePiece( "5_piece_thick", false);
+				pieceNode = pm->CreatePiece("5_piece_thick", false);
 			else if (rnd == 9)
-				pieceNode = pm->CreatePiece( "4_piece_thick", false);
+				pieceNode = pm->CreatePiece("4_piece_thick", false);
 			else if (rnd == 10)
 				pieceNode = pm->CreatePiece("3_piece_thick", false);
 			else if (rnd == 11)
-				pieceNode = pm->CreatePiece( "2_piece_thick", false);
+				pieceNode = pm->CreatePiece("2_piece_thick", false);
 			else if (rnd == 12)
 				pieceNode = pm->CreatePiece("4x4_piece_thin", false);
 			else if (rnd == 13)
 				pieceNode = pm->CreatePiece("4x8_piece_thin", false);
 			else if (rnd == 14)
-				pieceNode = pm->CreatePiece( "gear_large", false);
+				pieceNode = pm->CreatePiece("gear_large", false);
 			else if (rnd == 15)
-				pieceNode = pm->CreatePiece( "gear_medium", false);
+				pieceNode = pm->CreatePiece("gear_medium", false);
 			else if (rnd == 16)
-				pieceNode = pm->CreatePiece( "gear_small", false);
+				pieceNode = pm->CreatePiece("gear_small", false);
 			else if (rnd == 17)
-				pieceNode = pm->CreatePiece( "gear_extra_large", false);
+				pieceNode = pm->CreatePiece("gear_extra_large", false);
 			else if (rnd == 18)
 				pieceNode = pm->CreatePiece("rod_round_1", false);
 			else if (rnd == 19)
-				pieceNode = pm->CreatePiece( "rod_hard_1", false);
+				pieceNode = pm->CreatePiece("rod_hard_1", false);
 			else if (rnd == 20)
 				pieceNode = pm->CreatePiece("corner_hard_1", false);
+			else if (rnd == 21)
+				pieceNode = pm->CreatePieceAssembly("Motor", false).front()->GetNode();
 
 
 			pieceNode->SetWorldPosition(Vector3(Random(-2,2), y * .05, Random(-2,2)));

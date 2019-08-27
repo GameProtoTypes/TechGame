@@ -45,6 +45,8 @@ public:
 
 	Node* CreatePiece(ea::string name, bool loadExisting);
 
+	ea::vector<Piece*> CreatePieceAssembly(ea::string name, bool loadExisting);
+
 
 
 
