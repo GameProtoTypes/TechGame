@@ -9,10 +9,10 @@
 
 //tool to be attached to hand node.
 
-class HandTool : public Component {
-	URHO3D_OBJECT(HandTool, Component);
+class HandTool : public LogicComponent {
+	URHO3D_OBJECT(HandTool, LogicComponent);
 public:
-	HandTool(Context* context) : Component(context)
+	HandTool(Context* context) : LogicComponent(context)
 	{
 		SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(HandTool, HandleUpdate));
 	}

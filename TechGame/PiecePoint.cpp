@@ -24,7 +24,8 @@ void PiecePoint::RegisterObject(Context* context)
 void PiecePoint::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
 	debug->AddFrame(node_->GetWorldTransform(), 0.125f*0.25f, Color::RED, Color::RED, Color::RED, depthTest);
-	
+	debug->AddLine(node_->GetWorldPosition(), node_->GetWorldPosition() + GetDirectionWorld() * 0.125f*0.25f, Color::GREEN, depthTest);
+
 }
 
 bool PiecePoint::OccupancyCompatible(PiecePoint* point)

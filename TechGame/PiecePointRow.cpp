@@ -26,10 +26,6 @@ bool PiecePointRow::RowsAttachCompatable(PiecePointRow* rowA, PiecePointRow* row
 
 
 
-	//check that the row directions agree within tolerance of 45 degrees.
-	if (!(rowA->GetRowDirectionWorld().CrossProduct(rowB->GetRowDirectionWorld()).Length() <= 0.25f))
-		return false;
-
 	return true;
 }
 
@@ -68,10 +64,15 @@ bool PiecePointRow::CheckValid()
 	return true;
 }
 
-void PiecePointRow::FormPointDirectionsOnEndPoints()
+void PiecePointRow::FormPointDirections()
 {
 	if (points_.size() <= 1)
+	{
+		if (points_.size() == 1) {
+			points_[0]->direction_ = localDirection_;
+		}
 		return;
+	}
 
 	//first find center of row in real coords
 	Vector3 center = GetLocalCenter();

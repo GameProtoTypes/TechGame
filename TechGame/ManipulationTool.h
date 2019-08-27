@@ -49,6 +49,17 @@ public:
 	{
 		gatherNode_->Rotate(rotation, TS_PARENT);
 	}
+
+	void StartGatherNodeRotation(Quaternion rotation) {
+		gatherTargetRotation_ = gatherTargetRotation_ * rotation;
+		gatherStartRotation_ = gatherNode_->GetRotation();
+		gatherNodeIsRotating_ = true;
+	}
+
+	void StopGatherNodeRotation() {
+		gatherNodeIsRotating_ = false;
+	}
+
 	void ResetGatherNodeRotation()
 	{
 		if (MoveMode_Camera)
@@ -77,9 +88,17 @@ public:
 	virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
 
 
+
+
 protected:
 
 	void HandleUpdate(StringHash eventType, VariantMap& eventData);
+
+	void UpdateMoveGatherNode();
+
+	void UpdateDragging();
+
+	void UpdateGatherNodeRotation();
 
 	virtual void OnNodeSet(Node* node) override;
 
@@ -96,7 +115,7 @@ protected:
 	float dragMassTotal_ = 0.0f;
 	Vector3 dragIntegralAccum_;
 	bool dragUseKinematicJoint_ = false;
-
+	Vector3 dragIntegralAccum_;
 
 	WeakPtr<Node> gatherNode_;
 	MoveMode moveMode_ = MoveMode_Camera;
@@ -108,6 +127,15 @@ protected:
 	ea::vector<Piece*> allGatherPieces_;
 	
 	Quaternion gatherRotation_;
+	Quaternion gatherRotationalVel_;
+	Quaternion gatherStartRotation_;
+	Quaternion gatherTargetRotation_;
+	bool gatherNodeIsRotating_ = false;
+	float gatherSlerpParam_ = 0.0f;
+	ea::vector<Vector2> gatherNodeRotationMetrics_;
+	unsigned lastAttachSignature_ = false;
+	unsigned lastNumGoodAttachments_ = 0;
+	unsigned lastNumBadAttachmnets_ = 0;
 
 	Vector3 gatherNodeRefOffset_ = Vector3(0,0,2);
 	float gatherNodeMaxCastDist_ = 5.0f;
@@ -115,7 +143,7 @@ protected:
 	WeakPtr<NewtonKinematicsControllerConstraint> kinamaticConstriant_;
 
 	Timer kinamaticConstraintUpdateTimer_;
-	int kinamaticConstraintUpdateTimerTimeout_ = 6000;
+	int kinamaticConstraintUpdateTimerTimeout_ = 60;
 	int kinamaticConstraintTimerFireCount_ = false;
 
 
@@ -129,5 +157,9 @@ protected:
 	SharedPtr<PieceManager> pieceManager_;
 	SharedPtr<PieceAttachmentStager> attachStager_;
 	
+	virtual void DelayedStart() override;
+
+	void CreateGatherNode();
+
 };
 

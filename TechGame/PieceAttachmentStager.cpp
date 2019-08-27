@@ -62,7 +62,7 @@ bool PieceAttachmentStager::RemovePotentialAttachment(PiecePoint* pointA, PieceP
 	return false;
 }
 
-void PieceAttachmentStager::checkDistances()
+void PieceAttachmentStager::checkPointDistances()
 {
 	for (AttachmentPair* pair : potentialAttachments_)
 	{
@@ -72,8 +72,33 @@ void PieceAttachmentStager::checkDistances()
 		float thresh = scene_->GetComponent<PieceManager>()->GetAttachPointThreshold();
 
 		if ((posA - posB).Length() > thresh) {
-			
 			pair->goodAttachment_ = false;
+			URHO3D_LOGINFO("checkPointDistances fail");
+		}
+		pair->distDiff_ = (posA - posB).Length();
+
+		URHO3D_LOGINFO("Dist Diff: " + ea::to_string(pair->distDiff_));
+	}
+}
+
+void PieceAttachmentStager::checkPointDirections()
+{
+	for (AttachmentPair* pair : potentialAttachments_)
+	{
+
+		pair->angleDiff_ = pair->pointA->GetDirectionWorld().Angle(pair->pointB->GetDirectionWorld());
+		
+		float nearestMultiple = RoundToNearestMultiple(pair->angleDiff_, 90.0f);
+
+		float deltaAbs = Abs(nearestMultiple - pair->angleDiff_);
+
+		URHO3D_LOGINFO("Angle Diff: " + ea::to_string(deltaAbs));
+		URHO3D_LOGINFO("nearestMultiple: " + ea::to_string(nearestMultiple));
+
+		if (deltaAbs > 0.1f || (Abs(nearestMultiple) == 90.0f))
+		{
+			pair->goodAttachment_ = false;
+			URHO3D_LOGINFO("checkPointDirections fail");
 		}
 	}
 }
@@ -117,7 +142,8 @@ void PieceAttachmentStager::checkRowBasicCompatability()
 		if (!PiecePointRow::RowsAttachCompatable(pair->rowA, pair->rowB))
 		{
 			pair->goodAttachment_ = false;
-	}
+			URHO3D_LOGINFO("checkRowBasicCompatability fail");
+		}
 	}
 }
 
@@ -197,20 +223,9 @@ void PieceAttachmentStager::checkEndPointRules(AttachmentPair* attachPair)
 	if (!overallPass)
 	{
 		attachPair->goodAttachment_ = false;
+		URHO3D_LOGINFO("checkEndPointRules fail");
 	}
 
-
-}
-
-void PieceAttachmentStager::checkPointDirections()
-{
-	for (AttachmentPair* pair : potentialAttachments_)
-	{
-		if (pair->pointA->GetDirectionWorld().CrossProduct(pair->pointB->GetDirectionWorld()).LengthSquared() >= 0.001f)
-		{
-			pair->goodAttachment_ = false;
-		}
-	}
 }
 
 bool PieceAttachmentStager::AttachAll()
@@ -273,4 +288,26 @@ bool PieceAttachmentStager::AttachAll()
 
 
 	return allAttachSuccess;
+}
+
+float PieceAttachmentStager::GetCurrentAttachMetric()
+{
+	if (badAttachments_.size())
+		return 0.0f;
+
+	if (goodAttachments_.size() == 0)
+		return 0.0f;
+
+	float totalMetric = 0.0f;
+	for (AttachmentPair* pair : goodAttachments_) {
+
+		float angleMetric = pair->angleDiff_ / 180.0f;
+		float distMetric = pair->angleDiff_ / scene_->GetComponent<PieceManager>()->GetAttachPointThreshold();
+
+		float pairMetric = (angleMetric + distMetric)*0.5f;
+		totalMetric += pairMetric;
+	}
+
+	totalMetric /= float(goodAttachments_.size());
+	return totalMetric;
 }

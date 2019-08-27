@@ -23,6 +23,8 @@ public:
 		WeakPtr<Piece> pieceA = nullptr;
 		WeakPtr<Piece> pieceB = nullptr;
 
+		float angleDiff_ = 0.0f;
+		float distDiff_ = 0.0f;
 		bool goodAttachment_ = true;
 	};
 
@@ -61,7 +63,7 @@ public:
 		isValid_ = false;
 
 
-		checkDistances();
+		checkPointDistances();
 
 		collectRows();
 
@@ -129,9 +131,31 @@ public:
 	ea::vector<AttachmentPair*>& GetGoodAttachments() { return goodAttachments_; }
 	ea::vector<AttachmentPair*>& GetBadAttachments() { return badAttachments_; }
 
+	unsigned GetCurrentAttachSignature() { 
+
+		unsigned hash = 0;//NOT A PERFECT HASH! (but should do the job)
+		for (AttachmentPair* pair : goodAttachments_) {
+			hash += (unsigned)(void*)pair->pointA + (unsigned)(void*)pair->pointB + Urho3D::Pow((int)pair->goodAttachment_, 2);
+		}
+
+		for (AttachmentPair* pair : badAttachments_) {
+			hash += (unsigned)(void*)pair->pointA + (unsigned)(void*)pair->pointB + Urho3D::Pow((int)pair->goodAttachment_, 2);
+		}
+		
+
+		return hash;
+	
+	}
+
+	//returns a value from 0 to 1 indicating how well the overall attachment is lined up.
+	float GetCurrentAttachMetric();
+
+
+
+
 protected:
 
-	void checkDistances();
+	void checkPointDistances();
 	bool collectRows();
 
 	void checkRowBasicCompatability();

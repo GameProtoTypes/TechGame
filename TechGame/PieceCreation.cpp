@@ -898,7 +898,7 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 					piecePoint->isEndCap_ = true;
 
 			}
-			pointRow2->SetRowDirectionLocal(Vector3(1, 0, 0));
+			pointRow2->SetRowDirectionLocal(Vector3(0, 0, 1));
 			pointRow2->Finalize();
 			pointRow2->SetRowType(PiecePointRow::RowType_RodHard);
 

@@ -38,6 +38,8 @@ namespace Urho3D {
 
 	URHOMATHEXTRAS_API Plane BestFitPlaneSVD(ea::vector<Vector3> points);
 
+	///Basic Algorithm for finding min and max points in the values array. (no filtering)
+	URHOMATHEXTRAS_API void FindInflectionPoints(ea::vector<Vector2> & values, ea::vector<ea::pair<Vector2, int>> & t);
 
 	///Given an orientation - converts to Euler angles and rounds each axis independently to a multiple of the given angle. then converts back to quaternion
 	template <typename T>
