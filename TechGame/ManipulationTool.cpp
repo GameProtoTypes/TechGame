@@ -50,7 +50,6 @@ bool ManipulationTool::BeginDrag()
 	aimPiece->GetAttachedPieces(pieces, true);
 	pieces.push_back(aimPiece);
 	dragMassTotal_ = 0.0f;
-	dragIntegralAccum_ = Vector3::ZERO;
 
 	for (Piece* pc : pieces) {
 		dragMassTotal_ += pc->GetRigidBody()->GetEffectiveMass();
@@ -805,6 +804,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 		}
 		else
 		{
+			//URHO3D_LOGINFO(gatherNode_->GetWorldPosition().ToString());
 			Vector3 displacement = (gatherNode_->GetWorldPosition() - dragPoint_->GetWorldPosition());
 
 			float dragPieceMass = dragPiece_->GetEffectiveRigidBody()->GetEffectiveMass();
@@ -814,7 +814,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 			dragIntegralAccum_ += displacement;
 
-			Vector3 finalWorldForce = (Urho3D::Ln<float>(displacement.Length() + 1) * 1.0f * displacement.Normalized()) + worldVel * -0.1f + dragIntegralAccum_ * 0.01f;
+			Vector3 finalWorldForce = (Urho3D::Ln<float>(displacement.Length() + 1) * 1.0f * displacement.Normalized()) + worldVel * -0.1f + dragIntegralAccum_*0.01f;
 
 			Vector3 finalWorldTorque = -worldAngVel*0.07f*dragPieceMass;
 
@@ -840,8 +840,11 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 			dragPiece_->GetEffectiveRigidBody()->AddWorldTorque(finalWorldTorque);
 
 			//limit rotational velocity on drag piece
+			
 			Vector3 worldRotVel = dragPiece_->GetEffectiveRigidBody()->GetAngularVelocity(TS_WORLD);
 			Vector3 worldLinearVel = dragPiece_->GetEffectiveRigidBody()->GetLinearVelocity(TS_WORLD);
+
+			//dragPiece_->GetEffectiveRigidBody()->AddWorldTorque(-worldRotVel.Normalized() * (worldRotVel.LengthSquared() * 0.1f * dragPieceMass));
 		}
 
 	}
