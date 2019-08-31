@@ -60,6 +60,15 @@ namespace Urho3D {
 	URHOMATHEXTRAS_API Quaternion SnapOrientationAngle(const Quaternion& orientation, T angle)
 	{
 		Quaternion orientationNormalized = orientation.Normalized();
-		return Quaternion(RoundToNearestMultiple(orientationNormalized.Angle(), angle), orientationNormalized.Axis()).Normalized();
+
+		if (orientationNormalized.Axis().IsNaN() || orientationNormalized.Axis().IsInf()) {
+			return Quaternion::IDENTITY;
+		}
+		else
+		{
+			return Quaternion(RoundToNearestMultiple(orientationNormalized.Angle(), angle), orientationNormalized.Axis()).Normalized();
+		}
+
+		
 	}
 }
