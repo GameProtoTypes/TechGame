@@ -64,7 +64,7 @@ public:
 
 	PiecePointRow(Context* context) : LogicComponent(context)
 	{
-		debugColor_ = Color(Random(1.0f), Random(1.0f), Random(1.0f),0.2f);
+		debugColor_ = Color(Random(1.0f), Random(1.0f), Random(1.0f), 0.2f);
 
 		SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(PiecePointRow, HandleUpdate));
 	}

@@ -96,7 +96,7 @@ void Piece::SetGhostingEffectEnabled(bool enable)
 
 void Piece::RefreshVisualMaterial()
 {
-	Material* ghostMat = GetVisualNode()->GetComponent<StaticModel>(false)->GetMaterial();
+	SharedPtr<Material> ghostMat = SharedPtr<Material>(GetVisualNode()->GetComponent<StaticModel>(false)->GetMaterial());
 
 	//make sure there is a unique material object for the static model:
 	if (!ghostMat) {
@@ -146,6 +146,43 @@ void Piece::GetAttachedPiecesRec(ea::vector<Piece*>& pieces, bool recursive)
 			}
 		}
 	}
+
+	//also get pieces that are attached via normal constraints
+	ea::vector<NewtonConstraint*> constraints;
+	constraints = GetNode()->GetComponent<NewtonRigidBody>()->GetConnectedContraints();
+
+	for (NewtonConstraint* cn : constraints) 
+	{
+		Piece* piece = nullptr;
+
+		if (cn->GetOwnBody(false) == GetNode()->GetComponent<NewtonRigidBody>()) {
+			NewtonRigidBody* otherRigidBody = cn->GetOtherBody();
+			if (otherRigidBody) {
+				Node* otherNode = otherRigidBody->GetNode();
+				piece = otherNode->GetComponent<Piece>();
+			}
+		}
+		else if (cn->GetOtherBody(false) == GetNode()->GetComponent<NewtonRigidBody>()) {
+			NewtonRigidBody* otherRigidBody = cn->GetOwnBody();
+			if (otherRigidBody) {
+				Node* otherNode = otherRigidBody->GetNode();
+				piece = otherNode->GetComponent<Piece>();
+			}
+		}
+
+		bool s = (!pieces.contains(piece));
+		
+		if (piece != nullptr && s)
+		{
+			pieces.push_back(piece);
+			if (recursive)
+				piece->GetAttachedPiecesRec(pieces, recursive);
+		}
+
+	}
+
+
+
 }
 
 

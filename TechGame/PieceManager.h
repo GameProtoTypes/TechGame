@@ -45,10 +45,9 @@ public:
 
 	Node* CreatePiece(ea::string name, bool loadExisting);
 
-	ea::vector<Piece*> CreatePieceAssembly(ea::string name, bool loadExisting);
+	Node* CreatePieceAssembly(ea::string name, bool loadExisting);
 
-
-
+	void UnPackAssembly(Node* assemblyRoot, ea::vector<Node*>& pieceNodes = ea::vector<Node*>());
 
 	//contraption utils
 	void GetAllPointsInContraption(Piece* pieceInContraption, ea::vector<PiecePoint*>& points);

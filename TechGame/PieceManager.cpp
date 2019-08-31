@@ -33,6 +33,14 @@ PiecePoint* PieceManager::GetClosestPiecePoint(Vector3 worldPosition, Piece* pie
 
 
 
+void PieceManager::UnPackAssembly(Node* assemblyRoot, ea::vector<Node*>& pieceNodes)
+{
+	assemblyRoot->GetChildren(pieceNodes);
+	for (Node* child : pieceNodes) {
+		child->SetParent(assemblyRoot->GetParent());
+	}
+}
+
 void PieceManager::GetAllPointsInContraption(Piece* pieceInContraption, ea::vector<PiecePoint*>& points)
 {
 	ea::vector<Piece*> pieces;

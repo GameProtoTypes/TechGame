@@ -491,6 +491,8 @@ void TechGame::DefaultCreateScene()
 
 			Node* pieceNode;
 
+			Vector3 worldPosition = Vector3(Random(-2, 2), y * .05, Random(-2, 2));
+
 			int rnd = y % numDiffPieces;// Random(0, numDiffPieces);
 			if (rnd == 0)
 				pieceNode = pm->CreatePiece("8_piece_Cshape", false);
@@ -534,32 +536,43 @@ void TechGame::DefaultCreateScene()
 				pieceNode = pm->CreatePiece("rod_hard_1", false);
 			else if (rnd == 20)
 				pieceNode = pm->CreatePiece("corner_hard_1", false);
-			else if (rnd == 21)
-				pieceNode = pm->CreatePieceAssembly("Motor", false).front()->GetNode();
+			else if (rnd == 21) {
+				pieceNode = pm->CreatePieceAssembly("Motor", false);
+			}
 
 
-			pieceNode->SetWorldPosition(Vector3(Random(-2,2), y * .05, Random(-2,2)));
+			pieceNode->SetWorldPosition(worldPosition);
 
-			Color color;
-			float colorBaseHue = Color::BLUE.Hue();
-			float colorRange = 1.0f;
-			color.FromHSL(Wrap<float>(colorBaseHue + Random(-0.5f ,0.5f)*colorRange, 0.0f, 1.0f), 0.3f, 0.5f + Random(-0.4f, 0.0f));
-			
+			ea::vector<Piece*> piecesJustCreated;
 
+			if (pieceNode->HasTag("PieceAssembly")) {
 
-			pieceNode->GetComponent<Piece>()->SetPrimaryColor(color);
+				ea::vector<Node*> children;
+				pm->UnPackAssembly(pieceNode, children);
 
-
-
-			ea::vector<Piece*> singlePiece;
-			singlePiece.push_back(pieceNode->GetComponent<Piece>());
-
-
-
-			pieces.push_back(pieceNode->GetComponent<Piece>());
+				for (Node* child : children) {
+					piecesJustCreated.push_back(child->GetComponent<Piece>());
+				}
+			}
+			else
+				piecesJustCreated.push_back(pieceNode->GetComponent<Piece>());
 
 
-			prevPiece = pieceNode;
+			for (Piece* pc : piecesJustCreated) {
+				
+				Color color;
+				float colorBaseHue = Color::BLUE.Hue();
+				float colorRange = 1.0f;
+				color.FromHSL(Wrap<float>(colorBaseHue + Random(-0.5f, 0.5f)*colorRange, 0.0f, 1.0f), 0.3f, 0.5f + Random(-0.4f, 0.0f));
+
+				pc->SetPrimaryColor(color);
+
+				ea::vector<Piece*> singlePiece;
+				singlePiece.push_back(pc);
+
+				pieces.push_back(pc);
+				prevPiece = pieceNode;
+			}
 		}
 
 		//PieceSolidificationGroup* group = scene_->GetComponent<PieceManager>()->AddPiecesToNewSolidGroup(pieces);
@@ -691,6 +704,19 @@ void TechGame::HandlePostUpdate(StringHash eventType, VariantMap& eventData)
 
 	ui::Checkbox("DynamicRodDetachment", &scene_->GetComponent<PieceManager>()->enableDynamicRodDetach_);
 
+
+	if (scene_->GetComponent<NewtonPhysicsWorld>()->GetRemainingSteps() == -1) {
+		if (ui::Button("Pause Physics Simulation")) {
+
+			scene_->GetComponent<NewtonPhysicsWorld>()->SetRemainingSteps(0);
+		}
+	}
+	else
+	{
+		if (ui::Button("Resume Physics Simulation")) {
+			scene_->GetComponent<NewtonPhysicsWorld>()->SetRemainingSteps(-1);
+		}
+	}
 
 
 

@@ -290,11 +290,36 @@ void ManipulationTool::InstantDuplicatePiece()
 		return;
 
 	ea::string pieceName = aimPiece->GetNode()->GetVar("PieceName").ToString();
+	ea::string assemblyName = aimPiece->GetNode()->GetVar("AssemblyName").ToString();
 
-	Node* pieceNode = node_->GetScene()->GetComponent<PieceManager>()->CreatePiece(pieceName, false);
+
+	Node* pieceNode;
+	if (assemblyName.length()) {
+		pieceNode = node_->GetScene()->GetComponent<PieceManager>()->CreatePieceAssembly(assemblyName, false);
+	}
+	else {
+		pieceNode = node_->GetScene()->GetComponent<PieceManager>()->CreatePiece(pieceName, false);
+	}
 
 	pieceNode->SetWorldPosition(aimPiece->GetNode()->GetWorldPosition() + Vector3(0, 1.0f, 0));
-	pieceNode->GetComponent<Piece>()->SetPrimaryColor(aimPiece->GetPrimaryColor());
+
+
+	if (assemblyName.length()) {
+		//unpack pieces from assembly
+		ea::vector<Node*> children;
+		node_->GetScene()->GetComponent<PieceManager>()->UnPackAssembly(pieceNode, children);
+
+		for (Node* ch : children) {
+			ch->GetComponent<Piece>()->SetPrimaryColor(aimPiece->GetPrimaryColor());
+		}
+
+
+	}
+	else
+	{
+		pieceNode->GetComponent<Piece>()->SetPrimaryColor(aimPiece->GetPrimaryColor());
+
+	}
 
 }
 

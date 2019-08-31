@@ -5,6 +5,7 @@
 #include "NewtonCollisionShapesDerived.h"
 #include "PieceManager.h"
 #include "PieceGear.h"
+#include "NewtonHingeConstraint.h"
 
 
 Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
@@ -1041,93 +1042,175 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 	return root;
 }
 
-ea::vector<Piece*> PieceManager::CreatePieceAssembly(ea::string name, bool loadExisting)
+///Creates a piece assembly as child of single root node.  remove children from root node when "unpacking" the assembly.
+Urho3D::Node* PieceManager::CreatePieceAssembly(ea::string name, bool loadExisting)
 {
 	ea::vector<Piece*> pieces;
 	
+	Node* superRoot = GetScene()->CreateChild(name);
+	superRoot->AddTag("PieceAssembly");
+
+
 	if (loadExisting)
 	{
-		Node* root;
 		SharedPtr<File> file = SharedPtr<File>(new File(context_));
 		file->Open(name + ".xml", FILE_READ);
-		root = GetScene()->InstantiateXML(*file, Vector3::ZERO, Quaternion::IDENTITY);
+		superRoot = GetScene()->InstantiateXML(*file, Vector3::ZERO, Quaternion::IDENTITY);
 	}
-	else {
+	else
+	{
 		
 
 		if (name == "Motor") {
-			Node* root;
+
+			NewtonRigidBody* outerHousingBody;
+			NewtonRigidBody* innerHousingBody;
+			{
+				Node* HousingNode;
+				HousingNode = superRoot->CreateChild();
+
+				HousingNode->SetVar("PieceName", "motorhousing");
+				HousingNode->SetVar("AssemblyName", name);
+				float scaleFactor = GetScene()->GetComponent<PieceManager>()->GetScaleFactor();
+
+				outerHousingBody = HousingNode->CreateComponent<NewtonRigidBody>();
+				Node* visualNode = HousingNode->CreateChild("visualNode");
+				StaticModel* staticMdl = visualNode->CreateComponent<StaticModel>();
+				staticMdl->SetCastShadows(true);
+				visualNode->SetScale(scaleFactor / 0.25f);
 
 
-			root = GetScene()->CreateChild();
-			root->SetVar("PieceName", name);
-			float scaleFactor = GetScene()->GetComponent<PieceManager>()->GetScaleFactor();
-
-			auto* body = root->CreateComponent<NewtonRigidBody>();
-			Node* visualNode = root->CreateChild("visualNode");
-			StaticModel* staticMdl = visualNode->CreateComponent<StaticModel>();
-			visualNode->SetScale(scaleFactor / 0.25f);
-			Color color;
+				Color color;
 
 
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/outerhousing.mdl");
-			Vector3 offset(0, 0, 0);
+				Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/outerhousing.mdl");
+				Vector3 offset(0, 0, 0);
 
-			//make shapes
-			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Box>();
-			shape1->SetScaleFactor(Vector3(2, 2 - 2 * 0.25f, 3) * scaleFactor);
-			shape1->SetRotationOffset(Quaternion(90, Vector3(1, 0, 0)));
+				//make shapes
+				auto* shape1 = HousingNode->CreateComponent<NewtonCollisionShape_Box>();
+				shape1->SetScaleFactor(Vector3(2, 2 - 2 * 0.25f, 3) * scaleFactor);
+				shape1->SetRotationOffset(Quaternion(90, Vector3(1, 0, 0)));
 
-			auto* shape2 = root->CreateComponent<NewtonCollisionShape_Box>();
-			shape2->SetScaleFactor(Vector3(2, 2 - 2 * 0.25f, 3) * scaleFactor);
-			//shape2->SetRotationOffset(Quaternion(0, Vector3(0, 1, 0)));
+				auto* shape2 = HousingNode->CreateComponent<NewtonCollisionShape_Box>();
+				shape2->SetScaleFactor(Vector3(2, 2 - 2 * 0.25f, 3) * scaleFactor);
+				//shape2->SetRotationOffset(Quaternion(0, Vector3(0, 1, 0)));
 
 
+				for (int i = 0; i < 4; i++) {
+					PiecePointRow* pointRow = HousingNode->CreateComponent<PiecePointRow>();
 
-			PiecePointRow* pointRow = root->CreateComponent<PiecePointRow>();
-
-			for (int i = 0; i < 4; i++) {
-				
-				float x, y = 0;
-				if (i == 0 || i == 1) {
-					if (i == 0) {
-						x = 1; y = 0;
+					float x, y = 0;
+					if (i == 0 || i == 1) {
+						if (i == 0) {
+							x = 1; y = 0;
+						}
+						if (i == 1) {
+							x = -1; y = 0;
+						}
 					}
-					if (i == 1) {
-						x = -1; y = 0;
+					if (i == 2 || i == 3) {
+						if (i == 2) {
+							x = 0; y = -1;
+						}
+						if (i == 3) {
+							x = 0; y = 1;
+						}
 					}
+
+					for (int p = 0; p < 4; p++)
+					{
+
+						Node* point = HousingNode->CreateChild();
+						point->SetPosition(Vector3((p*0.5f - 1.5*0.5f)*scaleFactor, x*scaleFactor, y*scaleFactor));
+						PiecePoint* piecePoint = point->CreateComponent<PiecePoint>();
+						pointRow->PushBack(piecePoint);
+					}
+
+					pointRow->Finalize();
+					pointRow->SetRowType(PiecePointRow::RowType_Hole);
+
 				}
-				if (i == 2 || i == 3) {
-					if (i == 2) {
-						x = 0; y = -1;
-					}
-					if (i == 3) {
-						x = 0; y = 1;
-					}
-				}
-				
+
+
+				//body->SetUseInertiaHack(true);
+
+
+				staticMdl->SetModel(pieceModel);
+
+				Piece* piece = HousingNode->CreateComponent<Piece>();
+
+				pieces.push_back(piece);
+
+			}
+			//create inner rotational piece
+			{
+				Node* RotationalNode;
+				RotationalNode = superRoot->CreateChild();
+
+				RotationalNode->SetVar("PieceName", "motorrotatioaldrive");
+				RotationalNode->SetVar("AssemblyName", name);
+
+				float scaleFactor = GetScene()->GetComponent<PieceManager>()->GetScaleFactor();
+
+				innerHousingBody = RotationalNode->CreateComponent<NewtonRigidBody>();
+				Node* visualNode = RotationalNode->CreateChild("visualNode");
+				StaticModel* staticMdl = visualNode->CreateComponent<StaticModel>();
+				staticMdl->SetCastShadows(true);
+				visualNode->SetScale(scaleFactor / 0.25f);
+
+				//make shapes
+				auto* shape1 = RotationalNode->CreateComponent<NewtonCollisionShape_Cylinder>();
+				shape1->SetScaleFactor(Vector3(2, 1, 1) * scaleFactor);
+				shape1->SetRotationOffset(Quaternion(90, Vector3(1, 0, 0)));
+
+				Color color;
+
+				PiecePointRow* pointRow = RotationalNode->CreateComponent<PiecePointRow>();
+
+
 				for (int p = 0; p < 4; p++)
 				{
 
-					Node* point = root->CreateChild();
-					point->SetPosition(Vector3((p*0.5f - 1.5*0.5f)*scaleFactor, x*scaleFactor, y*scaleFactor));
+					Node* point = RotationalNode->CreateChild();
+					point->SetPosition(Vector3((p*0.5f - 1.5*0.5f)*scaleFactor, 0, 0));
 					PiecePoint* piecePoint = point->CreateComponent<PiecePoint>();
+					
 					pointRow->PushBack(piecePoint);
 				}
+				pointRow->SetRowType(PiecePointRow::RowType_Hole);
+				pointRow->Finalize();
+
+				Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/InnerRotationalDrive.mdl");
+				Vector3 offset(0, 0, 0);
+
+				staticMdl->SetModel(pieceModel);
+				Piece* piece = RotationalNode->CreateComponent<Piece>();
+
+				pieces.push_back(piece);
+
 			}
 
 
-			//body->SetUseInertiaHack(true);
-			pointRow->Finalize();
-			pointRow->SetRowType(PiecePointRow::RowType_RodHard);
+			//make motor contraint between the 2 bodies
+			NewtonHingeConstraint* constraint = outerHousingBody->GetNode()->CreateComponent<NewtonHingeConstraint>();
 
-			staticMdl->SetModel(pieceModel);
+			constraint->SetOtherBody(innerHousingBody);
+			constraint->SetPowerMode(NewtonHingeConstraint::MOTOR);
+			
 
-			staticMdl->SetCastShadows(true);
 
-			Piece* piece = root->CreateComponent<Piece>();
 
-			pieces.push_back(piece);
+
+
+
+
+
+
+
+
+
+
+
 
 		}
 		else
@@ -1141,5 +1224,5 @@ ea::vector<Piece*> PieceManager::CreatePieceAssembly(ea::string name, bool loadE
 	}
 
 
-	return pieces;
+	return superRoot;
 }
