@@ -73,11 +73,11 @@ void PieceAttachmentStager::checkPointDistances()
 
 		if ((posA - posB).Length() > thresh) {
 			pair->goodAttachment_ = false;
-			URHO3D_LOGINFO("checkPointDistances fail");
+			//URHO3D_LOGINFO("checkPointDistances fail");
 		}
 		pair->distDiff_ = (posA - posB).Length();
 
-		URHO3D_LOGINFO("Dist Diff: " + ea::to_string(pair->distDiff_));
+		//URHO3D_LOGINFO("Dist Diff: " + ea::to_string(pair->distDiff_));
 	}
 }
 
@@ -92,13 +92,13 @@ void PieceAttachmentStager::checkPointDirections()
 
 		float deltaAbs = Abs(nearestMultiple - pair->angleDiff_);
 
-		URHO3D_LOGINFO("Angle Diff: " + ea::to_string(deltaAbs));
-		URHO3D_LOGINFO("nearestMultiple: " + ea::to_string(nearestMultiple));
+		//URHO3D_LOGINFO("Angle Diff: " + ea::to_string(deltaAbs));
+		//URHO3D_LOGINFO("nearestMultiple: " + ea::to_string(nearestMultiple));
 
 		if (deltaAbs > 0.1f || (Abs(nearestMultiple) == 90.0f))
 		{
 			pair->goodAttachment_ = false;
-			URHO3D_LOGINFO("checkPointDirections fail");
+			//URHO3D_LOGINFO("checkPointDirections fail");
 		}
 	}
 }
@@ -142,7 +142,7 @@ void PieceAttachmentStager::checkRowBasicCompatability()
 		if (!PiecePointRow::RowsAttachCompatable(pair->rowA, pair->rowB))
 		{
 			pair->goodAttachment_ = false;
-			URHO3D_LOGINFO("checkRowBasicCompatability fail");
+			//URHO3D_LOGINFO("checkRowBasicCompatability fail");
 		}
 	}
 }
@@ -223,7 +223,7 @@ void PieceAttachmentStager::checkEndPointRules(AttachmentPair* attachPair)
 	if (!overallPass)
 	{
 		attachPair->goodAttachment_ = false;
-		URHO3D_LOGINFO("checkEndPointRules fail");
+		//URHO3D_LOGINFO("checkEndPointRules fail");
 	}
 
 }

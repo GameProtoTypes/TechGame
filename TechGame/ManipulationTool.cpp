@@ -100,7 +100,10 @@ void ManipulationTool::EndDrag(bool freeze)
 
 	if (freeze) {
 		node_->GetScene()->GetComponent<NewtonPhysicsWorld>()->WaitForUpdateFinished();
-		dragPiece_->GetEffectiveRigidBody()->SetMassScale(0);
+		dragPiece_->GetEffectiveRigidBody()->SetMassScale(0.0);
+
+
+		
 		
 	}
 	if (dragUseKinematicJoint_)
@@ -154,12 +157,25 @@ bool ManipulationTool::Gather(bool grabOne)
 
 	if (grabOne)
 	{
+		
 		allGatherPieces_.clear();
-		allGatherPieces_.push_back(gatheredPiece_);
+
+		if(gatheredPiece_->IsPartOfAssembly())
+			gatheredPiece_->GetAssemblyPieces(allGatherPieces_, true);
+		else
+			allGatherPieces_.push_back(gatheredPiece_);
+			
+			
 		allGatherPiecePoints_.clear();
-		gatheredPiece_->GetPoints(allGatherPiecePoints_);
+
+		for(Piece* pc : allGatherPieces_)
+			pc->GetPoints(allGatherPiecePoints_);
+
+
 
 		PieceSolidificationGroup* existingGroup = gatheredPiece_->GetPieceGroup();
+		
+		
 		ea::vector<Piece*> piecesInGroup;
 		if (existingGroup) {
 			existingGroup->GetPieces(piecesInGroup);
@@ -168,17 +184,20 @@ bool ManipulationTool::Gather(bool grabOne)
 		}
 
 		//detach from its contraption.
-		gatheredPiece_->DetachAll();
-		
-		
+		for (Piece* pc : allGatherPieces_)
+			pc->DetachAll();
+
+
 		for (Piece* pc : piecesInGroup) {
 			pieceManager_->FormSolidGroup(pc);
 		}
+		
+		
 	}
 	else
 	{
 		//form list of all connected pieces to the gathered piece and store in allGatherPieces_
-		formGatherContraption(grabOne);
+		formGatherContraption(false);
 	}
 
 
@@ -252,8 +271,12 @@ void ManipulationTool::UnGather(bool freeze)
 	bool goodToDrop = true;
 	bool hasAttachement = false;
 	if (attachStager_->IsValid()) {
-		//attach
-		hasAttachement = attachStager_->AttachAll();
+
+		if (attachStager_->Attachable()) {
+			//attach
+			hasAttachement = attachStager_->AttachAll();
+		}
+
 	}
 	else
 		goodToDrop = false;
@@ -440,6 +463,13 @@ void ManipulationTool::AdvanceGatherPoint(bool forward /*= true*/)
 	updateKinematicsControllerPos(true);
 }
 
+void ManipulationTool::ResetGatherNodeRotation()
+{
+	gatherTargetRotation_ = Quaternion::IDENTITY;
+	gatherSlerpParam_ = 0.0f;
+	gatherNodeIsRotating_ = true;
+}
+
 void ManipulationTool::SetUseGrid(bool enable)
 {
 	useGrid_ = enable;
@@ -535,9 +565,6 @@ void ManipulationTool::RotateNextNearest()
 
 			Quaternion pieceRotation = piece->GetNode()->GetWorldRotation();
 
-
-			Quaternion deltaRotation = gatherRotation_.Inverse() * pieceRotation;
-
 	
 		}
 
@@ -611,7 +638,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 		ea::vector<Piece*> blackList;
 		blackList.push_back(gatheredPiece_);
 		
-	
+		attachStager_->Reset();
 		
 		PiecePoint* otherPoint = pieceManager_->GetClosestGlobalPiecePoint(gatherNode_->GetWorldTransform().Translation(), blackList, 0.1f, 5);
 
@@ -692,7 +719,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 					if (attachmentPotential)
 					{
 						
-						attachStager_->Reset();
+						
 						for (int i = 0; i < allGatherPiecePoints_.size(); i++) {
 
 							if (closestPoints[i]) {
@@ -734,14 +761,14 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 
 						//update colors on good and bad attachments.
-						ea::vector<PieceAttachmentStager::AttachmentPair*>& attachments = attachStager_->GetBadAttachments();
-						for (auto* pair : attachments) {
+						ea::vector<PieceAttachmentStager::AttachmentPair*>* attachments =& attachStager_->GetBadAttachments();
+						for (auto* pair : *attachments) {
 							pair->pointB->SetShowColorIndicator(true, Color::RED);
 							recentPointList_.push_back(pair->pointB);
 						}
 						
-						attachments = attachStager_->GetGoodAttachments();
-						for (auto* pair : attachments) {
+						attachments = &attachStager_->GetGoodAttachments();
+						for (auto* pair : *attachments) {
 							pair->pointB->SetShowColorIndicator(true, Color::GREEN);
 							recentPointList_.push_back(pair->pointB);
 						}
@@ -928,16 +955,20 @@ void ManipulationTool::UpdateGatherNodeRotation()
 		return;
 
 
-	gatherNode_->Rotate(gatherRotationalVel_, TS_PARENT);
 
 	gatherSlerpParam_ += 0.03f;
-	gatherNode_->SetRotation(gatherStartRotation_.Slerp(gatherTargetRotation_, gatherSlerpParam_));
+
+
+	Quaternion rotation = gatherStartRotation_.Slerp(gatherTargetRotation_, gatherSlerpParam_);
+	
+	
+	SetGatherRotationViaMode(rotation);
 
 
 	if (gatherSlerpParam_ >= 1.0f)
 	{
 		gatherSlerpParam_ = 0.0f;
-		gatherNode_->SetRotation(gatherTargetRotation_);
+		SetGatherRotationViaMode(gatherTargetRotation_);
 		gatherNodeIsRotating_ = false;
 	}
 
@@ -945,25 +976,38 @@ void ManipulationTool::UpdateGatherNodeRotation()
 
 }
 
-void ManipulationTool::formGatherContraption(bool onlyOne)
+void ManipulationTool::SetGatherRotationViaMode(Quaternion rotation)
+{
+	if (moveMode_ == MoveMode_Camera)
+		gatherNode_->SetRotation(rotation);
+	else if (moveMode_ == MoveMode_Global)
+		gatherNode_->SetWorldRotation(rotation);
+}
+
+void ManipulationTool::formGatherContraption(bool oneAssembly)
 {
 	allGatherPieces_.clear();
 	allGatherPiecePoints_.clear();
 
 
-	gatheredPiece_->GetNode()->GetDerivedComponents<PiecePoint>(allGatherPiecePoints_, !onlyOne);
+	gatheredPiece_->GetNode()->GetDerivedComponents<PiecePoint>(allGatherPiecePoints_,  true);
 	allGatherPieces_.push_back( gatheredPiece_ );
 
-	if (!onlyOne) {
-		ea::vector<Piece*> attachedPieces;
+	
+	ea::vector<Piece*> attachedPieces;
+
+	if (oneAssembly) {
+		gatheredPiece_->GetAssemblyPieces(attachedPieces, false);
+	}
+	else
 		gatheredPiece_->GetAttachedPieces(attachedPieces, true);
 
-		for (Piece* piece : attachedPieces)
-		{
-			allGatherPieces_.push_back(piece);
-			piece->GetNode()->GetDerivedComponents<PiecePoint>(allGatherPiecePoints_, true, false);
-		}
+	for (Piece* piece : attachedPieces)
+	{
+		allGatherPieces_.push_back(piece);
+		piece->GetNode()->GetDerivedComponents<PiecePoint>(allGatherPiecePoints_, true, false);
 	}
+
 }
 
 void ManipulationTool::updateKinematicsControllerPos(bool forceUpdate)

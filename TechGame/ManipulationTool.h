@@ -60,13 +60,7 @@ public:
 		gatherNodeIsRotating_ = false;
 	}
 
-	void ResetGatherNodeRotation()
-	{
-		if (MoveMode_Camera)
-			gatherNode_->SetRotation(Quaternion::IDENTITY);
-		else if(MoveMode_Global)
-			gatherNode_->SetWorldRotation(Quaternion::IDENTITY);
-	}
+	void ResetGatherNodeRotation();
 
 	void SetUseGrid(bool enable);
 	bool GetUseGrid() const;
@@ -100,11 +94,13 @@ protected:
 
 	void UpdateGatherNodeRotation();
 
+	void SetGatherRotationViaMode(Quaternion rotation);
+
 	virtual void OnNodeSet(Node* node) override;
 
 	void drop(bool freeze, bool hadAttachement);
 
-	void formGatherContraption(bool onlyOne = false);
+	void formGatherContraption(bool oneAssembly);
 
 	void updateKinematicsControllerPos(bool forceUpdate);
 
@@ -125,7 +121,6 @@ protected:
 	ea::vector<PiecePoint*> allGatherPiecePoints_;
 	ea::vector<Piece*> allGatherPieces_;
 	
-	Quaternion gatherRotation_;
 	Quaternion gatherRotationalVel_;
 	Quaternion gatherStartRotation_;
 	Quaternion gatherTargetRotation_;

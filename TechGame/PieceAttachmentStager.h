@@ -62,6 +62,8 @@ public:
 
 		isValid_ = false;
 
+		goodAttachments_.clear();
+		badAttachments_.clear();
 
 		checkPointDistances();
 
@@ -83,13 +85,18 @@ public:
 
 		}
 
-		//URHO3D_LOGINFO("final attachment size " + ea::to_string(finalAttachments_.size()));
 
 		needsAnalyzed_ = false;
 		isValid_ = (badAttachments_.size() == 0);
 	}
 
-	
+	bool Attachable() {
+
+		if (IsValid() &&( goodAttachments_.size() > 0 ) && (badAttachments_.size() == 0))
+			return true;
+
+		return false;
+	}
 
 	bool IsValid()
 	{
@@ -100,7 +107,7 @@ public:
 		if (needsAnalyzed_)
 			return false;
 
-		if (goodAttachments_.size() == 0 && badAttachments_.size() == 0)
+		if ((goodAttachments_.size() == 0) && (badAttachments_.size() == 0))
 			return true;
 
 

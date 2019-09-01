@@ -491,7 +491,7 @@ void TechGame::DefaultCreateScene()
 
 			Node* pieceNode;
 
-			Vector3 worldPosition = Vector3(Random(-2, 2), y * .05, Random(-2, 2));
+			Vector3 worldPosition = Vector3(Random(-4, 4), y * .05, Random(-4, 4));
 
 			int rnd = y % numDiffPieces;// Random(0, numDiffPieces);
 			if (rnd == 0)

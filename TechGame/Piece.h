@@ -53,7 +53,11 @@ public:
 	Node* GetVisualNode() { return node_->GetChild("visualNode"); }
 
 
+	bool IsPartOfAssembly() const { return assemblyPieces_.size(); }
 
+	void GetAssemblyPieces(ea::vector<Piece*>& pieces, bool includeThisPiece = true);
+
+	bool AddAssemblyPiece(Piece* piece);
 
 	void SetPrimaryColor(Color color);
 	Color GetPrimaryColor() const { return primaryColor_; }
@@ -80,22 +84,7 @@ public:
 	}
 
 	//returns the rigid body that is enabled and is actually controlling this rigid body
-	NewtonRigidBody* GetEffectiveRigidBody()
-	{
-		if (GetPieceGroup())
-		{
-			return GetPieceGroup()->GetRigidBody();
-		}
-
-		ea::vector<NewtonRigidBody*> bodies;
-		GetRootRigidBodies(bodies, node_, false);
-		for (int i = 0; i < bodies.size(); i++)
-		{
-			if (bodies[i]->IsEnabledEffective())
-				return bodies[i];
-		}
-		return nullptr;
-	}
+	NewtonRigidBody* GetEffectiveRigidBody();
 
 	bool IsPartOfPieceGroup(PieceSolidificationGroup* group);
 
@@ -121,7 +110,7 @@ protected:
 
 
 
-
+	ea::vector<Piece*> assemblyPieces_;
 
 
 	virtual void OnNodeSet(Node* node) override;

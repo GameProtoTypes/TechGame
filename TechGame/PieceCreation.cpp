@@ -1065,6 +1065,8 @@ Urho3D::Node* PieceManager::CreatePieceAssembly(ea::string name, bool loadExisti
 
 			NewtonRigidBody* outerHousingBody;
 			NewtonRigidBody* innerHousingBody;
+			Piece* outerPiece;
+			Piece* innerPiece;
 			{
 				Node* HousingNode;
 				HousingNode = superRoot->CreateChild();
@@ -1137,9 +1139,10 @@ Urho3D::Node* PieceManager::CreatePieceAssembly(ea::string name, bool loadExisti
 
 				staticMdl->SetModel(pieceModel);
 
-				Piece* piece = HousingNode->CreateComponent<Piece>();
+				outerPiece = HousingNode->CreateComponent<Piece>();
+				
 
-				pieces.push_back(piece);
+				pieces.push_back(outerPiece);
 
 			}
 			//create inner rotational piece
@@ -1184,9 +1187,9 @@ Urho3D::Node* PieceManager::CreatePieceAssembly(ea::string name, bool loadExisti
 				Vector3 offset(0, 0, 0);
 
 				staticMdl->SetModel(pieceModel);
-				Piece* piece = RotationalNode->CreateComponent<Piece>();
+				innerPiece = RotationalNode->CreateComponent<Piece>();
 
-				pieces.push_back(piece);
+				pieces.push_back(innerPiece);
 
 			}
 
@@ -1198,8 +1201,8 @@ Urho3D::Node* PieceManager::CreatePieceAssembly(ea::string name, bool loadExisti
 			constraint->SetPowerMode(NewtonHingeConstraint::MOTOR);
 			
 
-
-
+			outerPiece->AddAssemblyPiece(innerPiece);
+			innerPiece->AddAssemblyPiece(outerPiece);
 
 
 

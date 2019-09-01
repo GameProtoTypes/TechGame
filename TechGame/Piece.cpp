@@ -58,6 +58,23 @@ void Piece::GetAttachedPieces(ea::vector<Piece*>& pieces, bool recursive)
 	pieces.erase_at(pieces.index_of(this));
 }
 
+void Piece::GetAssemblyPieces(ea::vector<Piece*>& pieces, bool includeThisPiece /*= true*/)
+{
+	pieces = assemblyPieces_;
+	if (includeThisPiece)
+		pieces.push_back(this);
+}
+
+bool Piece::AddAssemblyPiece(Piece* piece)
+{
+	if (piece != this) {
+		assemblyPieces_.push_back(piece);
+		return true;
+	}
+	else
+		return false;
+}
+
 void Piece::SetPrimaryColor(Color color)
 {
 	if (primaryColor_ != color) {
@@ -236,6 +253,23 @@ bool Piece::IsEffectivelySolidified()
 	return false;
 }
 
+
+Urho3D::NewtonRigidBody* Piece::GetEffectiveRigidBody()
+{
+	if (GetPieceGroup())
+	{
+		return GetPieceGroup()->GetRigidBody();
+	}
+
+	ea::vector<NewtonRigidBody*> bodies;
+	GetRootRigidBodies(bodies, node_, false);
+	for (int i = 0; i < bodies.size(); i++)
+	{
+		if (bodies[i]->IsEnabledEffective())
+			return bodies[i];
+	}
+	return nullptr;
+}
 
 bool Piece::IsPartOfPieceGroup(PieceSolidificationGroup* group)
 {
