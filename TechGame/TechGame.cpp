@@ -224,10 +224,11 @@ void TechGame::SubscribeToEvents()
 void TechGame::SetupViewport()
 {
 	auto* renderer = GetSubsystem<Renderer>();
-	XMLFile* file = GetSubsystem<ResourceCache>()->GetResource<XMLFile>("RenderPaths/Deferred.xml");
+	XMLFile* file = GetSubsystem<ResourceCache>()->GetResource<XMLFile>("RenderPaths/Deferred2XSuperSample.xml");
 	SharedPtr<RenderPath> renderPath = SharedPtr<RenderPath>(new RenderPath());
 	renderPath->Load(file);
 	renderer->SetDefaultRenderPath(renderPath);
+	
 
 	// Set up a viewport to the Renderer subsystem so that the 3D scene can be seen
 	SharedPtr<Viewport> viewport(new Viewport(context_, scene_, character_->headNode_->GetComponent<Camera>()));
@@ -407,7 +408,7 @@ void TechGame::DefaultCreateScene()
 	Node* zoneNode = scene_->CreateChild("Zone");
 	auto* zone = zoneNode->CreateComponent<Zone>();
 	zone->SetBoundingBox(BoundingBox(-1000.0f, 1000.0f));
-	zone->SetAmbientColor(Color(0.15f, 0.15f, 0.15f));
+	zone->SetAmbientColor(Color(0.45f, 0.45f, 0.45f));
 	zone->SetFogColor(Color(1.0f, 1.0f, 1.0f));
 	zone->SetFogStart(300.0f);
 	zone->SetFogEnd(500.0f);
@@ -419,11 +420,15 @@ void TechGame::DefaultCreateScene()
 	lightNode->SetDirection(Vector3(0.6f, -1.0f, 0.8f));
 	auto* light = lightNode->CreateComponent<Light>();
 	light->SetLightType(LIGHT_DIRECTIONAL);
-	light->SetBrightness(1.50f);
+	light->SetBrightness(0.8f);
 	light->SetCastShadows(true);
+	light->SetShadowIntensity(0.7f);
+	light->SetSpecularIntensity(0.5f);
 	light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
 	// Set cascade splits at 10, 50 and 200 world units, fade shadows out at 80% of maximum shadow distance
 	light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
+
+
 
 	// Create skybox. The Skybox component is used like StaticModel, but it will be always located at the camera, giving the
 	// illusion of the box planes being far away. Use just the ordinary Box model and a suitable material, whose shader will
@@ -450,7 +455,7 @@ void TechGame::DefaultCreateScene()
 
 	Material* mat = GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/repeatingGround.xml");
 	//SharedPtr<Material> clonedMat = mat->Clone();
-	//clonedMat->SetShaderParameter("MatDiffColor", Vector4(0.3f + Random() / 8, 0.3f + Random() / 8, 0.3f + Random() / 8, 0.0f));
+	mat->SetShaderParameter("MatDiffColor", Vector4(0.6,0.6,0.6,0.0));
 	mat->SetShaderParameter("UOffset", Vector4(100.0f, 0.0f, 1.0f, 1.0f));
 	mat->SetShaderParameter("VOffset", Vector4(0.0f, 100.0f, 1.0f, 1.0f));
 	stmdl->SetMaterial(mat);
@@ -563,7 +568,7 @@ void TechGame::DefaultCreateScene()
 				Color color;
 				float colorBaseHue = Color::BLUE.Hue();
 				float colorRange = 1.0f;
-				color.FromHSL(Wrap<float>(colorBaseHue + Random(-0.5f, 0.5f)*colorRange, 0.0f, 1.0f), 0.3f, 0.5f + Random(-0.4f, 0.0f));
+				color.FromHSL(Wrap<float>(colorBaseHue + Random(-0.5f, 0.5f)*colorRange, 0.0f, 1.0f), 1.0f, 0.5f);
 
 				pc->SetPrimaryColor(color);
 

@@ -113,29 +113,28 @@ void Piece::SetGhostingEffectEnabled(bool enable)
 
 void Piece::RefreshVisualMaterial()
 {
-	SharedPtr<Material> ghostMat = SharedPtr<Material>(GetVisualNode()->GetComponent<StaticModel>(false)->GetMaterial());
+	SharedPtr<Material> resolvedMaterial = SharedPtr<Material>(GetVisualNode()->GetComponent<StaticModel>(false)->GetMaterial());
 
 	//make sure there is a unique material object for the static model:
-	if (!ghostMat) {
+	if (!resolvedMaterial) {
 		SharedPtr<Material> mat = GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/Piece.xml")->Clone();
 		GetVisualNode()->GetComponent<StaticModel>(false)->SetMaterial(mat);
-		ghostMat = mat;
+		resolvedMaterial = mat;
 	}
 
-
-
-
-	
 	if (ghostingEffectOn_) {
-		ghostMat->SetTechnique(0, GetSubsystem<ResourceCache>()->GetResource<Technique>("Techniques/DiffEmissiveAlpha.xml"));
-		ghostMat->SetShaderParameter("MatDiffColor", Color(1.0f,1.0f,1.0f,0.7f));
+		resolvedMaterial->SetTechnique(0, GetSubsystem<ResourceCache>()->GetResource<Technique>("Techniques/DiffEmissiveAlpha.xml"));
+		resolvedMaterial->SetShaderParameter("MatDiffColor", Color(1.0f,1.0f,1.0f,0.7f));
 	}
 	else
 	{
-		ghostMat->SetTechnique(0, GetSubsystem<ResourceCache>()->GetResource<Technique>("Techniques/Diff.xml"));
-		ghostMat->SetShaderParameter("MatDiffColor", primaryColor_.ToVector4());
+		resolvedMaterial->SetTechnique(0, GetSubsystem<ResourceCache>()->GetResource<Technique>("Techniques/Diff.xml"));
+		resolvedMaterial->SetShaderParameter("MatDiffColor", primaryColor_.ToVector4());
 	}
 
+
+	resolvedMaterial->SetShaderParameter("UOffset", Vector4(0.1f, 0.0f, 1.0f, 1.0f));
+	resolvedMaterial->SetShaderParameter("VOffset", Vector4(0.0f, 0.1f, 1.0f, 1.0f));
 	
 }
 
