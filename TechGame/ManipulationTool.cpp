@@ -188,6 +188,7 @@ bool ManipulationTool::Gather(bool grabOne)
 			pc->DetachAll();
 
 
+
 		for (Piece* pc : piecesInGroup) {
 			pieceManager_->FormSolidGroup(pc);
 		}
