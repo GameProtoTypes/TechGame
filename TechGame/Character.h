@@ -41,7 +41,7 @@ public:
 	void Update(float timeStep) override;
 
 	
-	void SetIsVRCharacter(bool enable) { isVR_ = enable; }
+	void SetIsVRCharacter(bool enable);
 	bool GetIsVRCharacter() const {
 		return isVR_;
 	}

@@ -7,6 +7,7 @@
 #include "MathExtras.h"
 #include "PieceGear.h"
 #include "VisualDebugger.h"
+#include "VR.h"
 
 
 ManipulationTool::ManipulationTool(Context* context) : HandTool(context)
@@ -501,7 +502,7 @@ void ManipulationTool::SetMoveMode(MoveMode mode)
 			//set gather node to child and in front of tool
 			gatherNode_->SetParent(GetEffectiveLookNode());
 			gatherNode_->SetTransform(Matrix3x4::IDENTITY);
-			if (mode == MoveMode_Camera) {
+			if (!GetSubsystem<VR>()->IsRunning()) {
 				gatherNode_->Translate(gatherNodeRefOffset_);
 			}
 		}
@@ -512,9 +513,6 @@ void ManipulationTool::SetMoveMode(MoveMode mode)
 			gatherNode_->SetWorldRotation(SnapOrientationEuler(gatherNode_->GetWorldRotation(), 45.0f));
 		}
 }
-
-
-
 
 ManipulationTool::MoveMode ManipulationTool::GetMoveMode()
 {

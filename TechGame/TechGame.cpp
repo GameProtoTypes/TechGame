@@ -399,9 +399,10 @@ void TechGame::DefaultCreateScene()
 	character_->ResolveNodes();
 	ResolveTools(character_);
 
-	bool vrInitialized = vr->InitializeVR(character_->GetNode());
+	bool vrInitialized = false;// vr->InitializeVR(character_->GetNode());
 
-	
+	character_->SetIsVRCharacter(vrInitialized);
+
 
 
 
@@ -598,7 +599,6 @@ void TechGame::ResolveTools(Character* character)
 	ManipulationTool* manipTool = character->rightHandNode_->GetOrCreateComponent<ManipulationTool>();
 	manipTool->SetMoveMode(manipTool->GetMoveMode());
 
-	character->rightHandNode_->GetOrCreateComponent<HandTool>();
 }
 
 void TechGame::SetupSceneAfterLoad()

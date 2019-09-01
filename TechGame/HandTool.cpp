@@ -11,7 +11,7 @@
 void HandTool::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 {
 	//draw forward vector
-	debug->AddLine(node_->GetWorldPosition(), node_->GetWorldPosition() + node_->GetWorldDirection() * 10.0f, Color::GREEN, depthTest);
+	debug->AddLine(GetEffectiveLookNode()->GetWorldPosition(), GetEffectiveLookNode()->GetWorldPosition() + GetEffectiveLookNode()->GetWorldDirection() * 10.0f, Color::GREEN, depthTest);
 }
 
 void HandTool::HandleUpdate(StringHash eventType, VariantMap& eventData)

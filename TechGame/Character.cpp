@@ -24,6 +24,7 @@
 #include "Urho3D/Audio/SoundListener.h"
 #include "Urho3D/Audio/Audio.h"
 #include "NodeTools.h"
+#include "VR.h"
 
 Character::Character(Context* context) :
 	LogicComponent(context),
@@ -89,8 +90,24 @@ void Character::Update(float timeStep)
 	
 	groundNode_->SetRotation(Quaternion(controls_.yaw_, Vector3::UP));
 	
-	headNode_->SetRotation(Quaternion(controls_.pitch_, Vector3::RIGHT));
-	headNode_->SetPosition(Vector3(0, 0.7f, 0));
+
+
+	if (!isVR_) {
+
+		headNode_->SetRotation(Quaternion(controls_.pitch_, Vector3::RIGHT));
+		headNode_->SetPosition(Vector3(0, 0.7f, 0));
+
+
+	}
+	else
+	{
+
+		headNode_->SetWorldTransform(GetSubsystem<VR>()->headNode_->GetWorldTransform().Translation(), GetSubsystem<VR>()->headNode_->GetWorldTransform().Rotation(), 1.0f);
+		leftHandNode_->SetWorldTransform(GetSubsystem<VR>()->leftHandNode_->GetWorldTransform().Translation(), GetSubsystem<VR>()->leftHandNode_->GetWorldTransform().Rotation(), 1.0f);
+		rightHandNode_->SetWorldTransform(GetSubsystem<VR>()->rightHandNode_->GetWorldTransform().Translation(), GetSubsystem<VR>()->rightHandNode_->GetWorldTransform().Rotation(), 1.0f);
+
+	}
+
 
 
 	updatePhysics(timeStep);
@@ -98,6 +115,24 @@ void Character::Update(float timeStep)
 
 }
 
+
+void Character::SetIsVRCharacter(bool enable)
+{
+	isVR_ = enable;
+
+	if (isVR_) {
+
+
+
+
+
+
+
+
+	}
+
+
+}
 
 void Character::HandleNodeCollision(StringHash eventType, VariantMap& eventData)
 {
