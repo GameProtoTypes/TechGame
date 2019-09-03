@@ -1,5 +1,6 @@
 #pragma once
 #include "Urho3D/Urho3DAll.h"
+#include "ColorPallet.h"
 
 
 //class to manage pieces on a scene level. (attach to scene node)
@@ -16,6 +17,8 @@ public:
 	{
 		SubscribeToEvent(E_NODEADDED, URHO3D_HANDLER(PieceManager, HandleNodeAdded));
 		SubscribeToEvent(E_NODEREMOVED, URHO3D_HANDLER(PieceManager, HandleNodeRemoved));
+
+		colorPalletManager_ = context->CreateObject<ColorPalletManager>();
 	}
 
 	static void RegisterObject(Context* context)
@@ -135,6 +138,12 @@ public:
 	void FindLoops(Piece* piece, ea::vector<ea::vector<Piece*>>& loops);
 	void FindLoops(Piece* piece, ea::vector<ea::vector<Piece*>>& loops, ea::vector<Piece*>& traverseStack, int depth);
 
+
+
+
+
+
+	SharedPtr<ColorPalletManager> colorPalletManager_;
 protected:
 
 	void HandleNodeAdded(StringHash event, VariantMap& eventData);

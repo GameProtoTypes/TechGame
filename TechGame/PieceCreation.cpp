@@ -28,13 +28,13 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 		StaticModel* staticMdl = visualNode->CreateComponent<StaticModel>();
 		visualNode->SetScale(scaleFactor/0.25f);
 		Color color;
-
+		unsigned palletId = 0;
 
 		if (name == "8_piece_Cshape") {
 
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/8_piece_Cshape.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, -0.25, 0);
-
+			palletId = 1;
 			//make shapes
 			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Box>();
 			shape1->SetScaleFactor(Vector3(2, 1, 1)*scaleFactor);
@@ -86,8 +86,8 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "2_sleeve") {
 
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/2_sleeve.mdl");
-			
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
+			palletId = 2;
 			Vector3 offset(0, 0, 0);
 
 			
@@ -119,9 +119,9 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "1_cap_small") {
 
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/1_cap_small.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
-
+			palletId = 3;
 
 			const float thickness = 0.5f;
 
@@ -153,9 +153,9 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "gear_large") {
 
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/gear_large.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
-
+			palletId = 4;
 
 			const float thickness = 0.5f;
 
@@ -241,9 +241,9 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "gear_extra_large") {
 
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/gear_extra_large.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
-
+			palletId = 4;
 
 			const float thickness = 0.5f;
 
@@ -333,9 +333,9 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "gear_medium") {
 
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/gear_medium.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
-
+			palletId = 4;
 
 			const float thickness = 0.5f;
 
@@ -375,9 +375,9 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "gear_small") {
 
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/gear_small.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
-
+			palletId = 4;
 			const float thickness = 0.5f;
 
 			//make shapes
@@ -419,8 +419,9 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "4x4_piece_thin") {
 
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/4x4_piece_thin.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
+			palletId = 5;
 
 			const int length = 4;
 			const int width = 4;
@@ -461,9 +462,9 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "4x8_piece_thin") {
 
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/4x8_piece_thin.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
-
+			palletId = 5;
 			const int length = 4;
 			const int width = 8;
 			const float thickness = 0.5f;
@@ -507,8 +508,9 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "6_piece_thin") {
 
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/6_piece_thin.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
+			palletId = 6;
 
 			const int length = 6;
 			const float thickness = 0.5f;
@@ -543,8 +545,9 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "6_piece_thick") {
 
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/6_piece_thick.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
+			palletId = 9;
 
 			const int length = 6;
 			const float thickness = 1.0f;
@@ -590,8 +593,9 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "5_piece_thick") {
 
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/5_piece_thick.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
+			palletId = 9;
 
 			const int length = 5;
 			const float thickness = 1.0f;
@@ -636,8 +640,9 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "4_piece_thick") {
 
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/4_piece_thick.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
+			palletId = 9;
 
 			const int length = 4;
 			const float thickness = 1.0f;
@@ -680,8 +685,9 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "3_piece_thick") {
 
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/3_piece_thick.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
+			palletId = 9;
 
 			const int length = 3;
 			const float thickness = 1.0f;
@@ -724,8 +730,9 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "2_piece_thick") {
 
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/2_piece_thick.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
+			palletId = 9;
 
 			const int length = 2;
 			const float thickness = 1.0f;
@@ -768,8 +775,10 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "rod_round_1")
 		{
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/rod_round_1.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
+			palletId = 7;
+
 
 			//make shapes
 			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Cylinder>();
@@ -807,8 +816,9 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 		}
 		if (name == "rod_hard_1")
 		{
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/rod_hard_1.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
+			palletId = 8;
 
 			//make shapes
 			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Cylinder>();
@@ -847,8 +857,9 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "corner_hard_1")
 		{
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/corner_hard_1.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
+			palletId = 8;
 
 			//make shapes
 			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Box>();
@@ -920,8 +931,10 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "rod_round_4")
 		{
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/rod_round_4.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
+			palletId = 7;
+
 
 			//make shapes
 			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Cylinder>();
@@ -962,8 +975,9 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "rod_round_no_caps_4")
 		{
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/rod_round_no_caps_4.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
+			palletId = 9;
 
 			//make shapes
 			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Cylinder>();
@@ -988,8 +1002,9 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 
 		if (name == "rod_hard_4")
 		{
-			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/rod_hard_4.mdl");
+			Model* pieceModel = GetSubsystem<ResourceCache>()->GetResource<Model>("Models/" + name + ".mdl");
 			Vector3 offset(0, 0, 0);
+			palletId = 8;
 
 			//make shapes
 			auto* shape1 = root->CreateComponent<NewtonCollisionShape_Cylinder>();
@@ -1025,7 +1040,7 @@ Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
 		staticMdl->SetCastShadows(true);
 
 		Piece* piece = root->CreateComponent<Piece>();
-		
+		piece->SetColorPalletId(palletId);
 
 
 		//SharedPtr<File> file = SharedPtr<File>(new File(context_));
@@ -1194,7 +1209,7 @@ Urho3D::Node* PieceManager::CreatePieceAssembly(ea::string name, bool loadExisti
 			}
 
 
-			//make motor contraint between the 2 bodies
+			//make motor constraint between the 2 bodies
 			NewtonHingeConstraint* constraint = outerHousingBody->GetNode()->CreateComponent<NewtonHingeConstraint>();
 
 			constraint->SetOtherBody(innerHousingBody);
@@ -1204,6 +1219,8 @@ Urho3D::Node* PieceManager::CreatePieceAssembly(ea::string name, bool loadExisti
 			outerPiece->AddAssemblyPiece(innerPiece);
 			innerPiece->AddAssemblyPiece(outerPiece);
 
+			innerPiece->SetColorPalletId(2);
+			outerPiece->SetColorPalletId(11);
 
 
 

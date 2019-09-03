@@ -87,6 +87,8 @@ public:
 protected:
 
 	void HandleUpdate(StringHash eventType, VariantMap& eventData);
+	void HandlePhysicsUpdate(StringHash eventType, VariantMap& eventData);
+
 
 	void UpdateMoveGatherNode();
 

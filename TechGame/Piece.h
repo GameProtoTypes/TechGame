@@ -62,6 +62,13 @@ public:
 	void SetPrimaryColor(Color color);
 	Color GetPrimaryColor() const { return primaryColor_; }
 
+	void SetColorPalletId(unsigned id) { 
+		if (id != colorPalletId_) {
+			colorPalletId_ = id;
+			RefreshVisualMaterial();
+			useColorPallet_ = true;
+		}
+	}
 
 	void SetEnableDynamicDetachmentAttrib(bool enable);
 	void SetEnableDynamicDetachment(bool enable);
@@ -102,6 +109,8 @@ protected:
 	bool ghostingEffectOn_ = false;
 
 	Color primaryColor_;
+	unsigned colorPalletId_ = 0;
+	bool useColorPallet_ = true;
 	bool visualsDirty_ = false;
 
 	Matrix3x4 lastRigBodyTransform_;

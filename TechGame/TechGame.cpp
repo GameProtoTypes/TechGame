@@ -47,7 +47,8 @@ void TechGame::Setup()
 	PiecePoint::RegisterObject(context_);
 	PiecePointRow::RegisterObject(context_);
 	PieceGear::RegisterObject(context_);
-
+	ColorPallet::RegisterObject(context_);
+	ColorPalletManager::RegisterObject(context_);
 
 
 	RegisterNewtonPhysicsLibrary(context_);
@@ -247,7 +248,7 @@ void TechGame::UpdateUIInput(float timestep)
 
 	if (GetSubsystem<Input>()->GetKeyPress(KEY_TAB))
 	{
-		URHO3D_LOGINFO("TAB PRESSED");
+		
 		GetSubsystem<Input>()->SetMouseGrabbed(!GetSubsystem<Input>()->IsMouseGrabbed());
 		GetSubsystem<Input>()->SetMouseVisible(!GetSubsystem<Input>()->IsMouseVisible());
 		GetSubsystem<Input>()->SetMouseMode(MM_ABSOLUTE);
@@ -456,7 +457,7 @@ void TechGame::DefaultCreateScene()
 
 	Material* mat = GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/repeatingGround.xml");
 	//SharedPtr<Material> clonedMat = mat->Clone();
-	mat->SetShaderParameter("MatDiffColor", Vector4(0.6,0.6,0.6,0.0));
+	mat->SetShaderParameter("MatDiffColor", Vector4(0.8,0.8,0.8,0.0));
 	mat->SetShaderParameter("UOffset", Vector4(100.0f, 0.0f, 1.0f, 1.0f));
 	mat->SetShaderParameter("VOffset", Vector4(0.0f, 100.0f, 1.0f, 1.0f));
 	stmdl->SetMaterial(mat);
@@ -484,15 +485,15 @@ void TechGame::DefaultCreateScene()
 
 		PieceManager* pm = scene_->GetComponent<PieceManager>();
 		
-		//pm->CreatePiece("gear_medium", false)->SetWorldPosition(Vector3(-1,0,0));
-		//pm->CreatePiece("8_piece_Cshape", false)->SetWorldPosition(Vector3(1, 0, 0));
+		pm->CreatePiece("rod_hard_4", false)->SetWorldPosition(Vector3(-1,0,0));
+		pm->CreatePiece("2_sleeve", false)->SetWorldPosition(Vector3(1, 0, 0));
 
 		pm->CreatePieceAssembly("motor", false);
 
 		Node* prevPiece = nullptr;
 
 		ea::vector<Piece*> pieces;
-		int numDiffPieces = 22;
+		int numDiffPieces =  22;
 		for (int y = 0; y < numDiffPieces*2; y += 1) {
 
 			Node* pieceNode;
@@ -565,13 +566,6 @@ void TechGame::DefaultCreateScene()
 
 
 			for (Piece* pc : piecesJustCreated) {
-				
-				Color color;
-				float colorBaseHue = Color::BLUE.Hue();
-				float colorRange = 1.0f;
-				color.FromHSL(Wrap<float>(colorBaseHue + Random(-0.5f, 0.5f)*colorRange, 0.0f, 1.0f), 1.0f, 0.5f);
-
-				pc->SetPrimaryColor(color);
 
 				ea::vector<Piece*> singlePiece;
 				singlePiece.push_back(pc);
@@ -695,8 +689,6 @@ void TechGame::HandlePostUpdate(StringHash eventType, VariantMap& eventData)
 	if (ui::Button("Form PieceSolidificationGroup"))
 	{
 		if (piece) {
-
-			URHO3D_LOGINFO("FORMING MANUAL GROUP...");
 			scene_->GetComponent<PieceManager>()->FormSolidGroup(piece);
 		}
 	}

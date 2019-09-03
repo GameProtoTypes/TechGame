@@ -1,6 +1,7 @@
 #include "Piece.h"
 #include "PiecePoint.h"
 #include "PiecePointRow.h"
+#include "ColorPallet.h"
 
 #include "NewtonPhysicsEvents.h"
 
@@ -80,6 +81,7 @@ void Piece::SetPrimaryColor(Color color)
 	if (primaryColor_ != color) {
 		primaryColor_ = color;
 		visualsDirty_ = true;
+		useColorPallet_ = false;
 	}
 }
 
@@ -129,7 +131,16 @@ void Piece::RefreshVisualMaterial()
 	else
 	{
 		resolvedMaterial->SetTechnique(0, GetSubsystem<ResourceCache>()->GetResource<Technique>("Techniques/Diff.xml"));
-		resolvedMaterial->SetShaderParameter("MatDiffColor", primaryColor_.ToVector4());
+
+		Color resolvedColor;
+		if (useColorPallet_) {
+			resolvedColor = GetScene()->GetComponent<PieceManager>()->colorPalletManager_->GetPallet("default")->GetColorById(colorPalletId_);
+		}
+		else {
+			resolvedColor = primaryColor_;
+		}
+
+		resolvedMaterial->SetShaderParameter("MatDiffColor", resolvedColor.ToVector4());
 	}
 
 

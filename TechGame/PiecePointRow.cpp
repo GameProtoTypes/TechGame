@@ -300,8 +300,8 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 
 
-	URHO3D_LOGINFO("PiecePointRow::AttachRows holebody enabled: " + ea::to_string(holeBody->IsEnabledEffective()));
-	URHO3D_LOGINFO("PiecePointRow::AttachRows rodbody enabled: " + ea::to_string(rodBody->IsEnabledEffective()));
+	//URHO3D_LOGINFO("PiecePointRow::AttachRows holebody enabled: " + ea::to_string(holeBody->IsEnabledEffective()));
+	//URHO3D_LOGINFO("PiecePointRow::AttachRows rodbody enabled: " + ea::to_string(rodBody->IsEnabledEffective()));
 
 
 		//wait for update finished because we need to do some manual rigidbody moving and hacking.
@@ -318,7 +318,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 		if (theRodRow->GetRowType() == PiecePointRow::RowType_RodHard || theHoleRow->GetRowType() == PiecePointRow::RowType_HoleTight)
 		{
 
-			URHO3D_LOGINFO("PiecePointRow::AttachRows running hard attachment case.");
+			//URHO3D_LOGINFO("PiecePointRow::AttachRows running hard attachment case.");
 
 
 			holeBody->SetWorldPosition(-theHolePoint->GetNode()->GetPosition() );
@@ -448,7 +448,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 				if (flipped)
 				{
-					URHO3D_LOGINFO("PiecePointRow::AttachRows flipped");
+					//URHO3D_LOGINFO("PiecePointRow::AttachRows flipped");
 					float tmp = slideLimits.x_;
 					slideLimits.x_ = -slideLimits.y_;
 					slideLimits.y_ = -tmp;
@@ -522,7 +522,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			UpdateOptimizeFullRow(rowA);
 			UpdateOptimizeFullRow(rowB);
 		}
-		URHO3D_LOGINFO("row attached");
+		
 		return true;
 
 }

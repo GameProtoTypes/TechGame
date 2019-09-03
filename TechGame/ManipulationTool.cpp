@@ -8,11 +8,13 @@
 #include "PieceGear.h"
 #include "VisualDebugger.h"
 #include "VR.h"
+#include "NewtonPhysicsEvents.h"
 
 
 ManipulationTool::ManipulationTool(Context* context) : HandTool(context)
 {
 	SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(ManipulationTool, HandleUpdate));
+	SubscribeToEvent(E_NEWTON_PHYSICSPRESTEP, URHO3D_HANDLER(ManipulationTool, HandlePhysicsUpdate));
 }
 
 void ManipulationTool::RegisterObject(Context* context)
@@ -30,7 +32,7 @@ bool ManipulationTool::BeginDrag()
 	Piece* aimPiece = node_->GetScene()->GetComponent<PieceManager>()->GetClosestAimPiece(worldHitPos, GetEffectiveLookNode());
 
 	if (!aimPiece) {
-		URHO3D_LOGINFO("No aim piece");
+		//URHO3D_LOGINFO("No aim piece");
 		return false;
 	}
 
@@ -226,7 +228,7 @@ bool ManipulationTool::Gather(bool grabOne)
 			//assign gatheredPieceGroup to the existing common grouping and flag.
 			gatheredPieceGroup_ = commonGroup;
 			gatheredPieceGroupFromExisting = true;
-			URHO3D_LOGINFO("gatheredPieceGroup_ assigned to existing common group");
+			//URHO3D_LOGINFO("gatheredPieceGroup_ assigned to existing common group");
 
 		}
 		else
@@ -238,7 +240,7 @@ bool ManipulationTool::Gather(bool grabOne)
 			pieceManager_->MovePiecesToSolidGroup(allGatherPieces_, newGroup);
 			gatheredPieceGroup_ = newGroup;
 			gatheredPieceGroupFromExisting = false;
-			URHO3D_LOGINFO("gatheredPieceGroup_ group created.");
+			//URHO3D_LOGINFO("gatheredPieceGroup_ group created.");
 		}
 	}
 
@@ -790,19 +792,23 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 
 	}
-	else if(IsDragging())
-	{
-		
-	UpdateDragging();
 
-
-	}
 
 
 	UpdateGatherNodeRotation();
 
 
 
+}
+
+void ManipulationTool::HandlePhysicsUpdate(StringHash eventType, VariantMap& eventData)
+{
+	if (IsDragging())
+	{
+
+		UpdateDragging();
+
+	}
 }
 
 void ManipulationTool::UpdateMoveGatherNode()
@@ -918,7 +924,7 @@ void ManipulationTool::UpdateDragging()
 
 		Vector3 finalWorldTorque = -worldAngVel * 0.07f*dragPieceMass;
 
-
+		URHO3D_LOGINFO("mass: " + ea::to_string(dragPieceMass) + ", vel: " + worldVel.ToString() + ", angVel: " + worldAngVel.ToString());
 
 		dragPiece_->GetEffectiveRigidBody()->ResetForces();
 
