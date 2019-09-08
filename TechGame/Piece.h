@@ -62,7 +62,7 @@ public:
 	void SetPrimaryColor(Color color);
 	Color GetPrimaryColor() const { return primaryColor_; }
 
-	void SetColorPalletId(unsigned id) { 
+	void SetColorPalletId(StringHash id) { 
 		if (id != colorPalletId_) {
 			colorPalletId_ = id;
 			RefreshVisualMaterial();
@@ -109,7 +109,7 @@ protected:
 	bool ghostingEffectOn_ = false;
 
 	Color primaryColor_;
-	unsigned colorPalletId_ = 0;
+	StringHash colorPalletId_;
 	bool useColorPallet_ = true;
 	bool visualsDirty_ = false;
 

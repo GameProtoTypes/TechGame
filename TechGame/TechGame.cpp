@@ -20,6 +20,7 @@
 #include "Urho3D/SystemUI/DebugHud.h"
 #include "PieceGear.h"
 #include "VR.h"
+#include "ColorPallet.h"
 
 void TechGame::Setup()
 {
