@@ -146,8 +146,8 @@ void Piece::RefreshVisualMaterial()
 	}
 
 
-	resolvedMaterial->SetShaderParameter("UOffset", Vector4(0.1f, 0.0f, 1.0f, 1.0f));
-	resolvedMaterial->SetShaderParameter("VOffset", Vector4(0.0f, 0.1f, 1.0f, 1.0f));
+	resolvedMaterial->SetShaderParameter("UOffset", Vector4(0.5, 0.0f, 1.0f, 1.0f));
+	resolvedMaterial->SetShaderParameter("VOffset", Vector4(0.0f, 0.5f, 1.0f, 1.0f));
 	
 }
 

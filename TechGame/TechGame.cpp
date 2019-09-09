@@ -62,7 +62,7 @@ void TechGame::Start()
 	GetSubsystem<Engine>()->SetMinFps(90);
 
 
-	const int alphaVersion = 1;
+	const int alphaVersion = 2;
 	const int betaVersion = 0;
 	const int releaseVersion = 0;
 	GetSubsystem<Graphics>()->SetWindowTitle("Mechanism " + ea::to_string(releaseVersion)
