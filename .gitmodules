@@ -7,6 +7,3 @@
 [submodule "rbfx-openvr"]
 	path = rbfx-openvr
 	url = https://github.com/TrevorCash/rbfx-openvr
-[submodule "rbfx-breakpad"]
-	path = rbfx-breakpad
-	url = https://github.com/TrevorCash/rbfx-breakpad
