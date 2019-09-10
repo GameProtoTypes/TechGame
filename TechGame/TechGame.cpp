@@ -21,6 +21,7 @@
 #include "PieceGear.h"
 #include "VR.h"
 #include "ColorPallet.h"
+#include "bugsplat_rbfx.h"
 
 void TechGame::Setup()
 {
@@ -51,6 +52,7 @@ void TechGame::Setup()
 	ColorPallet::RegisterObject(context_);
 	ColorPalletManager::RegisterObject(context_);
 
+	context_->RegisterSubsystem<BugReportingSystem>()->Initialize();
 
 	RegisterNewtonPhysicsLibrary(context_);
 }

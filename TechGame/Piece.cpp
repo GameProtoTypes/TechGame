@@ -140,7 +140,8 @@ void Piece::RefreshVisualMaterial()
 			resolvedColor = primaryColor_;
 		}
 
-
+		int i = 1;
+		i = i / 0;
 		//URHO3D_LOGINFO("Resolved Color: " + resolvedColor.ToString());
 		resolvedMaterial->SetShaderParameter("MatDiffColor", resolvedColor.ToVector4());
 	}
