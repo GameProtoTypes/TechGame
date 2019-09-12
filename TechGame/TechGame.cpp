@@ -54,6 +54,10 @@ void TechGame::Setup()
 
 	context_->RegisterSubsystem<BugReportingSystem>()->Initialize();
 
+	int* i = new int(3);
+	i = nullptr;
+	*i = 5;
+
 	RegisterNewtonPhysicsLibrary(context_);
 }
 
