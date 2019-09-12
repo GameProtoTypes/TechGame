@@ -22,6 +22,7 @@
 #include "VR.h"
 #include "ColorPallet.h"
 #include "bugsplat_rbfx.h"
+#include "AppVersion.h"
 
 void TechGame::Setup()
 {
@@ -30,6 +31,7 @@ void TechGame::Setup()
 	float scale = 0.8;
 	engineParameters_[EP_WINDOW_WIDTH] = int(1920* scale);
 	engineParameters_[EP_WINDOW_HEIGHT] = int(1080* scale);
+	engineParameters_[EP_APPLICATION_NAME] = "Mechanism";
 	
 	// Resource prefix path is a list of semicolon-separated paths which will be checked for containing resource directories. They are relative to application executable file.
 #if _WIN32
@@ -39,6 +41,7 @@ void TechGame::Setup()
 #endif
 	
 
+	context_->RegisterSubsystem<AppVersion>()->SetVersion(0, 0, 3);
 	Character::RegisterObject(context_);
 	ManipulationTool::RegisterObject(context_);
 
@@ -54,9 +57,9 @@ void TechGame::Setup()
 
 	context_->RegisterSubsystem<BugReportingSystem>()->Initialize();
 
-	int* i = new int(3);
-	i = nullptr;
-	*i = 5;
+	//int* i = new int(3);
+	//i = nullptr;
+	//*i = 5;
 
 	RegisterNewtonPhysicsLibrary(context_);
 }
@@ -67,12 +70,8 @@ void TechGame::Start()
 	GetSubsystem<Engine>()->SetMaxFps(200);
 	GetSubsystem<Engine>()->SetMinFps(90);
 
-
-	const int alphaVersion = 2;
-	const int betaVersion = 0;
-	const int releaseVersion = 0;
-	GetSubsystem<Graphics>()->SetWindowTitle("Mechanism " + ea::to_string(releaseVersion)
-		+ "." + ea::to_string(betaVersion) + "." + ea::to_string(alphaVersion));
+	
+	GetSubsystem<Graphics>()->SetWindowTitle("Mechanism " + GetSubsystem<AppVersion>()->GetVersionString());
 
 
 	// Create the scene content
