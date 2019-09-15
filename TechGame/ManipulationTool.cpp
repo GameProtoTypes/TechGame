@@ -619,6 +619,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 			constraintOrientation = gatherNode_->GetWorldRotation();
 		}
 
+
 		updateKinematicsControllerPos(false);
 		
 		if (!kinamaticConstriant_.Expired()) {
