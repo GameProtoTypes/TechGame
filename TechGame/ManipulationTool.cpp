@@ -14,7 +14,6 @@
 ManipulationTool::ManipulationTool(Context* context) : HandTool(context)
 {
 	SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(ManipulationTool, HandleUpdate));
-	SubscribeToEvent(E_NEWTON_PHYSICSPRESTEP, URHO3D_HANDLER(ManipulationTool, HandlePhysicsUpdate));
 }
 
 void ManipulationTool::RegisterObject(Context* context)
@@ -793,22 +792,17 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 	}
 
-
-
-	UpdateGatherNodeRotation();
-
-
-
-}
-
-void ManipulationTool::HandlePhysicsUpdate(StringHash eventType, VariantMap& eventData)
-{
 	if (IsDragging())
 	{
 
 		UpdateDragging();
 
 	}
+
+	UpdateGatherNodeRotation();
+
+
+
 }
 
 void ManipulationTool::UpdateMoveGatherNode()
