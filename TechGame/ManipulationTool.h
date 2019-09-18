@@ -78,6 +78,35 @@ public:
 	void UpdateGatherIndicators();
 
 
+	void WeldPoint() {
+		PiecePoint* piecePoint = nullptr;
+
+		piecePoint = pieceManager_->GetClosestAimPiecePoint(GetEffectiveLookNode());
+
+		if (piecePoint) {
+			if (!piecePoint->IsWelded())
+				piecePoint->Weld();
+		}
+	}
+
+	void Lubricate() {
+		PiecePoint* piecePoint = nullptr;
+
+		piecePoint = pieceManager_->GetClosestAimPiecePoint(GetEffectiveLookNode());
+
+		if (piecePoint) {
+			if (piecePoint->IsWelded())
+				piecePoint->UnWeld();
+
+		}
+	}
+
+
+
+
+
+
+
 
 	virtual void DrawDebugGeometry(DebugRenderer* debug, bool depthTest) override;
 

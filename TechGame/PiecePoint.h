@@ -36,6 +36,26 @@ public:
 	bool GetShowColorIndicator() const { return showColorIndicator_; }
 
 
+	bool IsWelded() const { return isWelded; }
+	bool Weld() {
+
+		if (occupiedPoint_) {
+
+			isWelded = true;
+			occupiedPoint_->isWelded = true;
+
+
+
+		}
+		else
+			return false;
+
+
+	}
+
+
+
+
 
 	bool isEndCap_ = false;//if the point is a rod - indicates the point is a limiting end.  if the point is a hole - indicates the hole is a cap and a rod cannot pass through one side. does not need to have row.
 
@@ -67,5 +87,8 @@ public:
 
 
 protected:
+
+	bool isWelded = false;
+
 	virtual void OnNodeSet(Node* node) override;
 };
