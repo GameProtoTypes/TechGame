@@ -919,7 +919,7 @@ void ManipulationTool::UpdateDragging()
 
 		Vector3 finalWorldTorque = -worldAngVel * 0.07f*dragPieceMass;
 
-		URHO3D_LOGINFO("mass: " + ea::to_string(dragPieceMass) + ", vel: " + worldVel.ToString() + ", angVel: " + worldAngVel.ToString());
+		//URHO3D_LOGINFO("mass: " + ea::to_string(dragPieceMass) + ", vel: " + worldVel.ToString() + ", angVel: " + worldAngVel.ToString());
 
 		dragPiece_->GetEffectiveRigidBody()->ResetForces();
 
