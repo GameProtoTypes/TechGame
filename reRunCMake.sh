@@ -5,7 +5,7 @@ cd build
 rm -f -r *
 
 
-cmake .. -G "Visual Studio 15 2017 Win64" \
+cmake .. -G "Visual Studio 15 2017 Win64"  \
 -DBUILD_SHARED_LIBS=ON \
 -DURHO3D_CSHARP=OFF \
 -DURHO3D_MONOLITHIC_HEADER=ON \

@@ -861,17 +861,16 @@ void PiecePointRow::HandleUpdate(StringHash event, VariantMap& eventData)
 
 void PiecePointRow::UpdatePointOccupancies()
 {
-
-	if (!rowAttachements_.size())
-		return;
-
-
 	//clear occupancies on points
 	for (SharedPtr<PiecePoint> point : points_)
 	{
 		point->occupiedPointPrev_ = point->occupiedPoint_;
 		point->occupiedPoint_ = nullptr;
 	}
+
+	if (!rowAttachements_.size())
+		return;
+
 
 	ea::vector<SharedPtr<PiecePoint>> otherPoints;
 	for (RowAttachement& row : rowAttachements_)
