@@ -5,6 +5,10 @@ cmake_minimum_required(VERSION 3.4.3)
 # Set project name
 project (TechGameSolution)
 
+if(MSVC)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4984")
+endif()
+
 # Set binary output directories. Changing these paths will require you adjusting your resource path configuration!
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
