@@ -408,6 +408,7 @@ void PieceManager::CleanAll()
 	{
 		CleanGroups(node);//kind-of redundant code here.
 	}
+
 }
 
 

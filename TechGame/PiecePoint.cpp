@@ -73,9 +73,44 @@ void PiecePoint::SetShowColorIndicator(bool enable, Color color)
 		colorIndicatorColor_ = color;
 
 
+		URHO3D_LOGINFO("color update.");
 		colorIndicatorStMdl_->GetMaterial()->SetShaderParameter("MatDiffColor", color.ToVector4());
 		colorIndicatorStMdl_->SetEnabled(showColorIndicator_);
 	}
+}
+
+bool PiecePoint::Weld()
+{
+	if (occupiedPoint_) {
+
+		isWelded = true;
+		occupiedPoint_->isWelded = true;
+		URHO3D_LOGINFO("Welding..");
+		GetScene()->GetComponent<PieceManager>()->FormSolidGroup(GetPiece());
+		GetScene()->GetComponent<PieceManager>()->FormSolidGroup(occupiedPoint_->GetPiece());
+	}
+	else
+		return false;
+}
+
+bool PiecePoint::UnWeld()
+{
+	if (occupiedPoint_ && isWelded) {
+		URHO3D_LOGINFO("UnWelding.");
+		isWelded = false;
+		occupiedPoint_->isWelded = false;
+
+		GetScene()->GetComponent<PieceManager>()->RemovePieceFromGroup(GetPiece());
+		GetScene()->GetComponent<PieceManager>()->RemovePieceFromGroup(occupiedPoint_->GetPiece());
+
+
+
+
+		GetScene()->GetComponent<PieceManager>()->FormSolidGroup(GetPiece());
+		GetScene()->GetComponent<PieceManager>()->FormSolidGroup(occupiedPoint_->GetPiece());
+		return true;
+	}
+	return false;
 }
 
 bool PiecePoint::SaveXML(XMLElement& dest) const
@@ -115,14 +150,15 @@ void PiecePoint::OnNodeSet(Node* node)
 
 		//make color indicator
 		SharedPtr<Material> mat = GetSubsystem<ResourceCache>()->GetResource<Material>("Materials/DefaultMaterial.xml")->Clone();
-\
+
 		colorIndicatorNode_ = node_->CreateChild();
 
 		colorIndicatorNode_->SetScale(0.02f);
 		colorIndicatorStMdl_ = colorIndicatorNode_->CreateComponent<StaticModel>();
 		colorIndicatorStMdl_->SetModel(GetSubsystem<ResourceCache>()->GetResource<Model>("Models/Sphere.mdl"));
 
-		mat->SetTechnique(0, GetSubsystem<ResourceCache>()->GetResource<Technique>("Techniques/DiffOverlay.xml"));
+
+		mat->SetTechnique(0, GetSubsystem<ResourceCache>()->GetResource<Technique>("Techniques/NoTextureOverlay.xml"));
 		colorIndicatorStMdl_->SetMaterial(mat);
 		colorIndicatorStMdl_->SetEnabled(false);
 	}

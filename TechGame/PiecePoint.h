@@ -37,21 +37,8 @@ public:
 
 
 	bool IsWelded() const { return isWelded; }
-	bool Weld() {
-
-		if (occupiedPoint_) {
-
-			isWelded = true;
-			occupiedPoint_->isWelded = true;
-
-
-
-		}
-		else
-			return false;
-
-
-	}
+	bool Weld();
+	bool UnWeld();
 
 
 

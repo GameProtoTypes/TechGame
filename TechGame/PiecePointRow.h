@@ -32,7 +32,6 @@ public:
 
 	enum RowType {
 		RowType_Hole = 0, // a hole
-		RowType_HoleTight, // a hole that limits movement (glued hole)
 		RowType_RodHard,
 		RowType_RodRound
 	};
@@ -73,6 +72,8 @@ public:
 
 	//attach 2 rows together.  Must be in setup in world configuration first.
 	static bool AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePoint* pointA, PiecePoint* pointB, bool attachAsFullRow = false, bool updateOptimizations = true);
+
+	static void ComputeSlideLimits(PiecePointRow* theHoleRow, PiecePointRow* theRodRow, PieceManager* pieceManager, NewtonConstraint* constraint, NewtonRigidBody* rodBody, Quaternion diffSnap45);
 
 	static bool RowsHaveDegreeOfFreedom(PiecePointRow* rowA, PiecePointRow* rowB);
 
@@ -164,6 +165,9 @@ public:
 
 	bool DetachAll();
 
+	bool ReAttachTo(PiecePointRow* otherRow);
+
+	bool ReAttachAll();
 
 	void ResetOccupiedPointsCountDown() {
 		occupiedCountDown_ = occupiedCountDownCount_;

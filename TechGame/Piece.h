@@ -70,6 +70,11 @@ public:
 		}
 	}
 
+	bool IsOiled() const { return oiled_; }
+	void SetOiled(bool enable) { oiled_ = enable; }
+	
+
+
 	void SetEnableDynamicDetachmentAttrib(bool enable);
 	void SetEnableDynamicDetachment(bool enable);
 	bool GetEnableDynamicDetachment() const { return enableDynamicDetachment_; }
@@ -81,6 +86,8 @@ public:
 	void RefreshVisualMaterial();
 
 	void DetachAll();
+
+	void ReAttachAll();
 
 	bool IsEffectivelySolidified();
 
@@ -117,7 +124,7 @@ protected:
 
 	bool enableDynamicDetachment_ = true;
 
-
+	bool oiled_ = false;
 
 	ea::vector<Piece*> assemblyPieces_;
 

@@ -79,6 +79,9 @@ public:
 
 
 	void WeldPoint() {
+
+		URHO3D_LOGINFO("Attempting Weld..");
+
 		PiecePoint* piecePoint = nullptr;
 
 		piecePoint = pieceManager_->GetClosestAimPiecePoint(GetEffectiveLookNode());
@@ -89,7 +92,7 @@ public:
 		}
 	}
 
-	void Lubricate() {
+	void UnWeldPoint() {
 		PiecePoint* piecePoint = nullptr;
 
 		piecePoint = pieceManager_->GetClosestAimPiecePoint(GetEffectiveLookNode());
@@ -101,10 +104,31 @@ public:
 		}
 	}
 
+	void OilPiece() {
+		Vector3 worldPos;
+		Piece* piece = pieceManager_->GetClosestAimPiece(worldPos, GetEffectiveLookNode());
+		if (piece) {
+
+			piece->SetOiled(true);
+			pieceManager_->RemovePieceFromGroup(piece);
+			piece->ReAttachAll();
+
+
+		}
+
+	}
+	void UnOilPiece() {
+		Vector3 worldPos;
+		Piece* piece = pieceManager_->GetClosestAimPiece(worldPos, GetEffectiveLookNode());
+		if (piece) {
+
+			piece->SetOiled(false);
+			pieceManager_->FormSolidGroup(piece);
 
 
 
-
+		}
+	}
 
 
 
@@ -116,6 +140,8 @@ public:
 protected:
 
 	void HandleUpdate(StringHash eventType, VariantMap& eventData);
+
+	void UpdateHoverPointIndicators();
 
 
 
@@ -173,6 +199,8 @@ protected:
 
 
 	ea::vector<WeakPtr<PiecePoint>> recentPointList_;
+	ea::vector<WeakPtr<PiecePoint>> hoverPointList_;
+
 
 	bool useGrid_ = false;
 

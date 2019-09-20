@@ -596,9 +596,10 @@ void ManipulationTool::DrawDebugGeometry(DebugRenderer* debug, bool depthTest)
 
 void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 {
+
+	UpdateHoverPointIndicators();
+
 	UpdateMoveGatherNode();
-
-
 
 	if (IsGathering())
 	{
@@ -630,7 +631,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 		//reset all recent colored indicators
 		for (WeakPtr<PiecePoint> point : recentPointList_) {
-			if(!point.Expired())
+			if (!point.Expired())
 				point->SetShowColorIndicator(false, Color::BLUE);
 		}
 		recentPointList_.clear();
@@ -728,14 +729,7 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 							}
 						}
 
-
-
 						attachStager_->Analyze();
-
-
-
-
-
 
 
 						//stop rotating the gather node if we hit a good attachment configuration.
@@ -757,10 +751,6 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 						lastNumBadAttachmnets_ = curNumBadAttachements;
 
 
-
-
-
-
 						//update colors on good and bad attachments.
 						ea::vector<PieceAttachmentStager::AttachmentPair*>* attachments =& attachStager_->GetBadAttachments();
 						for (auto* pair : *attachments) {
@@ -775,8 +765,6 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 						}
 					}
 				}
-
-
 			}
 			else
 			{
@@ -795,15 +783,37 @@ void ManipulationTool::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 	if (IsDragging())
 	{
-
 		UpdateDragging();
-
 	}
 
 	UpdateGatherNodeRotation();
 
 
 
+}
+
+void ManipulationTool::UpdateHoverPointIndicators()
+{
+	PiecePoint* pointA = nullptr;
+	PiecePoint* pointB = nullptr;
+	pointA = pieceManager_->GetClosestAimPiecePoint(GetEffectiveLookNode());
+
+	if (pointA) {
+		pointA->SetShowColorIndicator(true, Color::GREEN);
+		hoverPointList_.push_back(WeakPtr<PiecePoint>(pointA));
+		if (pointA->occupiedPoint_) {
+			pointB = pointA->occupiedPoint_;
+			pointA->SetShowColorIndicator(true, Color::MAGENTA);
+			pointB->SetShowColorIndicator(true, Color(0.5f,0.0f,0.5));
+			hoverPointList_.push_back(WeakPtr<PiecePoint>(pointB));
+		}
+	}
+	for (auto point : hoverPointList_)
+	{
+		if(!point.Expired())
+			if (point != pointA && point != pointB)
+				point->SetShowColorIndicator(false, Color::BLUE);
+	}
 }
 
 void ManipulationTool::UpdateMoveGatherNode()

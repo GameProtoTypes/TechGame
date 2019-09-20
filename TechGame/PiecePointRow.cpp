@@ -239,6 +239,34 @@ bool PiecePointRow::DetachAll()
 	return true;
 }
 
+bool PiecePointRow::ReAttachTo(PiecePointRow* otherRow)
+{
+	ea::vector<RowAttachement> rowAttachementsCopy = rowAttachements_;
+	PiecePoint* pointA = nullptr;
+	PiecePoint* pointB = nullptr;
+	for (int i = 0; i < rowAttachementsCopy.size(); i++) {
+		if (rowAttachementsCopy[i].rowOther_ == otherRow)
+		{
+			pointA = rowAttachementsCopy[i].point;
+			pointB = rowAttachementsCopy[i].pointOther_;
+
+		}
+	}
+	DetachFrom(otherRow, true);
+	AttachRows(this, otherRow, pointA, pointB);
+	return true;
+}
+
+bool PiecePointRow::ReAttachAll()
+{
+	ea::vector<RowAttachement> rowAttachementsCopy = rowAttachements_;
+	for (int i = 0; i < rowAttachementsCopy.size(); i++) {
+
+		ReAttachTo(rowAttachementsCopy[i].rowOther_);
+	}
+	return true;
+}
+
 bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePoint* pointA, PiecePoint* pointB, bool attachAsFullRow /*= false*/, bool updateOptimizations /*= true*/)
 {
 	
@@ -315,7 +343,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 		//create the constraint
 		NewtonConstraint* constraint = nullptr;
-		if (theRodRow->GetRowType() == PiecePointRow::RowType_RodHard || theHoleRow->GetRowType() == PiecePointRow::RowType_HoleTight)
+		if (theRodRow->GetRowType() == PiecePointRow::RowType_RodHard)
 		{
 
 			//URHO3D_LOGINFO("PiecePointRow::AttachRows running hard attachment case.");
@@ -333,17 +361,26 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			holeBody->SetWorldRotation(Quaternion::IDENTITY);
 			rodBody->SetWorldRotation(diffSnap45);
 
+			if (theRodRow->GetPiece()->IsOiled()) {
+				constraint = holeBody->GetNode()->CreateComponent<NewtonSliderConstraint>();
+				static_cast<NewtonSliderConstraint*>(constraint)->SetTwistLowerLimitEnable(true);
+				static_cast<NewtonSliderConstraint*>(constraint)->SetTwistUpperLimitEnable(true);
+				static_cast<NewtonSliderConstraint*>(constraint)->SetEnableSliderLimits(true, true);
+				static_cast<NewtonSliderConstraint*>(constraint)->SetTwistLimits(0.0f, 0.0f);
+			}
+			else
+			{
+				constraint = holeBody->GetNode()->CreateComponent<NewtonFullyFixedConstraint>();
 
+				constraint->SetOtherBody(rodBody);
+				constraint->SetOwnPosition(theHolePoint->GetNode()->GetPosition());
+				constraint->SetOwnRotation(Quaternion(90, Vector3(0, 1, 0)));
+				constraint->SetOtherPosition(theRodPoint->GetNode()->GetPosition());
+				constraint->SetOtherRotation(diffSnap45 * Quaternion(90, Vector3(0, 1, 0)));
 
-			constraint = holeBody->GetNode()->CreateComponent<NewtonFullyFixedConstraint>();
+			}
 
-
-			constraint->SetOtherBody(rodBody);
-			constraint->SetOwnPosition(theHolePoint->GetNode()->GetPosition());
-			constraint->SetOwnRotation(Quaternion(90, Vector3(0, 1, 0)));
-			constraint->SetOtherPosition(theRodPoint->GetNode()->GetPosition());
-			constraint->SetOtherRotation(diffSnap45 * Quaternion(90, Vector3(0, 1, 0)));
-			
+			ComputeSlideLimits(theHoleRow, theRodRow, pieceManager, constraint, rodBody, diffSnap45);
 
 		}
 		else if (theRodRow->GetRowType() == PiecePointRow::RowType_RodRound)
@@ -388,87 +425,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			//	static_cast<NewtonHingeConstraint*>(constraint)->SetFriction(twistFriction);
 			//}
 
-				//compute slide limits
-				Vector2 slideLimits;
-				
-				float totalSlideAmount = (float(theHoleRow->Count() + theRodRow->Count() - 2))*pieceManager->RowPointDistance();
-
-				//if (attachAsFullRow)
-				//	totalSlideAmount = pieceManager->RowPointDistance()*0.5f;
-
-				slideLimits.x_ = -totalSlideAmount * 0.5f;
-				slideLimits.y_ = totalSlideAmount * 0.5f;
-
-				PiecePoint* rodEndA;
-				PiecePoint* rodEndB;
-				PiecePoint* holeEndA;
-				PiecePoint* holeEndB;
-
-				theRodRow->GetEndPoints(rodEndA, rodEndB);
-				theHoleRow->GetEndPoints(holeEndA, holeEndB);
-
-				bool flipped = theRodRow->GetRowDirectionWorld().DotProduct(theHoleRow->GetRowDirectionWorld()) < 0;
-				
-				
-				if (rodEndA->isEndCap_)
-				{
-					slideLimits.x_ += (float(theHoleRow->Count() - 1))*pieceManager->RowPointDistance();
-				}
-				else
-				{
-					slideLimits.x_ = -100.0f;
-				}
-
-				if (rodEndB->isEndCap_)
-				{
-					slideLimits.y_ -= (float(theHoleRow->Count() - 1))*pieceManager->RowPointDistance();
-				}
-				else
-				{
-					slideLimits.y_ = 100.0f;
-				}
-
-
-
-
-				if (holeEndB->isEndCap_)
-				{
-					slideLimits.y_ = (theRodRow->Count() / 2.0f)*pieceManager->RowPointDistance() + 0.5f;
-					slideLimits.x_ = (theRodRow->Count() / 2.0f)*pieceManager->RowPointDistance() - 0.01f;
-				}
-				if (holeEndA->isEndCap_)
-				{
-					slideLimits.y_ = -(theRodRow->Count() / 2.0f)*pieceManager->RowPointDistance() + 0.01f;
-					slideLimits.x_ = -(theRodRow->Count() / 2.0f)*pieceManager->RowPointDistance() - 0.5f;
-				}
-
-
-
-				//Vector2 trueSlideLimits = static_cast<PiecePointRoundRod*>(point)->GetSlideLimits();
-
-				if (flipped)
-				{
-					//URHO3D_LOGINFO("PiecePointRow::AttachRows flipped");
-					float tmp = slideLimits.x_;
-					slideLimits.x_ = -slideLimits.y_;
-					slideLimits.y_ = -tmp;
-				}
-				
-
-				const float slopDist = 0.005f;
-				//if (!attachAsFullRow) {
-					static_cast<NewtonSliderConstraint*>(constraint)->SetSliderLimits(slideLimits.x_ - slopDist, slideLimits.y_ + slopDist);
-					static_cast<NewtonSliderConstraint*>(constraint)->SetSliderFriction(0.001f);
-				//}
-
-
-
-				constraint->SetOtherBody(rodBody);
-				constraint->SetOwnPosition(theHoleRow->GetLocalCenter());
-				constraint->SetOwnRotation(Quaternion(90, Vector3(0, 1, 0)));
-				constraint->SetOtherPosition(theRodRow->GetLocalCenter());
-				constraint->SetOtherRotation(diffSnap45 * Quaternion(90, Vector3(0, 1, 0)));
-
+				ComputeSlideLimits(theHoleRow, theRodRow, pieceManager, constraint, rodBody, diffSnap45);
 
 		}
 		else
@@ -527,6 +484,87 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 }
 
+void PiecePointRow::ComputeSlideLimits(PiecePointRow* theHoleRow, PiecePointRow* theRodRow, PieceManager* pieceManager, NewtonConstraint* constraint, NewtonRigidBody* rodBody, Quaternion diffSnap45)
+{
+	//compute slide limits
+	Vector2 slideLimits;
+
+	float totalSlideAmount = (float(theHoleRow->Count() + theRodRow->Count() - 2))*pieceManager->RowPointDistance();
+
+	//if (attachAsFullRow)
+	//	totalSlideAmount = pieceManager->RowPointDistance()*0.5f;
+
+	slideLimits.x_ = -totalSlideAmount * 0.5f;
+	slideLimits.y_ = totalSlideAmount * 0.5f;
+
+	PiecePoint* rodEndA;
+	PiecePoint* rodEndB;
+	PiecePoint* holeEndA;
+	PiecePoint* holeEndB;
+
+	theRodRow->GetEndPoints(rodEndA, rodEndB);
+	theHoleRow->GetEndPoints(holeEndA, holeEndB);
+
+	bool flipped = theRodRow->GetRowDirectionWorld().DotProduct(theHoleRow->GetRowDirectionWorld()) < 0;
+
+
+	if (rodEndA->isEndCap_)
+	{
+		slideLimits.x_ += (float(theHoleRow->Count() - 1))*pieceManager->RowPointDistance();
+	}
+	else
+	{
+		slideLimits.x_ = -100.0f;
+	}
+
+	if (rodEndB->isEndCap_)
+	{
+		slideLimits.y_ -= (float(theHoleRow->Count() - 1))*pieceManager->RowPointDistance();
+	}
+	else
+	{
+		slideLimits.y_ = 100.0f;
+	}
+
+	if (holeEndB->isEndCap_)
+	{
+		slideLimits.y_ = (theRodRow->Count() / 2.0f)*pieceManager->RowPointDistance() + 0.5f;
+		slideLimits.x_ = (theRodRow->Count() / 2.0f)*pieceManager->RowPointDistance() - 0.01f;
+	}
+	if (holeEndA->isEndCap_)
+	{
+		slideLimits.y_ = -(theRodRow->Count() / 2.0f)*pieceManager->RowPointDistance() + 0.01f;
+		slideLimits.x_ = -(theRodRow->Count() / 2.0f)*pieceManager->RowPointDistance() - 0.5f;
+	}
+
+
+
+	//Vector2 trueSlideLimits = static_cast<PiecePointRoundRod*>(point)->GetSlideLimits();
+
+	if (flipped)
+	{
+		//URHO3D_LOGINFO("PiecePointRow::AttachRows flipped");
+		float tmp = slideLimits.x_;
+		slideLimits.x_ = -slideLimits.y_;
+		slideLimits.y_ = -tmp;
+	}
+
+
+	const float slopDist = 0.005f;
+	//if (!attachAsFullRow) {
+	static_cast<NewtonSliderConstraint*>(constraint)->SetSliderLimits(slideLimits.x_ - slopDist, slideLimits.y_ + slopDist);
+	static_cast<NewtonSliderConstraint*>(constraint)->SetSliderFriction(0.001f);
+	//}
+
+
+
+	constraint->SetOtherBody(rodBody);
+	constraint->SetOwnPosition(theHoleRow->GetLocalCenter());
+	constraint->SetOwnRotation(Quaternion(90, Vector3(0, 1, 0)));
+	constraint->SetOtherPosition(theRodRow->GetLocalCenter());
+	constraint->SetOtherRotation(diffSnap45 * Quaternion(90, Vector3(0, 1, 0)));
+}
+
 bool PiecePointRow::RowsHaveDegreeOfFreedom(PiecePointRow* rowA, PiecePointRow* rowB)
 {
 	if (!RowsAttachCompatable(rowA, rowB))
@@ -549,17 +587,27 @@ bool PiecePointRow::RowsHaveDegreeOfFreedom(PiecePointRow* rowA, PiecePointRow* 
 	}
 
 
-	if (holeRow->GetRowType() == RowType_HoleTight)
+	//check if any rows have welded points.
+	for (PiecePoint* point : holeRow->points_)
 	{
+		if (point->IsWelded()) {
+			if (point->occupiedPoint_->row_ == rodRow)
+				return false;
+		}
+	}
+
+	//if anything is oiled it has degree of freedom.
+	if (holeRow->GetPiece()->IsOiled() || rodRow->GetPiece()->IsOiled())
+		return true;
+
+
+	if (rodRow->GetRowType() == RowType_RodHard)
 		return false;
-	}
 	else
-	{
-		if (rodRow->GetRowType() == RowType_RodHard)
-			return false;
-		else
-			return true;
-	}
+		return true;
+
+
+
 }
 
 bool PiecePointRow::UpdateOptimizeFullRow(PiecePointRow* row)

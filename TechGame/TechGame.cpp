@@ -333,6 +333,24 @@ void TechGame::UpdateUIInput(float timestep)
 	}
 
 
+	if (input->GetKeyPress(KEY_B))
+	{
+		manipTool->WeldPoint();
+	}
+	if (input->GetKeyDown(KEY_SHIFT) && input->GetKeyDown(KEY_B))
+	{
+		manipTool->UnWeldPoint();
+	}
+	if (input->GetKeyDown(KEY_L))
+	{
+		manipTool->OilPiece();
+	}
+	if (input->GetKeyDown(KEY_SHIFT) && input->GetKeyDown(KEY_L))
+	{
+		manipTool->UnOilPiece();
+	}
+
+
 	if (input->GetKeyDown(KEY_SHIFT))
 	{
 		crossHairElementOuter_->SetVar("curMode", (int)CrossHairMode::CrossHairMode_Busy);

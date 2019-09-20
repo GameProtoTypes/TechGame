@@ -254,6 +254,25 @@ void Piece::DetachAll()
 }
 
 
+void Piece::ReAttachAll()
+{
+	ea::vector<Piece*> assemblyPieces_;
+	GetAttachedPieces(assemblyPieces_, false);
+	for (Piece* pc : assemblyPieces_) {
+		GetScene()->GetComponent<PieceManager>()->RemovePieceFromGroup(pc);
+	}
+
+	ea::vector<PiecePointRow*> rows;
+	GetPointRows(rows);
+
+	for (PiecePointRow* row : rows) {
+		
+		row->ReAttachAll();
+	}
+
+	GetScene()->GetComponent<PieceManager>()->AutoFormAllGroups();
+}
+
 bool Piece::IsEffectivelySolidified()
 {
 	PieceSolidificationGroup* nearestGroup = GetPieceGroup();
