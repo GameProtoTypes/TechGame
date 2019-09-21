@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.4.3)
 
-add_library(rbfx-mathextras SHARED MathExtras.h MathExtras.cpp)
+add_library(rbfx-mathextras MathExtras.h MathExtras.cpp)
 
 target_compile_definitions(rbfx-mathextras PUBLIC URHOMATHEXTRAS_EXPORTS)
 

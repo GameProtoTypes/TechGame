@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.4.3)
 
-add_library(rbfx-visualdebugger SHARED VisualDebugger.h VisualDebugger.cpp)
+add_library(rbfx-visualdebugger VisualDebugger.h VisualDebugger.cpp)
 
 target_compile_definitions(rbfx-visualdebugger PUBLIC URHOVISUALDEBUGGER_EXPORTS)
 
