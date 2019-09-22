@@ -231,9 +231,12 @@ bool PiecePointRow::DetachFrom(PiecePointRow* otherRow, bool updateOccupiedPoint
 bool PiecePointRow::DetachAll()
 {
 	ea::vector<RowAttachement> rowAttachementsCopy = rowAttachements_;
+	
 	for (int i = 0; i < rowAttachementsCopy.size(); i++) {
+
 		if(!rowAttachementsCopy[i].rowOther_.Expired())
 			DetachFrom(rowAttachementsCopy[i].rowOther_, true);
+
 	}
 
 	return true;
