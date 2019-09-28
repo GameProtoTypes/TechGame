@@ -105,6 +105,11 @@ TechGame::TechGame(Context* context) : Application(context)
 
 
 
+TechGame::~TechGame()
+{
+
+}
+
 void TechGame::CreateCharacter()
 {
 	auto* cache = GetSubsystem<ResourceCache>();

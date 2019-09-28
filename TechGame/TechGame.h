@@ -13,6 +13,7 @@ class URHO3D_EXPORT_API TechGame : public Application
 	URHO3D_OBJECT(TechGame, Application);
 public:
 	explicit TechGame(Context* context);
+	~TechGame();
 	void Setup() override;
 	void Start() override;
 	void Stop() override;
