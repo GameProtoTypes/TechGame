@@ -73,7 +73,7 @@ void PiecePoint::SetShowColorIndicator(bool enable, Color color)
 		colorIndicatorColor_ = color;
 
 
-		URHO3D_LOGINFO("color update.");
+		//URHO3D_LOGINFO("color update.");
 		colorIndicatorStMdl_->GetMaterial()->SetShaderParameter("MatDiffColor", color.ToVector4());
 		colorIndicatorStMdl_->SetEnabled(showColorIndicator_);
 	}
