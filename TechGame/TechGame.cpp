@@ -19,7 +19,6 @@
 #include "Urho3D/SystemUI/Console.h"
 #include "Urho3D/SystemUI/DebugHud.h"
 #include "PieceGear.h"
-#include "VR.h"
 #include "ColorPallet.h"
 #include "bugsplat_rbfx.h"
 #include "AppVersion.h"
