@@ -1213,7 +1213,7 @@ Urho3D::Node* PieceManager::CreatePieceAssembly(ea::string name, bool loadExisti
 			NewtonHingeConstraint* constraint = outerHousingBody->GetNode()->CreateComponent<NewtonHingeConstraint>();
 
 			constraint->SetOtherBody(innerHousingBody);
-			constraint->SetPowerMode(NewtonHingeConstraint::MOTOR);
+			constraint->SetPowerMode(NewtonHingeConstraint::MOTOR_TORQUE);
 			
 
 			outerPiece->AddAssemblyPiece(innerPiece);

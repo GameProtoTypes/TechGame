@@ -2,7 +2,7 @@
 
 mkdir -p build
 cd build 
-rm -f -r *
+#rm -f -r *
 
 
 cmake .. -G "Visual Studio 15 2017 Win64"  \
@@ -15,7 +15,8 @@ cmake .. -G "Visual Studio 15 2017 Win64"  \
 -DURHO3D_NAVIGATION=OFF \
 -DURHO3D_URHO2D=OFF \
 -DURHO3D_NETWORK=ON \
--DURHO3D_PROFILING=OFF \
+-DURHO3D_PROFILING=ON \
 -DNEWTON_WITH_AVX2_PLUGIN=ON \
 -DNEWTON_DOUBLE_PRECISION=ON \
--DOPENVR_BUILD_SHARED=ON
+-D_RAKNET_SUPPORT_TCPInterface=1 \
+-DCMAKE_PREFIX_PATH=C:/Users/casht/repos/TechGame/rbfx-torch/libtorch

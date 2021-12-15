@@ -20,7 +20,6 @@
 #include "Urho3D/SystemUI/DebugHud.h"
 #include "PieceGear.h"
 #include "ColorPallet.h"
-#include "bugsplat_rbfx.h"
 #include "AppVersion.h"
 
 void TechGame::Setup()
@@ -54,7 +53,6 @@ void TechGame::Setup()
 	ColorPallet::RegisterObject(context_);
 	ColorPalletManager::RegisterObject(context_);
 
-	context_->RegisterSubsystem<BugReportingSystem>()->Initialize();
 
 
 
@@ -417,9 +415,6 @@ void TechGame::DefaultCreateScene()
 
 	context_->RegisterSubsystem<VisualDebugger>();
 
-	VR::RegisterObject(context_);
-
-	VR* vr = context_->GetSubsystem<VR>();
 
 
 	CreateCharacter();
@@ -632,8 +627,6 @@ void TechGame::SetupSceneAfterLoad()
 	ResolveTools(character_);
 
 
-	VR* vr = context_->GetSubsystem<VR>();
-	vr->SetReferenceNode(character_->GetNode());
 
 	SetupViewport();
 }

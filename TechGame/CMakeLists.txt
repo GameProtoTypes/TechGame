@@ -26,5 +26,5 @@ add_executable(TechGame ${TARGET_TYPE} ${SOURCE_FILES})
 
 
 # Link to libraries.
-target_link_libraries(TechGame Urho3D rbfx-mathextras rbfx-newton rbfx-visualdebugger rbfx-openvr rbfx-bugsplat)
+target_link_libraries(TechGame Urho3D rbfx-mathextras rbfx-newton rbfx-visualdebugger)
 

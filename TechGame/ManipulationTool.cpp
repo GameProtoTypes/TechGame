@@ -7,7 +7,7 @@
 #include "MathExtras.h"
 #include "PieceGear.h"
 #include "VisualDebugger.h"
-#include "VR.h"
+
 #include "NewtonPhysicsEvents.h"
 
 
@@ -503,9 +503,9 @@ void ManipulationTool::SetMoveMode(MoveMode mode)
 			//set gather node to child and in front of tool
 			gatherNode_->SetParent(GetEffectiveLookNode());
 			gatherNode_->SetTransform(Matrix3x4::IDENTITY);
-			if (!GetSubsystem<VR>()->IsRunning()) {
-				gatherNode_->Translate(gatherNodeRefOffset_);
-			}
+
+			gatherNode_->Translate(gatherNodeRefOffset_);
+			
 		}
 		if (mode == MoveMode_Global)
 		{
