@@ -5,7 +5,7 @@ import torch
 import neat
 import os
 import pickle
-from Trainer import *
+from GYMServer import *
 
 
 
@@ -70,13 +70,11 @@ pop.add_reporter(stats)
 pop.add_reporter(neat.StdOutReporter(True))
 
 #pe = neat.ParallelEvaluator(multiprocessing.cpu_count()*2, eval_genome)
-winner = pop.run(eval_genomes,80)
+winner = pop.run(eval_genomes,250)
 
 # Save the winner.
 with open('winner', 'wb') as f:
     pickle.dump(winner, f)
-
-print(winner)
 
 
 

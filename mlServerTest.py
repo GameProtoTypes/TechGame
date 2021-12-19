@@ -2,7 +2,7 @@ import socket
 import sys
 import time
 import torch
-from Trainer import *
+from GYMServer import *
 
 gym = GYMInterface()
 gym.ConnectToGYMS(1)

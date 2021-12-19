@@ -88,6 +88,7 @@ bool PiecePoint::Weld()
 		URHO3D_LOGINFO("Welding..");
 		GetScene()->GetComponent<PieceManager>()->FormSolidGroup(GetPiece());
 		GetScene()->GetComponent<PieceManager>()->FormSolidGroup(occupiedPoint_->GetPiece());
+
 	}
 	else
 		return false;

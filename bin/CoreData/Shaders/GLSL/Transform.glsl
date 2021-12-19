@@ -1,5 +1,9 @@
 #ifdef COMPILEVS
 
+// Silence WARNING: Shader ... does not use the define NOUV
+#ifdef NOUV
+#endif
+
 // Silence GLSL 150 deprecation warnings
 #ifdef GL3
 #define attribute in
@@ -20,6 +24,17 @@ attribute vec4 iCubeTexCoord1;
     attribute vec4 iTexCoord4;
     attribute vec4 iTexCoord5;
     attribute vec4 iTexCoord6;
+    #ifdef SPHERICALHARMONICS
+        attribute vec4 iTexCoord7;
+        attribute vec4 iTexCoord8;
+        attribute vec4 iTexCoord9;
+        attribute vec4 iTexCoord10;
+        attribute vec4 iTexCoord11;
+        attribute vec4 iTexCoord12;
+        attribute vec4 iTexCoord13;
+    #else
+        attribute vec4 iTexCoord7;
+    #endif
 #endif
 attribute float iObjectIndex;
 
@@ -51,6 +66,11 @@ mat3 GetNormalMatrix(mat4 modelMatrix)
 vec2 GetTexCoord(vec2 texCoord)
 {
     return vec2(dot(texCoord, cUOffset.xy) + cUOffset.w, dot(texCoord, cVOffset.xy) + cVOffset.w);
+}
+
+vec2 GetLightMapTexCoord(vec2 texCoord)
+{
+    return texCoord * cLMOffset.xy + cLMOffset.zw;
 }
 
 vec4 GetClipPos(vec3 worldPos)

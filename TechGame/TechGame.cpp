@@ -948,54 +948,54 @@ void TechGame::HandleNodeCollisionStart(StringHash eventType, VariantMap& eventD
 	NewtonRigidBody* bodyA = static_cast<NewtonRigidBody*>(eventData[NewtonPhysicsCollisionStart::P_BODYA].GetPtr());
 	NewtonRigidBody* bodyB = static_cast<NewtonRigidBody*>(eventData[NewtonPhysicsCollisionStart::P_BODYB].GetPtr());
 
-	NewtonRigidBodyContactEntry* contactData = static_cast<NewtonRigidBodyContactEntry*>(eventData[NewtonPhysicsCollisionStart::P_CONTACT_DATA].GetPtr());
+	//NewtonRigidBodyContactEntry* contactData = static_cast<NewtonRigidBodyContactEntry*>(eventData[NewtonPhysicsCollisionStart::P_CONTACT_DATA].GetPtr());
 
-	float largestForce = 0.0f;
-	Vector3 position;
-	for (int i = 0; i < contactData->numContacts; i++) {
-		if (contactData->contactForces[i].Length() > largestForce) {
-			largestForce = contactData->contactForces[i].Length();
-			position = contactData->contactPositions[i];
-		}
-	}
+	//float largestForce = 0.0f;
+	//Vector3 position;
+	//for (int i = 0; i < contactData->numContacts; i++) {
+	//	if (contactData->contactForces[i].Length() > largestForce) {
+	//		largestForce = contactData->contactForces[i].Length();
+	//		position = contactData->contactPositions[i];
+	//	}
+	//}
 
-	Vector3 velA = bodyA->GetLinearVelocity();
-	Vector3 velB = bodyB->GetLinearVelocity();
-	float impactVelocity = velA.Length() + velB.Length();
+	//Vector3 velA = bodyA->GetLinearVelocity();
+	//Vector3 velB = bodyB->GetLinearVelocity();
+	//float impactVelocity = velA.Length() + velB.Length();
 
-	//URHO3D_LOGINFO(String(impactVelocity));
+	////URHO3D_LOGINFO(String(impactVelocity));
 
-	if (impactVelocity > 0.1 && !crashSoundPlaying) {
+	//if (impactVelocity > 0.1 && !crashSoundPlaying) {
 
-		Node* tempSoundNode = bodyA->GetNode()->CreateChild();
-		tempSoundNode->SetTemporary(true);
+	//	Node* tempSoundNode = bodyA->GetNode()->CreateChild();
+	//	tempSoundNode->SetTemporary(true);
 
-		SoundSource3D* soundSource = tempSoundNode->CreateComponent<SoundSource3D>();
-		soundSource->SetTemporary(true);
-		soundSource->SetAutoRemoveMode(REMOVE_NODE);
-		soundSource->SetFarDistance(50);
-		soundSource->SetNearDistance(1);
-
-
+	//	SoundSource3D* soundSource = tempSoundNode->CreateComponent<SoundSource3D>();
+	//	soundSource->SetTemporary(true);
+	//	soundSource->SetAutoRemoveMode(REMOVE_NODE);
+	//	soundSource->SetFarDistance(50);
+	//	soundSource->SetNearDistance(1);
 
 
-		int randSound = Random(1, 4);
-		Sound* impactSound;
-		//if(randSound == 0)
-		//	impactSound = GetSubsystem<ResourceCache>()->GetResource<Sound>("Sounds/Metal Sounds/metal_sound_89.wav");
-		if (randSound == 1)
-			impactSound = GetSubsystem<ResourceCache>()->GetResource<Sound>("Sounds/Metal Sounds/metal_sound_82.wav");
-		if (randSound == 2)
-			impactSound = GetSubsystem<ResourceCache>()->GetResource<Sound>("Sounds/Metal Sounds/metal_sound_83.wav");
-		if (randSound == 3)
-			impactSound = GetSubsystem<ResourceCache>()->GetResource<Sound>("Sounds/Metal Sounds/metal_sound_81.wav");
-		//if (randSound == 4)
-		//	impactSound = GetSubsystem<ResourceCache>()->GetResource<Sound>("Sounds/Metal Sounds/metal_sound_69.wav");
 
 
-		//soundSource->Play(impactSound, Random(44100 * 0.9f, 44100 * 1.1f), Clamp(impactVelocity, 0.0f, 0.25f));
+	//	int randSound = Random(1, 4);
+	//	Sound* impactSound;
+	//	//if(randSound == 0)
+	//	//	impactSound = GetSubsystem<ResourceCache>()->GetResource<Sound>("Sounds/Metal Sounds/metal_sound_89.wav");
+	//	if (randSound == 1)
+	//		impactSound = GetSubsystem<ResourceCache>()->GetResource<Sound>("Sounds/Metal Sounds/metal_sound_82.wav");
+	//	if (randSound == 2)
+	//		impactSound = GetSubsystem<ResourceCache>()->GetResource<Sound>("Sounds/Metal Sounds/metal_sound_83.wav");
+	//	if (randSound == 3)
+	//		impactSound = GetSubsystem<ResourceCache>()->GetResource<Sound>("Sounds/Metal Sounds/metal_sound_81.wav");
+	//	//if (randSound == 4)
+	//	//	impactSound = GetSubsystem<ResourceCache>()->GetResource<Sound>("Sounds/Metal Sounds/metal_sound_69.wav");
 
-	}
+
+	//	//soundSource->Play(impactSound, Random(44100 * 0.9f, 44100 * 1.1f), Clamp(impactVelocity, 0.0f, 0.25f));
+
+	//}
 }
 
 void TechGame::HandleNodeCollisionEnd(StringHash eventType, VariantMap& eventData)

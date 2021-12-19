@@ -127,28 +127,28 @@ void Character::SetIsVRCharacter(bool enable)
 void Character::HandleNodeCollision(StringHash eventType, VariantMap& eventData)
 {
 	// Check collision contacts and see if character is standing on ground (look for a contact that has near vertical normal)
-	using namespace NewtonNodeCollision;
+	//using namespace NewtonNodeCollision;
 
-	NewtonRigidBodyContactEntry* contactData = static_cast<NewtonRigidBodyContactEntry*>((eventData[NewtonNodeCollision::P_CONTACT_DATA].GetPtr()));
+	//NewtonRigidBodyContactEntry* contactData = static_cast<NewtonRigidBodyContactEntry*>((eventData[NewtonNodeCollision::P_CONTACT_DATA].GetPtr()));
 
-	for (int i = 0; i < contactData->numContacts; i++)
-	{
-		Vector3 contactPosition = contactData->contactPositions[i];
-		Vector3 contactNormal = contactData->contactNormals[i];
+	//for (int i = 0; i < contactData->numContacts; i++)
+	//{
+	//	Vector3 contactPosition = contactData->contactPositions[i];
+	//	Vector3 contactNormal = contactData->contactNormals[i];
 
-		// If contact is below node center and pointing up, assume it's a ground contact
-		if (contactPosition.y_ < (node_->GetPosition().y_ + 1.0f))
-		{
-			float level = contactNormal.y_;
-			if (level > 0.75) {
-				onGround_ = true;
-			}
-			else
-			{
-				onGround_ = false;
-			}
-		}
-	}
+	//	// If contact is below node center and pointing up, assume it's a ground contact
+	//	if (contactPosition.y_ < (node_->GetPosition().y_ + 1.0f))
+	//	{
+	//		float level = contactNormal.y_;
+	//		if (level > 0.75) {
+	//			onGround_ = true;
+	//		}
+	//		else
+	//		{
+	//			onGround_ = false;
+	//		}
+	//	}
+	//}
 }
 
 void Character::HandleNodeCollisionEnd(StringHash eventType, VariantMap& eventData)

@@ -878,7 +878,8 @@ void PiecePointRow::UpdatePointOccupancies()
 	ea::vector<SharedPtr<PiecePoint>> otherPoints;
 	for (RowAttachement& row : rowAttachements_)
 	{
-		otherPoints.push_back(row.rowOther_->points_);	
+		for(SharedPtr<PiecePoint> piece : row.rowOther_->points_)
+		otherPoints.push_back(piece);
 	}
 
 	numOccupiedPoints_ = 0;
