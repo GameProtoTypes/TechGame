@@ -71,7 +71,9 @@ class GYMInterface:
 
     verify = ReadInt(self.connection)
     print(f"Verify:{verify}, Bytes: {struct.pack('<i',verify)}")
-
+    if(verify != 99999):
+      print("SYNC ERROR")
+      exit(1)
 
     return states
 
