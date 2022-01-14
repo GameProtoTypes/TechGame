@@ -18,5 +18,4 @@ cmake .. -G "Visual Studio 15 2017 Win64"  \
 -DURHO3D_PROFILING=ON \
 -DNEWTON_WITH_AVX2_PLUGIN=ON \
 -DNEWTON_DOUBLE_PRECISION=ON \
--D_RAKNET_SUPPORT_TCPInterface=1 \
 -DCMAKE_PREFIX_PATH=C:/Users/casht/repos/TechGame/rbfx-torch/libtorch

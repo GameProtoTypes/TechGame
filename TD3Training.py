@@ -19,7 +19,7 @@ def evaluate_policy(policy, eval_episodes=10):
 			action = policy.select_action(np.array(eval_obs))
 			action = np.resize(action,(1,np.shape(action)[0]))
 			
-			eval_obs, eval_reward, done = gym.TakeActions(action)
+			eval_obs, eval_reward, done = gym.TakeActions(action,True)
 			avg_reward += eval_reward
 
 	avg_reward /= eval_episodes
@@ -34,10 +34,10 @@ if __name__ == "__main__":
 	
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--policy_name", default="TD3")					# Policy name
-	parser.add_argument("--env_name", default="UniCycle")			    # gym environment name
+	parser.add_argument("--env_name", default="TrialBike")			        # gym environment name
 	parser.add_argument("--seed", default=0, type=int)					# Sets Gym, PyTorch and Numpy seeds
 	parser.add_argument("--start_timesteps", default=1e4, type=int)		# How many time steps purely random policy is run for
-	parser.add_argument("--eval_freq", default=5e5, type=float)			# How often (time steps) we evaluate
+	parser.add_argument("--eval_freq", default=1e4, type=float)			# How often (time steps) we evaluate
 	parser.add_argument("--max_timesteps", default=1e7, type=float)		# Max time steps to run environment for
 	parser.add_argument("--save_models", default=True, type=bool)		# Whether or not models are saved
 	parser.add_argument("--expl_noise", default=0.1, type=float)		# Std of Gaussian exploration noise
@@ -114,7 +114,7 @@ if __name__ == "__main__":
 		if dones[0] == 1 and np.all(dones == dones[0]): 
 
 			if total_timesteps != 0: 
-				print(f"Total T: {total_timesteps} Episode Num: {episode_num} Episode T: {episode_timesteps} Reward(Mean): {np.mean(episode_rewards)}  --  Wallclk T: {int(time.time() - t0)} sec")
+				print(f"Total T: {total_timesteps} Episode Num: {episode_num} Episode T: {episode_timesteps} Episode Reward: {np.mean(episode_rewards)}  --  Wallclk T: {int(time.time() - t0)} sec")
 				if args.policy_name == "TD3":
 					policy.train(replay_buffer, episode_timesteps, args.batch_size*args.num_gyms, args.discount, args.tau, args.policy_noise, args.noise_clip, args.policy_freq)
 				else: 
@@ -139,7 +139,8 @@ if __name__ == "__main__":
 		
 		# Select action randomly or according to policy
 		if total_timesteps < args.start_timesteps:
-			actions = np.random.randn(gym.actionSize,args.num_gyms)
+			actions = np.random.randn(gym.actionSize,args.num_gyms).clip(-1.0, 1.0)
+
 		else:
 
 			for i in range(0, args.num_gyms):
@@ -154,7 +155,7 @@ if __name__ == "__main__":
 
 
 		# Perform actions
-		new_obs, rewards, dones = gym.TakeActions(np.transpose(actions)) 
+		new_obs, rewards, dones = gym.TakeActions(np.transpose(actions), False) 
 		
 		episode_rewards += np.transpose(rewards)
 

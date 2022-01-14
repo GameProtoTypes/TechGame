@@ -58,8 +58,8 @@ class GYMInterface:
     self.numGYMS = numGYMS
     states = np.zeros((self.numGYMS, self.stateSize))
 
-
-    win32file.WriteFile(self.connection, struct.pack('<i',1))
+    #code for
+    win32file.WriteFile(self.connection, struct.pack('<i',1))#code for reset
     win32file.WriteFile(self.connection, struct.pack('<i',self.numGYMS))
 
 
@@ -79,14 +79,15 @@ class GYMInterface:
 
 
   # tell all gyms to take a set of actions and return reward
-  def TakeActions(self, actionSets):      
+  def TakeActions(self, actionSets, render = False):      
     states = np.zeros((self.numGYMS, self.stateSize))
     rewards = np.zeros((self.numGYMS, 1))
     ends = np.zeros((self.numGYMS))
 
 
 
-    win32file.WriteFile(self.connection, struct.pack('<i',0))
+    win32file.WriteFile(self.connection, struct.pack('<i',0))#code for action
+    win32file.WriteFile(self.connection, struct.pack('<i', int(render)))
 
 
     for g in range(0,self.numGYMS):
