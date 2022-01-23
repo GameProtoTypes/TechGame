@@ -18,12 +18,11 @@ add_subdirectory("./rbfx")
 add_subdirectory("./rbfx-newton")
 add_subdirectory("./rbfx-mathextras")
 add_subdirectory("./rbfx-visualdebugger")
-add_subdirectory("./rbfx-torch")
+#add_subdirectory("./rbfx-torch")
 add_subdirectory("./TechGame")
 
-
 #make the game project the main one for visual studio.
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT TechGame)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT DirtBike)
 
 
 

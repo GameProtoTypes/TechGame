@@ -33,7 +33,6 @@ namespace Urho3D {
 
 	URHOMATHEXTRAS_API void TestFunc();
 
-
 	URHOMATHEXTRAS_API void TestEigen();
 
 	URHOMATHEXTRAS_API Plane BestFitPlaneSVD(ea::vector<Vector3> points);
