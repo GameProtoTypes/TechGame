@@ -67,7 +67,5 @@ namespace Urho3D {
 		{
 			return Quaternion(RoundToNearestMultiple(orientationNormalized.Angle(), angle), orientationNormalized.Axis()).Normalized();
 		}
-
-		
 	}
 }

@@ -257,10 +257,10 @@ void Character::ResolveNodes()
 
 
 	// Set zero angular factor so that physics doesn't turn the character on its own.
-	// Instead we will control the character yaw manually
+	// Instead control the character yaw manually
 	//body->SetAngularFactor(Vector3::ZERO);
 
-	// Set the rigidbody to signal collision also when in rest, so that we get ground collisions properly
+	// Set the rigidbody to signal collision also when in rest,  get ground collisions properly
 	body->SetCollisionEventMode(NewtonRigidBody::COLLISION_ALL);
 
 	// Set a capsule shape for collision
@@ -270,10 +270,10 @@ void Character::ResolveNodes()
 	shape->SetElasticity(0.0f);
 
 	//create 6dof constraint to limit angles
-	NewtonSixDofConstraint* constraint = node_->GetOrCreateComponent<NewtonSixDofConstraint>();
-	constraint->SetPitchLimits(0, 0);
-	constraint->SetYawLimits(0, 0);
-	constraint->SetRollLimits(0, 0);
+	//Newton6DOFConstraint* constraint = node_->GetOrCreateComponent<Newton6DOFConstraint>();
+	//constraint->SetPitchLimits(0, 0);
+	//constraint->SetYawLimits(0, 0);
+	//constraint->SetRollLimits(0, 0);
 }
 
 void Character::OnNodeSet(Node* node)

@@ -364,12 +364,10 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			holeBody->SetWorldRotation(Quaternion::IDENTITY);
 			rodBody->SetWorldRotation(diffSnap45);
 
-			if (theRodRow->GetPiece()->IsOiled()) {
+			if (theRodRow->GetPiece()->IsOiled()) 
+			{
 				constraint = holeBody->GetNode()->CreateComponent<NewtonSliderConstraint>();
-				static_cast<NewtonSliderConstraint*>(constraint)->SetTwistLowerLimitEnable(true);
-				static_cast<NewtonSliderConstraint*>(constraint)->SetTwistUpperLimitEnable(true);
-				static_cast<NewtonSliderConstraint*>(constraint)->SetEnableSliderLimits(true, true);
-				static_cast<NewtonSliderConstraint*>(constraint)->SetTwistLimits(0.0f, 0.0f);
+				static_cast<NewtonSliderConstraint*>(constraint)->SetEnableSpin(true);
 			}
 			else
 			{
@@ -415,10 +413,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			//if (!attachAsFullRow) {
 
 				constraint = holeBody->GetNode()->CreateComponent<NewtonSliderConstraint>();
-				static_cast<NewtonSliderConstraint*>(constraint)->SetTwistLowerLimitEnable(false);
-				static_cast<NewtonSliderConstraint*>(constraint)->SetTwistUpperLimitEnable(false);
-				static_cast<NewtonSliderConstraint*>(constraint)->SetEnableSliderLimits(true, true);
-				static_cast<NewtonSliderConstraint*>(constraint)->SetTwistFriction(twistFriction);
+				static_cast<NewtonSliderConstraint*>(constraint)->SetEnableSpin(true);
 				//constraint->SetSolveMode(SOLVE_MODE_ITERATIVE);
 			//}
 			//else
@@ -439,7 +434,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 
 
 		//force build now to ensure the bond is accurate.
-		constraint->BuildNow();
+		//constraint->BuildNow();
 
 
 

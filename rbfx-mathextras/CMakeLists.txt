@@ -4,7 +4,7 @@ add_library(rbfx-mathextras MathExtras.h MathExtras.cpp)
 
 target_compile_definitions(rbfx-mathextras PUBLIC URHOMATHEXTRAS_EXPORTS)
 
-target_include_directories(rbfx-mathextras PRIVATE ThirdParty/Eigen)
+target_include_directories(rbfx-mathextras PUBLIC ThirdParty/Eigen)
 
 target_include_directories(rbfx-mathextras PUBLIC . )
 
