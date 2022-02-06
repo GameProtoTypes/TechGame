@@ -167,8 +167,7 @@ void PhysicsTests::CreateScene()
     scene_->CreateComponent<Octree>();
     NewtonPhysicsWorld* newtonWorld = scene_->CreateComponent<NewtonPhysicsWorld>();
     newtonWorld->SetGravity(Vector3(0, -9.81f, 0));
-    //newtonWorld->SetGravity(Vector3(0, 0, 0));
-	
+
     //scene_->CreateComponent<NewtonCollisionShape_SceneCollision>();
     scene_->CreateComponent<DebugRenderer>();
 
@@ -241,8 +240,8 @@ void PhysicsTests::CreateScene()
 	//ResetGYMs();	
 
 	//SpawnSegway(Vector3(0,5,10));
-	for(int i = 0; i < 10; i++)
-		SpawnRobotArm(Vector3(i*10, 5, 0));
+
+	SpawnRobotArm(Vector3(0, 5, 0));
 
 
     //SpawnKinematicBodyTest(Vector3(0, 0, 0), Quaternion::IDENTITY);
@@ -1379,7 +1378,7 @@ void PhysicsTests::SpawnSegway(Vector3 worldPosition)
 	topMotor->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
 	topMotor->SetEnableLimits(false);
 	topMotor->SetOtherBody(top->GetComponent<NewtonRigidBody>());
-	//topMotor->SetMotorTorque(1);
+
 
 
     root->SetWorldPosition(worldPosition);
@@ -1445,7 +1444,8 @@ void PhysicsTests::SpawnRobotArm(Vector3 worldPosition)
     for(int i = 0 ; i < 6; i++)
     {
         robotHinges[i]->SetFrictionCoef(10.0f);
-        robotHinges[i]->SetEnableLimits(false);
+        //robotHinges[i]->SetEnableLimits(false);
+        //robotHinges[i]->GetOtherBody()->SetNoCollideOverride(true);
     }
 
 	root->SetWorldPosition(worldPosition);
@@ -2024,10 +2024,12 @@ void PhysicsTests::ToggleRejointTest()
 void PhysicsTests::UpdateRobotArm(float timestep)
 {
 
-    //compute the Jacobian
+    //compute the Jacobian From end to base
     Matrix3x4 rootTransform = robotHinges[0]->GetOwnWorldFrame();
+    Vector3 rootWorldVel = robotHinges[0]->GetOwnWorldFrameVel();
+    Vector3 rootWorldOmega = robotHinges[0]->GetOwnWorldFrameOmega();
     Vector3 endEffectorWorld = robotHinges[5]->GetOwnWorldFrame().Translation();
-    Vector3 endEffectorRelRoot = endEffectorWorld - rootTransform.Translation();
+    Vector3 endEffectorRelRoot = rootTransform.Inverse() * endEffectorWorld;
     Vector3 hingeLocalRotationAxis = Vector3(1, 0, 0);
     Vector3 d_n_0 = endEffectorRelRoot;
 
@@ -2036,7 +2038,7 @@ void PhysicsTests::UpdateRobotArm(float timestep)
     {
         Matrix3x4 rootSpace = rootTransform.Inverse() * robotHinges[i]->GetOwnWorldFrame();
         Matrix3 r_i_0 = rootSpace.RotationMatrix();
-        Vector3 d_i_0 = robotHinges[i]->GetOwnWorldFrame().Translation() - rootTransform.Translation();
+        Vector3 d_i_0 = rootTransform.Inverse() * robotHinges[i]->GetOwnWorldFrame().Translation();
         j_v_i[i] = (r_i_0 * hingeLocalRotationAxis).CrossProduct(d_n_0 - d_i_0);
     }
 
@@ -2047,7 +2049,6 @@ void PhysicsTests::UpdateRobotArm(float timestep)
         Matrix3 r_i_0 = rootSpace.RotationMatrix();
         j_w_i[i] = (r_i_0 * hingeLocalRotationAxis);
     }
-
 
     Eigen::MatrixXd J(6, 6);
     for(int c = 0; c < 6; c++)
@@ -2062,8 +2063,8 @@ void PhysicsTests::UpdateRobotArm(float timestep)
     }
 
 
-    ui::Begin("6DOFRobot Velocity Jacobian");
-    ui::BeginTable("Velocity Jacobian", 6);
+    ui::Begin("6DOFRobot Base To End Effector Jacobian");
+    ui::BeginTable("Jacobian", 6);
     ui::TableHeader("Joints");
 
     for (int i = 0; i < 6; i++)
@@ -2103,19 +2104,17 @@ void PhysicsTests::UpdateRobotArm(float timestep)
     Eigen::MatrixXd E = J*Q;
 
 
-
-
     ui::Begin("6DOFRobot End Effector Vel Compare");
     ui::BeginTable("endeff", 3);
     ui::TableSetupColumn("Sim");
 	ui::TableSetupColumn("E=JQ");
-    ui::TableSetupColumn("E-Sim");
+    ui::TableSetupColumn("Error = E-Sim");
 
         ui::TableHeadersRow();
         ui::TableNextColumn();
 
-        Vector3 simulationVelRelBase   = rootTransform.RotationMatrix().Inverse() * robotHinges[5]->GetOwnWorldFrameVel();
-        Vector3 simulationOmegaRelBase = rootTransform.RotationMatrix().Inverse() * robotHinges[5]->GetOwnBody()->GetAngularVelocity(TS_WORLD);
+        Vector3 simulationVelRelBase   = rootTransform.RotationMatrix().Inverse() * (robotHinges[5]->GetOwnWorldFrameVel() /*- rootWorldVel*/);
+        Vector3 simulationOmegaRelBase = rootTransform.RotationMatrix().Inverse() * (robotHinges[5]->GetOwnBody()->GetAngularVelocity(TS_WORLD) /*- rootWorldOmega*/ );
 
         ui::Text("%f", simulationVelRelBase.x_);
         ui::Text("%f", simulationVelRelBase.y_);
@@ -2150,8 +2149,6 @@ void PhysicsTests::UpdateRobotArm(float timestep)
         ui::Text("%f", solvedOmegaRelBase.y_ - simulationOmegaRelBase.y_);
         ui::Text("%f", solvedOmegaRelBase.z_ - simulationOmegaRelBase.z_);
 
-
-
     ui::EndTable();
     ui::End();
 
@@ -2167,18 +2164,18 @@ void PhysicsTests::UpdateRobotArm(float timestep)
 
 
     Vector3 delta = redBox->GetWorldPosition() - endEffectorWorld;
-    E_target_vel(0) = delta.x_ * 0.1f;
-    E_target_vel(1) = delta.y_ * 0.1f;
-    E_target_vel(2) = delta.z_ * 0.1f;
+    E_target_vel(0) = 0.5f;
+    E_target_vel(1) = 0.0f;
+    E_target_vel(2) = 0.0f;
     E_target_vel(3) = 0.0f;
     E_target_vel(4) = 0.0f;
     E_target_vel(5) = 0.0f;
 
-    static float frc = 10;
-    ui::SliderFloat("end force up", &frc, 0.0f, 1000.0f);
+    static float tune1 = 10.0f;
+    ui::SliderFloat("tune1", &tune1, 0.0f, 1000.0f);
 
     E_target_wrench(0) = 0;
-    E_target_wrench(1) = frc;
+    E_target_wrench(1) = tune1;
     E_target_wrench(2) = 0;
     E_target_wrench(3) = 0;
     E_target_wrench(4) = 0;
@@ -2187,13 +2184,13 @@ void PhysicsTests::UpdateRobotArm(float timestep)
 
 
     Eigen::VectorXd SolvedQ_vel = J_inv * E_target_vel;
-    Eigen::VectorXd SolvedQ_torques = J.transpose() * E_target_wrench;
+    //Eigen::VectorXd SolvedQ_torques = J.transpose() * E_target_wrench;
 
 
-    ui::Begin("Solved Q");
-    ui::BeginTable("Q", 2);
-    ui::TableSetupColumn("Vel");
-    ui::TableSetupColumn("Torque");
+    ui::Begin("Solved");
+    ui::BeginTable("Q",1);
+    ui::TableSetupColumn("Solved Vel");
+
 
     ui::TableHeadersRow();
     ui::TableNextColumn();
@@ -2203,20 +2200,17 @@ void PhysicsTests::UpdateRobotArm(float timestep)
         ui::Text("%f", SolvedQ_vel(i));
     }
 
-    ui::TableNextColumn();
-
-    for (int i = 0; i < 6; i++)
-    {
-        ui::Text("%f", SolvedQ_torques(i));
-    }
 
     ui::EndTable();
     ui::End();
 
     for (int i = 0; i < 6; i++)
     {
-        if(Abs(SolvedQ_torques(i)) < 10000.0f)
-			robotHinges[i]->SetCommandedTorque(SolvedQ_torques(i));
+        float error = (SolvedQ_vel(i) - robotHinges[i]->GetRelativeWorldOmegaInOwnLocalFrame().x_);
+        float torque = tune1*error;
+
+        if(Abs(torque) < 100.0f)
+			robotHinges[i]->SetCommandedTorque(torque);
     }
 
 
