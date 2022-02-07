@@ -10,3 +10,6 @@
 [submodule "rbfx-bugsplat"]
 	path = rbfx-bugsplat
 	url = https://github.com/TrevorCash/rbfx-bugsplat
+[submodule "rbfx-mathextras/MathExtras_DSP"]
+	path = rbfx-mathextras/MathExtras_DSP
+	url = https://github.com/TrevorCash/MathExtras_DSP
