@@ -1455,12 +1455,12 @@ void PhysicsTests::SpawnRobotArm(Vector3 worldPosition)
     robotPIDControllers[4].PGain = 500.0f;
     robotPIDControllers[5].PGain = 200.0f;
 
-    robotPIDControllers[0].IGain = 3.0f;
+    /*robotPIDControllers[0].IGain = 3.0f;
     robotPIDControllers[1].IGain = 3.0f;
     robotPIDControllers[2].IGain = 3.0f;
     robotPIDControllers[3].IGain = 3.0f;
     robotPIDControllers[4].IGain = 2.0f;
-    robotPIDControllers[5].IGain = 1.0f;
+    robotPIDControllers[5].IGain = 1.0f;*/
 
 
 
@@ -2044,10 +2044,10 @@ void PhysicsTests::UpdateRobotArm(float timestep)
     Matrix3x4 rootTransform = robotHinges[0]->GetOwnWorldFrame();
     Vector3 rootWorldVel = robotHinges[0]->GetOwnWorldFrameVel();
     Vector3 rootWorldOmega = robotHinges[0]->GetOwnWorldFrameOmega();
-    Vector3 endEffectorWorld = robotHinges[5]->GetOwnWorldFrame().Translation();
-    Vector3 endEffectorRelRoot = rootTransform.Inverse() * endEffectorWorld;
+    Matrix3x4 endEffectorWorld = robotHinges[5]->GetOwnWorldFrame();
+    Matrix3x4 endEffectorRelRoot = rootTransform.Inverse() * endEffectorWorld;
     Vector3 hingeLocalRotationAxis = Vector3(1, 0, 0);
-    Vector3 d_n_0 = endEffectorRelRoot;
+    Vector3 d_n_0 = endEffectorRelRoot.Translation();
 
 
 
@@ -2221,13 +2221,17 @@ void PhysicsTests::UpdateRobotArm(float timestep)
 
     static Vector3 targetVel;
     Vector3 targetPos = (rootTransform.Inverse() * redBox->GetWorldTransform()).Translation();
-    Vector3 delta = (targetPos - endEffectorRelRoot)*0.2f;
-
+    Vector3 delta = (targetPos - endEffectorRelRoot.Translation());
+    Vector3 dirDelta = endEffectorRelRoot.RotationMatrix() * Vector3(1, 0, 0).CrossProduct(delta.Normalized());
 
     const float clampv = 0.5f;
-    float xv = Clamp(delta.x_, -clampv, clampv);
-    float yv = Clamp(delta.y_, -clampv, clampv);
-    float zv = Clamp(delta.z_, -clampv, clampv);
+    float xv = Clamp(delta.x_ * 0.2f, -clampv, clampv);
+    float yv = Clamp(delta.y_ * 0.2f, -clampv, clampv);
+    float zv = Clamp(delta.z_ * 0.2f, -clampv, clampv);
+
+    float xomega = 0.0f;// dirDelta.x_ * 0.1f;
+    float yomega = 0.0f;// dirDelta.y_ * 0.1f;
+    float zomega = 0.0f;// dirDelta.z_ * 0.1f;
 
     ui::Text("XY: %f", xv);
     ui::Text("YY: %f", yv);
@@ -2236,9 +2240,9 @@ void PhysicsTests::UpdateRobotArm(float timestep)
     E_target_vel(0) = xv;
     E_target_vel(1) = yv;
     E_target_vel(2) = zv;
-    E_target_vel(3) = 0.0f;
-    E_target_vel(4) = 0.0f;
-    E_target_vel(5) = 0.0f;
+    E_target_vel(3) = xomega;
+    E_target_vel(4) = yomega;
+    E_target_vel(5) = zomega;
 
 
     E_target_wrench(0) = 0;
@@ -2293,15 +2297,13 @@ void PhysicsTests::UpdateRobotArm(float timestep)
         ui::SliderFloat(pstr.c_str(), &(robotPIDControllers[i].PGain), 0.0f, 10000.0f);
         ui::SliderFloat(istr.c_str(), &(robotPIDControllers[i].IGain), 0.0f, 5.0f);
 
-        //ui::SliderFloat(omegastr.c_str(), &robotJointSpeedTargets[i], -1.0f, 1.0f);
-
-        robotJointSpeedTargets[i] = Clamp(float(SolvedQ_vel(i)),-clampv*10.0f,clampv*10.0f);
+        robotJointSpeedTargets[i] = Clamp(float(SolvedQ_vel(i)),-clampv*1.0f,clampv*1.0f);
 
         float torque = robotPIDControllers[i].PIControl(robotJointSpeedTargets[i], robotHinges[i]->GetRelativeWorldOmegaInOwnLocalFrame().x_);
 
         ea::string filterstr = "Filter Coeff (";
         filterstr = filterstr + ea::to_string(i) + ")";
-        ui::SliderFloat(filterstr.c_str(), &robotControlFilters[i].filterCoeff, 0.0f, 100.0f);
+        ui::SliderFloat(filterstr.c_str(), &robotControlFilters[i].filterCoeff, 0.0f, 1.0f);
 
         float filteredTorque = robotControlFilters[i].Process(torque, timestep);
         
