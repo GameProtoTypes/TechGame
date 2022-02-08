@@ -220,7 +220,7 @@ void PhysicsTests::CreateScene()
 	//cylinder->GetComponent<NewtonRigidBody>()->SetCenterOfMassLocalOffset(Vector3(5, 0, 0));
 
     //SpawnSamplePhysicsCylinder(scene_, Vector3(5, 2, 0), 0.25f,4);
-    redBox = SpawnSamplePhysicsBox(scene_, Vector3(5, 5, 0), Vector3(1,1,1), Color::RED);
+    redBox = SpawnSamplePhysicsBox(scene_, Vector3(5, 5, 0), Vector3(0.2f,0.2f,0.2f), Color::RED);
 
     //SpawnMaterialsTest(Vector3(0,-25,100));
 
@@ -1448,14 +1448,19 @@ void PhysicsTests::SpawnRobotArm(Vector3 worldPosition)
         robotHinges[i]->GetOtherBody()->SetNoCollideOverride(true);
     }
 
-    robotPIDControllers[0].PGain = 7000.0f;
-    robotPIDControllers[1].PGain = 5000.0f;
-    robotPIDControllers[2].PGain = 5000.0f;
-    robotPIDControllers[3].PGain = 3000.0f;
+    robotPIDControllers[0].PGain = 20000.0f;
+    robotPIDControllers[1].PGain = 20000.0f;
+    robotPIDControllers[2].PGain = 20000.0f;
+    robotPIDControllers[3].PGain = 10000.0f;
     robotPIDControllers[4].PGain = 500.0f;
     robotPIDControllers[5].PGain = 200.0f;
 
-
+    robotPIDControllers[0].IGain = 3.0f;
+    robotPIDControllers[1].IGain = 3.0f;
+    robotPIDControllers[2].IGain = 3.0f;
+    robotPIDControllers[3].IGain = 3.0f;
+    robotPIDControllers[4].IGain = 2.0f;
+    robotPIDControllers[5].IGain = 1.0f;
 
 
 
@@ -2045,6 +2050,7 @@ void PhysicsTests::UpdateRobotArm(float timestep)
     Vector3 d_n_0 = endEffectorRelRoot;
 
 
+
     for(int i = 0; i < 6; i++)
     {
         Matrix3x4 rootSpace = rootTransform.Inverse() * robotHinges[i]->GetOwnWorldFrame();
@@ -2115,77 +2121,121 @@ void PhysicsTests::UpdateRobotArm(float timestep)
     Eigen::MatrixXd E = J*Q;
 
 
-    ui::Begin("6DOFRobot End Effector Vel Compare");
-    ui::BeginTable("endeff", 3);
-    ui::TableSetupColumn("Sim");
-	ui::TableSetupColumn("E=JQ");
-    ui::TableSetupColumn("Error = E-Sim");
+ //   ui::Begin("6DOFRobot End Effector Vel Compare");
+ //   ui::BeginTable("endeff", 3);
+ //   ui::TableSetupColumn("Sim");
+	//ui::TableSetupColumn("E=JQ");
+ //   ui::TableSetupColumn("Error = E-Sim");
 
-        ui::TableHeadersRow();
-        ui::TableNextColumn();
+ //       ui::TableHeadersRow();
+ //       ui::TableNextColumn();
 
-        Vector3 simulationVelRelBase   = rootTransform.RotationMatrix().Inverse() * (robotHinges[5]->GetOwnWorldFrameVel() /*- rootWorldVel*/);
-        Vector3 simulationOmegaRelBase = rootTransform.RotationMatrix().Inverse() * (robotHinges[5]->GetOwnBody()->GetAngularVelocity(TS_WORLD) /*- rootWorldOmega*/ );
+ //       Vector3 simulationVelRelBase   = rootTransform.RotationMatrix().Inverse() * (robotHinges[5]->GetOwnWorldFrameVel() /*- rootWorldVel*/);
+ //       Vector3 simulationOmegaRelBase = rootTransform.RotationMatrix().Inverse() * (robotHinges[5]->GetOwnBody()->GetAngularVelocity(TS_WORLD) /*- rootWorldOmega*/ );
 
-        ui::Text("%f", simulationVelRelBase.x_);
-        ui::Text("%f", simulationVelRelBase.y_);
-        ui::Text("%f", simulationVelRelBase.z_);
-        ui::Text("%f", simulationOmegaRelBase.x_);
-        ui::Text("%f", simulationOmegaRelBase.y_);
-        ui::Text("%f", simulationOmegaRelBase.z_);
-
-
-        Vector3 solvedVel = Vector3(E(0), E(1), E(2));
-        Vector3 solvedOmega = Vector3(E(3), E(4), E(5));
-
-        Vector3 solvedVelRelBase = solvedVel;
-        Vector3 solvedOmegaRelBase = solvedOmega;
-
-	    ui::TableNextColumn();
-        ui::Text("%f", solvedVelRelBase.x_);
-        ui::Text("%f", solvedVelRelBase.y_);
-        ui::Text("%f", solvedVelRelBase.z_);
-
-        ui::Text("%f", solvedOmegaRelBase.x_);
-        ui::Text("%f", solvedOmegaRelBase.y_);
-        ui::Text("%f", solvedOmegaRelBase.z_);
+ //       ui::Text("%f", simulationVelRelBase.x_);
+ //       ui::Text("%f", simulationVelRelBase.y_);
+ //       ui::Text("%f", simulationVelRelBase.z_);
+ //       ui::Text("%f", simulationOmegaRelBase.x_);
+ //       ui::Text("%f", simulationOmegaRelBase.y_);
+ //       ui::Text("%f", simulationOmegaRelBase.z_);
 
 
-        ui::TableNextColumn();
-        ui::Text("%f", solvedVelRelBase.x_ - simulationVelRelBase.x_);
-        ui::Text("%f", solvedVelRelBase.y_ - simulationVelRelBase.y_);
-        ui::Text("%f", solvedVelRelBase.z_ - simulationVelRelBase.z_);
+ //       Vector3 solvedVel = Vector3(E(0), E(1), E(2));
+ //       Vector3 solvedOmega = Vector3(E(3), E(4), E(5));
 
-        ui::Text("%f", solvedOmegaRelBase.x_ - simulationOmegaRelBase.x_);
-        ui::Text("%f", solvedOmegaRelBase.y_ - simulationOmegaRelBase.y_);
-        ui::Text("%f", solvedOmegaRelBase.z_ - simulationOmegaRelBase.z_);
+ //       Vector3 solvedVelRelBase = solvedVel;
+ //       Vector3 solvedOmegaRelBase = solvedOmega;
 
-    ui::EndTable();
-    ui::End();
+	//    ui::TableNextColumn();
+ //       ui::Text("%f", solvedVelRelBase.x_);
+ //       ui::Text("%f", solvedVelRelBase.y_);
+ //       ui::Text("%f", solvedVelRelBase.z_);
+
+ //       ui::Text("%f", solvedOmegaRelBase.x_);
+ //       ui::Text("%f", solvedOmegaRelBase.y_);
+ //       ui::Text("%f", solvedOmegaRelBase.z_);
+
+
+ //       ui::TableNextColumn();
+ //       ui::Text("%f", solvedVelRelBase.x_ - simulationVelRelBase.x_);
+ //       ui::Text("%f", solvedVelRelBase.y_ - simulationVelRelBase.y_);
+ //       ui::Text("%f", solvedVelRelBase.z_ - simulationVelRelBase.z_);
+
+ //       ui::Text("%f", solvedOmegaRelBase.x_ - simulationOmegaRelBase.x_);
+ //       ui::Text("%f", solvedOmegaRelBase.y_ - simulationOmegaRelBase.y_);
+ //       ui::Text("%f", solvedOmegaRelBase.z_ - simulationOmegaRelBase.z_);
+
+ //   ui::EndTable();
+ //   ui::End();
+
+
+
+    //ui::Begin("End Effector Positions");
+
+    //ui::Text("%f", endEffectorRelRoot.x_);
+    //ui::Text("%f", endEffectorRelRoot.y_);
+    //ui::Text("%f", endEffectorRelRoot.z_);
+
+    //ui::End();
 
 
     
    // Eigen::FullPivLU<Eigen::MatrixXd> lu(J);
     Eigen::MatrixXd J_inv = J.completeOrthogonalDecomposition().pseudoInverse();
-    
+
+
+    ui::Begin("6DOFRobot Base To End Effector Jacobian Inverse");
+    ui::BeginTable("Jacobian", 6);
+    ui::TableHeader("Joints");
+
+    for (int i = 0; i < 6; i++)
+    {
+        ui::TableNextColumn();
+        ui::Text("%f", J_inv(0, i));
+        ui::Text("%f", J_inv(1, i));
+        ui::Text("%f", J_inv(2, i));
+    }
+    for (int i = 0; i < 6; i++)
+    {
+        ui::TableNextColumn();
+        ui::Text("------");
+    }
+
+    ui::TableNextRow();
+    for (int i = 0; i < 6; i++)
+    {
+        ui::TableNextColumn();
+        ui::Text("%f", J_inv(3, i));
+        ui::Text("%f", J_inv(4, i));
+        ui::Text("%f", J_inv(5, i));
+    }
+
+    ui::EndTable();
+    ui::End();
+
 
 
     Eigen::VectorXd E_target_vel(6);
     Eigen::VectorXd E_target_wrench(6);
 
     static Vector3 targetVel;
-    static Vector3 targetPos;
-    static float p = 0.1f;
-    ui::SliderFloat("xpos", &targetPos.x_, -1.0f, 1.0f);
-    ui::SliderFloat("ypos", &targetPos.y_, -1.0f, 1.0f);
-    ui::SliderFloat("zpos", &targetPos.z_, -1.0f, 1.0f);
-    ui::SliderFloat("p", &p, 0.0001f, 1.0f);
+    Vector3 targetPos = (rootTransform.Inverse() * redBox->GetWorldTransform()).Translation();
+    Vector3 delta = (targetPos - endEffectorRelRoot)*0.2f;
 
-    Vector3 delta = targetPos - endEffectorWorld;
 
-    E_target_vel(0) = delta.x_ * p;
-    E_target_vel(1) = delta.y_ * p;
-    E_target_vel(2) = delta.z_ * p;
+    const float clampv = 0.5f;
+    float xv = Clamp(delta.x_, -clampv, clampv);
+    float yv = Clamp(delta.y_, -clampv, clampv);
+    float zv = Clamp(delta.z_, -clampv, clampv);
+
+    ui::Text("XY: %f", xv);
+    ui::Text("YY: %f", yv);
+    ui::Text("ZY: %f", zv);
+
+    E_target_vel(0) = xv;
+    E_target_vel(1) = yv;
+    E_target_vel(2) = zv;
     E_target_vel(3) = 0.0f;
     E_target_vel(4) = 0.0f;
     E_target_vel(5) = 0.0f;
@@ -2240,12 +2290,12 @@ void PhysicsTests::UpdateRobotArm(float timestep)
         ea::string omegastr = "JointSpeed Target(";
         omegastr = omegastr + ea::to_string(i) + ")";
 
-        //ui::SliderFloat(pstr.c_str(), &(robotPIDControllers[i].PGain), 0.0f, 10000.0f);
-        //ui::SliderFloat(istr.c_str(), &(robotPIDControllers[i].IGain), 0.0f, 1.0f);
+        ui::SliderFloat(pstr.c_str(), &(robotPIDControllers[i].PGain), 0.0f, 10000.0f);
+        ui::SliderFloat(istr.c_str(), &(robotPIDControllers[i].IGain), 0.0f, 5.0f);
 
         //ui::SliderFloat(omegastr.c_str(), &robotJointSpeedTargets[i], -1.0f, 1.0f);
 
-        robotJointSpeedTargets[i] = Clamp(float(SolvedQ_vel(i)),-10.0f,10.0f);
+        robotJointSpeedTargets[i] = Clamp(float(SolvedQ_vel(i)),-clampv*10.0f,clampv*10.0f);
 
         float torque = robotPIDControllers[i].PIControl(robotJointSpeedTargets[i], robotHinges[i]->GetRelativeWorldOmegaInOwnLocalFrame().x_);
 
@@ -2261,7 +2311,7 @@ void PhysicsTests::UpdateRobotArm(float timestep)
 	ui::End();
 
     //table of local joint omega
-    ui::Begin("Joint World Relative Omega");
+   /* ui::Begin("Joint World Relative Omega");
     ui::BeginTable("d",6);
 
     for (int i = 0; i < 6; i++)
@@ -2287,7 +2337,7 @@ void PhysicsTests::UpdateRobotArm(float timestep)
         ui::Text("%f", robotHinges[i]->GetRelativeWorldOmegaInOwnLocalFrame().z_);
     }
     ui::EndTable();
-    ui::End();
+    ui::End();*/
 
 
 
