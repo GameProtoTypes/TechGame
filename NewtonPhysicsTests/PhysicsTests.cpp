@@ -1443,10 +1443,21 @@ void PhysicsTests::SpawnRobotArm(Vector3 worldPosition)
 
     for(int i = 0 ; i < 6; i++)
     {
-        robotHinges[i]->SetFrictionCoef(10.0f);
-        //robotHinges[i]->SetEnableLimits(false);
-        //robotHinges[i]->GetOtherBody()->SetNoCollideOverride(true);
+        robotHinges[i]->SetFrictionCoef(1.0f);
+        robotHinges[i]->SetEnableLimits(false);
+        robotHinges[i]->GetOtherBody()->SetNoCollideOverride(true);
     }
+
+    robotPIDControllers[0].PGain = 7000.0f;
+    robotPIDControllers[1].PGain = 5000.0f;
+    robotPIDControllers[2].PGain = 5000.0f;
+    robotPIDControllers[3].PGain = 3000.0f;
+    robotPIDControllers[4].PGain = 500.0f;
+    robotPIDControllers[5].PGain = 200.0f;
+
+
+
+
 
 	root->SetWorldPosition(worldPosition);
 }
@@ -2162,20 +2173,26 @@ void PhysicsTests::UpdateRobotArm(float timestep)
     Eigen::VectorXd E_target_vel(6);
     Eigen::VectorXd E_target_wrench(6);
 
+    static Vector3 targetVel;
+    static Vector3 targetPos;
+    static float p = 0.1f;
+    ui::SliderFloat("xpos", &targetPos.x_, -1.0f, 1.0f);
+    ui::SliderFloat("ypos", &targetPos.y_, -1.0f, 1.0f);
+    ui::SliderFloat("zpos", &targetPos.z_, -1.0f, 1.0f);
+    ui::SliderFloat("p", &p, 0.0001f, 1.0f);
 
-    Vector3 delta = redBox->GetWorldPosition() - endEffectorWorld;
-    E_target_vel(0) = 0.5f;
-    E_target_vel(1) = 0.0f;
-    E_target_vel(2) = 0.0f;
+    Vector3 delta = targetPos - endEffectorWorld;
+
+    E_target_vel(0) = delta.x_ * p;
+    E_target_vel(1) = delta.y_ * p;
+    E_target_vel(2) = delta.z_ * p;
     E_target_vel(3) = 0.0f;
     E_target_vel(4) = 0.0f;
     E_target_vel(5) = 0.0f;
 
-    static float tune1 = 10.0f;
-    ui::SliderFloat("tune1", &tune1, 0.0f, 1000.0f);
 
     E_target_wrench(0) = 0;
-    E_target_wrench(1) = tune1;
+    E_target_wrench(1) = 0;
     E_target_wrench(2) = 0;
     E_target_wrench(3) = 0;
     E_target_wrench(4) = 0;
@@ -2204,15 +2221,44 @@ void PhysicsTests::UpdateRobotArm(float timestep)
     ui::EndTable();
     ui::End();
 
+
+
+    
+
+
+
+
+	ui::Begin("Joint Control PIs");
     for (int i = 0; i < 6; i++)
     {
-        float error = (SolvedQ_vel(i) - robotHinges[i]->GetRelativeWorldOmegaInOwnLocalFrame().x_);
-        float torque = tune1*error;
+        ui::Text("Joint %d", i);
+        ea::string pstr = "P(";
+        pstr = pstr + ea::to_string(i) + ")";
+        ea::string istr = "I(";
+        istr = istr + ea::to_string(i) + ")";
 
-        if(Abs(torque) < 100.0f)
-			robotHinges[i]->SetCommandedTorque(torque);
+        ea::string omegastr = "JointSpeed Target(";
+        omegastr = omegastr + ea::to_string(i) + ")";
+
+        //ui::SliderFloat(pstr.c_str(), &(robotPIDControllers[i].PGain), 0.0f, 10000.0f);
+        //ui::SliderFloat(istr.c_str(), &(robotPIDControllers[i].IGain), 0.0f, 1.0f);
+
+        //ui::SliderFloat(omegastr.c_str(), &robotJointSpeedTargets[i], -1.0f, 1.0f);
+
+        robotJointSpeedTargets[i] = Clamp(float(SolvedQ_vel(i)),-10.0f,10.0f);
+
+        float torque = robotPIDControllers[i].PIControl(robotJointSpeedTargets[i], robotHinges[i]->GetRelativeWorldOmegaInOwnLocalFrame().x_);
+
+        ea::string filterstr = "Filter Coeff (";
+        filterstr = filterstr + ea::to_string(i) + ")";
+        ui::SliderFloat(filterstr.c_str(), &robotControlFilters[i].filterCoeff, 0.0f, 100.0f);
+
+        float filteredTorque = robotControlFilters[i].Process(torque, timestep);
+        
+
+    	robotHinges[i]->SetCommandedTorque(filteredTorque);
     }
-
+	ui::End();
 
     //table of local joint omega
     ui::Begin("Joint World Relative Omega");

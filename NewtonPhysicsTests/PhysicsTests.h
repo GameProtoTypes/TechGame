@@ -26,6 +26,9 @@
 #include "NewtonConstraint.h"
 #include <Urho3D/MLControl/Gym.h>
 
+#include "MathExtras_DSP/MathExtras_DSP.h"
+
+
 namespace Urho3D
 {
 class Node;
@@ -192,6 +195,9 @@ private:
     WeakPtr<NewtonRigidBody> robotBaseBody;
     WeakPtr<NewtonRigidBody> robotEndBody;
     WeakPtr<NewtonHingeConstraint> robotHinges[6];//base to end
+    MathExtras::PID<float> robotPIDControllers[6];
+    MathExtras::SinglePoleLPFilter<float> robotControlFilters[6];
+    float robotJointSpeedTargets[6];
     Vector3 j_w_i[6];
     Vector3 j_v_i[6];
     WeakPtr<Node> endEffectorTarget;
