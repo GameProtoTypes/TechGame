@@ -3,8 +3,7 @@
 #include <iostream>
 
 
-#include <Eigen/Dense>
-
+#include "eigen/Eigen/Dense"
 #include "Urho3D/IO/Log.h"
 #include "Urho3D/Math/Plane.h"
 #include "Urho3D/Math/Vector3.h"

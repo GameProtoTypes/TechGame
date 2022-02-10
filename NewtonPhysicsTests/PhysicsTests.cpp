@@ -64,7 +64,7 @@
 #include "NewtonGearConstraint.h"
 #include <NewtonCollisionShape.h>
 #include <NewtonCollisionShapesDerived.h>
-
+#include "NewtonModel.h"
 
 #include "PhysicsTests.h"
 #include "PhysicsSamplesUtils.h"
@@ -73,11 +73,10 @@
 #include "GYM_ATRT.h"
 #include "GYM_UniCycle.h"
 
-#include <Eigen/Eigen>
-
+#include "eigen/Eigen/Dense"
 #include <iostream>
 
-#include "NewtonModel.h"
+
 #include "UrhoNewtonConversions.h"
 
 PhysicsTests::PhysicsTests(Context* context) : Application(context),
@@ -238,11 +237,11 @@ void PhysicsTests::CreateScene()
 
 	//SpawnATRT(Vector3(5, 5, 0));
 
-	//ResetGYMs();	
+	ResetGYMs();	
 
 	//SpawnSegway(Vector3(0,5,10));
 
-	SpawnRobotArm(Vector3(0, 5, 0));
+	//SpawnRobotArm(Vector3(0, 5, 0));
 
 
     //SpawnKinematicBodyTest(Vector3(0, 0, 0), Quaternion::IDENTITY);
@@ -1203,8 +1202,8 @@ void PhysicsTests::ResetGYMs()
 	}
 	while (gyms.size() < gymCli->numGYMS)
 	{
-		gyms.push_back(context_->CreateObject<GYM_TrialBike>());
-		//gyms.push_back(context_->CreateObject<GYM_ATRT>());
+		//gyms.push_back(context_->CreateObject<GYM_TrialBike>());
+		gyms.push_back(context_->CreateObject<GYM_ATRT>());
 		//gyms.push_back(context_->CreateObject<GYM_UniCycle>());
 	}
 
@@ -1238,119 +1237,6 @@ void PhysicsTests::ResetGYMs()
 
 
 }
-void PhysicsTests::SpawnATRT(Vector3 worldPosition)
-{
-	Node* root = scene_->CreateChild("ATRT");
-	root->AddTag("ATRT");
-
-	//Body
-	Node* Body = SpawnSamplePhysicsBox(root, Vector3::ZERO, Vector3(1, 1, 1));
-
-
-	//LEFT LEG
-	Node* HIP_LEFT = SpawnSamplePhysicsCylinder(root, Vector3(0.5, -0.5, -0.5), 0.5, 0.25);
-	HIP_LEFT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
-
-	NewtonHingeConstraint* HIPBODYJOINT_LEFT = Body->CreateComponent<NewtonHingeConstraint>();
-	HIPBODYJOINT_LEFT->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
-	HIPBODYJOINT_LEFT->SetPosition(Vector3(0.5, -0.5, -0.5));
-	HIPBODYJOINT_LEFT->SetOtherBody(HIP_LEFT->GetComponent<NewtonRigidBody>());
-
-
-
-
-	Node* KNEE_LEFT = SpawnSamplePhysicsCylinder(HIP_LEFT, Vector3(1.0, -1.5, -0.5), 0.3, 0.25);
-	KNEE_LEFT->RemoveComponent<NewtonRigidBody>();
-
-	Node* KNEE2_LEFT = SpawnSamplePhysicsCylinder(root, Vector3(1.0, -1.5, -0.75), 0.3, 0.25);
-	KNEE2_LEFT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
-
-	NewtonHingeConstraint* KNEEJOINT_LEFT = HIP_LEFT->CreateComponent<NewtonHingeConstraint>();
-	KNEEJOINT_LEFT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
-	KNEEJOINT_LEFT->SetWorldPosition(KNEE_LEFT->GetWorldPosition());
-	KNEEJOINT_LEFT->SetOtherBody(KNEE2_LEFT->GetComponent<NewtonRigidBody>());
-
-
-
-
-
-
-
-	Node* KNEE3_LEFT = SpawnSamplePhysicsCylinder(KNEE2_LEFT, Vector3(1.0, -2.5, -0.5), 0.3, 0.25);
-	KNEE3_LEFT->RemoveComponent<NewtonRigidBody>();
-
-	Node* KNEE4_LEFT = SpawnSamplePhysicsCylinder(root, Vector3(1.0, -2.5, -0.75), 0.3, 0.25);
-	KNEE4_LEFT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
-
-	NewtonHingeConstraint* KNEEJOINT2_LEFT = KNEE2_LEFT->CreateComponent<NewtonHingeConstraint>();
-	KNEEJOINT2_LEFT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
-	KNEEJOINT2_LEFT->SetWorldPosition(KNEE3_LEFT->GetWorldPosition());
-	KNEEJOINT2_LEFT->SetOtherBody(KNEE4_LEFT->GetComponent<NewtonRigidBody>());
-
-
-
-	Node* FOOT_LEFT = SpawnSamplePhysicsCylinder(KNEE4_LEFT, Vector3(0, -3, -0.5), 0.2, 0.25);
-	FOOT_LEFT->RemoveComponent<NewtonRigidBody>();
-
-	//RIGHT LEG
-	Node* HIP_RIGHT = SpawnSamplePhysicsCylinder(root, Vector3(0.5, -0.5, 0.5), 0.5, 0.25);
-	HIP_RIGHT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
-
-	NewtonHingeConstraint* HIPBODYJOINT_RIGHT = Body->CreateComponent<NewtonHingeConstraint>();
-	HIPBODYJOINT_RIGHT->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
-	HIPBODYJOINT_RIGHT->SetPosition(Vector3(0.5, -0.5, 0.5));
-	HIPBODYJOINT_RIGHT->SetOtherBody(HIP_RIGHT->GetComponent<NewtonRigidBody>());
-
-
-
-	Node* KNEE_RIGHT = SpawnSamplePhysicsCylinder(HIP_RIGHT, Vector3(1.0, -1.5, 0.75), 0.3, 0.25);
-	KNEE_RIGHT->RemoveComponent<NewtonRigidBody>();
-
-	Node* KNEE2_RIGHT = SpawnSamplePhysicsCylinder(root, Vector3(1.0, -1.5, 0.5), 0.3, 0.25);
-	KNEE2_RIGHT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
-
-	NewtonHingeConstraint* KNEEJOINT_RIGHT = HIP_RIGHT->CreateComponent<NewtonHingeConstraint>();
-	KNEEJOINT_RIGHT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
-	KNEEJOINT_RIGHT->SetWorldPosition(KNEE_RIGHT->GetWorldPosition());
-	KNEEJOINT_RIGHT->SetOtherBody(KNEE2_RIGHT->GetComponent<NewtonRigidBody>());
-
-
-
-	Node* KNEE3_RIGHT = SpawnSamplePhysicsCylinder(KNEE2_RIGHT, Vector3(1.0, -2.5, 0.75), 0.3, 0.25);
-	KNEE3_RIGHT->RemoveComponent<NewtonRigidBody>();
-
-	Node* KNEE4_RIGHT = SpawnSamplePhysicsCylinder(root, Vector3(1.0, -2.5, 0.5), 0.3, 0.25);
-	KNEE4_RIGHT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
-
-	NewtonHingeConstraint* KNEEJOINT2_RIGHT = KNEE2_RIGHT->CreateComponent<NewtonHingeConstraint>();
-	KNEEJOINT2_RIGHT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
-	KNEEJOINT2_RIGHT->SetWorldPosition(KNEE3_RIGHT->GetWorldPosition());
-	KNEEJOINT2_RIGHT->SetOtherBody(KNEE4_RIGHT->GetComponent<NewtonRigidBody>());
-
-
-	Node* FOOT_RIGHT = SpawnSamplePhysicsCylinder(KNEE4_RIGHT, Vector3(0, -3, 0.5), 0.2, 0.25);
-	FOOT_RIGHT->RemoveComponent<NewtonRigidBody>();
-
-
-
-
-	//ea::vector<NewtonHingeConstraint*> motors;
-	//motors.push_back(HIPBODYJOINT_LEFT);
-	//motors.push_back(HIPBODYJOINT_RIGHT);
-	//motors.push_back(KNEEJOINT_LEFT);
-	//motors.push_back(KNEEJOINT_RIGHT);
-	//motors.push_back(KNEEJOINT2_LEFT);
-	//motors.push_back(KNEEJOINT2_RIGHT);
-	//GymMotors.push_back(motors);
-
-	//GymBodies.push_back(Body);
-
-	root->SetWorldPosition(worldPosition);
-	root->Rotate(Quaternion(RandomNormal(0, 45), Vector3(0, 0, 1)));
-
-	Body->GetComponent<NewtonRigidBody>()->SetLinearVelocityHard(Vector3(0, 0.1, 0));
-}
-
 
 
 void PhysicsTests::SpawnSegway(Vector3 worldPosition)
@@ -1693,7 +1579,8 @@ void PhysicsTests::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventD
 {
     float timeStep = eventData[NewtonPhysicsPostStep::P_TIMESTEP].GetFloat();
 
-    UpdateRobotArm(timeStep);
+    if(robotRoot)
+		UpdateRobotArm(timeStep);
 
 
 
@@ -2040,6 +1927,7 @@ void PhysicsTests::ToggleRejointTest()
 
 void PhysicsTests::UpdateRobotArm(float timestep)
 {
+    
     //compute the Jacobian From end to base
     Matrix3x4 rootTransform = robotHinges[0]->GetOwnWorldFrame();
     Vector3 rootWorldVel = robotHinges[0]->GetOwnWorldFrameVel();
@@ -2058,88 +1946,10 @@ void PhysicsTests::UpdateRobotArm(float timestep)
     robotHinges[0]->GetModel()->CalculateChainJabobian(constraintChain, J_);
 
 
-    Eigen::MatrixXd J(6, 6);
-    for(int c = 0; c < 6; c++)
-    {
-        J(0, c) = J_.J_v[c].x_;
-        J(1, c) = J_.J_v[c].y_;
-        J(2, c) = J_.J_v[c].z_;
-
-        J(3, c) = J_.J_v[c].x_;
-        J(4, c) = J_.J_v[c].y_;
-        J(5, c) = J_.J_v[c].z_;
-    }
-
-
-    ui::Begin("6DOFRobot Base To End Effector Jacobian");
-    ui::BeginTable("Jacobian", 6);
-    ui::TableHeader("Joints");
-
-    for (int i = 0; i < 6; i++)
-    {
-        ui::TableNextColumn();
-        ui::Text("%f", J(0, i));
-        ui::Text("%f", J(1, i));
-        ui::Text("%f", J(2, i));
-    }
-    for (int i = 0; i < 6; i++)
-    {
-        ui::TableNextColumn();
-        ui::Text("------");
-    }
-
-    ui::TableNextRow();
-    for (int i = 0; i < 6; i++)
-    {
-        ui::TableNextColumn();
-        ui::Text("%f", J(3, i));
-        ui::Text("%f", J(4, i));
-        ui::Text("%f", J(5, i));
-    }
-
-    ui::EndTable();
-    ui::End();
-
-
-
-    Eigen::VectorXd Q(6);
-    for(int i = 0; i < 6; i++)
-    {
-        Q(i) = robotHinges[i]->GetRelativeWorldOmegaInOwnLocalFrame().x_;
-    }
-
-    //E = J*Q
-    Eigen::MatrixXd E = J*Q;
-
-    
-   // Eigen::FullPivLU<Eigen::MatrixXd> lu(J);
-
-
-
-    Eigen::VectorXd E_target_vel(6);
-    Eigen::VectorXd E_target_wrench(6);
 
     static Vector3 targetVel;
     Vector3 targetPos = (rootTransform.Inverse() * redBox->GetWorldTransform()).Translation();
     Vector3 delta = (targetPos - endEffectorRelRoot.Translation());
-    Vector3 dirDelta = endEffectorRelRoot.RotationMatrix() * Vector3(1, 0, 0).CrossProduct(delta.Normalized());
-
-    const float clampv = 0.5f;
-    float xv = Clamp(delta.x_ * 0.2f, -clampv, clampv);
-    float yv = Clamp(delta.y_ * 0.2f, -clampv, clampv);
-    float zv = Clamp(delta.z_ * 0.2f, -clampv, clampv);
-
-    float xomega = 0.0f;// dirDelta.x_ * 0.1f;
-    float yomega = 0.0f;// dirDelta.y_ * 0.1f;
-    float zomega = 0.0f;// dirDelta.z_ * 0.1f;
-
-
-    E_target_vel(0) = xv;
-    E_target_vel(1) = yv;
-    E_target_vel(2) = zv;
-    E_target_vel(3) = xomega;
-    E_target_vel(4) = yomega;
-    E_target_vel(5) = zomega;
 
 
 
@@ -2148,73 +1958,26 @@ void PhysicsTests::UpdateRobotArm(float timestep)
     ui::SliderFloat("Gain", &gain, 1.0f, 1000.0f);
     ui::SliderFloat("Damping", &damping, 0.0f, 100.0f);
 
-    E_target_wrench(0) = gain * delta.x_ - damping * (rootTransform.RotationMatrix().Inverse() * robotHinges[5]->GetOwnWorldFrameVel()).x_;
-    E_target_wrench(1) = gain * delta.y_ - damping * (rootTransform.RotationMatrix().Inverse() * robotHinges[5]->GetOwnWorldFrameVel()).y_;
-    E_target_wrench(2) = gain * delta.z_ - damping * (rootTransform.RotationMatrix().Inverse() * robotHinges[5]->GetOwnWorldFrameVel()).z_;
-    E_target_wrench(3) = 0;
-    E_target_wrench(4) = 0;
-    E_target_wrench(5) = 0;
 
+    Vector3 endForce = gain * delta - damping * (rootTransform.RotationMatrix().Inverse() * robotHinges[5]->GetOwnWorldFrameVel());
+    Vector3 endTorque = Vector3::ZERO;
+    ea::vector<NewtonHingeConstraint*> chain;
+    for (int i = 0; i < 6; i++)
+        chain.push_back(robotHinges[i]);
+    ChainJacobian chainJac;
 
+    robotHinges[0]->GetModel()->CalculateChainJabobian(chain, chainJac);
+    ea::vector<float> jointTorques;
+    robotHinges[0]->GetModel()->SolveForJointTorques(chainJac, chain, endForce, endTorque, jointTorques);
 
-    Eigen::VectorXd SolvedQ_vel = J.completeOrthogonalDecomposition().solve(E_target_vel);// J_inv* E_target_vel;
-    Eigen::VectorXd SolvedQ_torques = J.transpose() * E_target_wrench;
-
-
-
-    
-
-	ui::Begin("Joint Control PIs");
-
-
-    static int controlMode = 0;
-    ui::SliderInt("Control Mode", &controlMode, 0, 1);
-
-    if(controlMode == 1)
-    {
-
-
-
-    }
 
 
     for (int i = 0; i < 6; i++)
     {
-        if(controlMode == 0)
-        {
-	        ui::Text("Joint %d", i);
-	        ea::string pstr = "P(";
-	        pstr = pstr + ea::to_string(i) + ")";
-	        ea::string istr = "I(";
-	        istr = istr + ea::to_string(i) + ")";
-
-	        ea::string omegastr = "JointSpeed Target(";
-	        omegastr = omegastr + ea::to_string(i) + ")";
-
-	        ui::SliderFloat(pstr.c_str(), &(robotPIDControllers[i].PGain), 0.0f, 10000.0f);
-	        ui::SliderFloat(istr.c_str(), &(robotPIDControllers[i].IGain), 0.0f, 5.0f);
-
-	        robotJointSpeedTargets[i] = Clamp(float(SolvedQ_vel(i)),-clampv*1.0f,clampv*1.0f);
-
-	        float torque = robotPIDControllers[i].PIControl(robotJointSpeedTargets[i], robotHinges[i]->GetRelativeWorldOmegaInOwnLocalFrame().x_);
-
-	        ea::string filterstr = "Filter Coeff (";
-	        filterstr = filterstr + ea::to_string(i) + ")";
-	        ui::SliderFloat(filterstr.c_str(), &robotControlFilters[i].filterCoeff, 0.0f, 1.0f);
-
-	        float filteredTorque = robotControlFilters[i].Process(torque, timestep);
-			robotHinges[i]->SetCommandedTorque(filteredTorque);
-        }
-        else if(controlMode == 1)
-        {
-            float torque = SolvedQ_torques(i);
-            torque = Clamp(torque, -1000.0f, 1000.0f);
-			robotHinges[i]->SetCommandedTorque(torque);
-        }
-
+        float torque = jointTorques[i];
+        torque = Clamp(torque, -1000.0f, 1000.0f);
+		robotHinges[i]->SetCommandedTorque(torque);
     }
-	ui::End();
-
 
 }
 

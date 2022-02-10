@@ -142,7 +142,6 @@ private:
     void SpawnKinematicBodyTest(Vector3 worldPosition, Quaternion worldRotation);
 	void SpawnRejointingTest(Vector3 worldPosition);
 	void SpawnCollisionOffsetTest(Vector3 worldPosition);
-	void SpawnATRT(Vector3 worldPosition);
     void SpawnSegway(Vector3 worldPosition);
 	void SpawnRobotArm(Vector3 worldPosition);
 

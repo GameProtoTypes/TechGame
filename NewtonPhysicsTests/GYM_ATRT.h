@@ -1,5 +1,6 @@
 #pragma once
 
+#include "NewtonModel.h"
 #include "Urho3D/MLControl/Gym.h"
 
 
@@ -17,15 +18,18 @@ public:
 	}
 
 
-
-	virtual void Reset()
+	void Reset() override
 	{
 		GYM::Reset();
 
 		targetWorldVel = Vector3(-1,0,0);
 		rootNode = scene_->CreateChild("ATRT");
 		rootNode->AddTag("ATRT");
+
+		orbitNode = rootNode->CreateChild("Orbit");
 		motors.clear();
+		leftHinges.clear();
+		rightHinges.clear();
 		//Body
 		bodyNode = SpawnSamplePhysicsBox(rootNode, Vector3::ZERO, Vector3(1, 1, 1));
 		
@@ -38,11 +42,7 @@ public:
 		HIPBODYJOINT_LEFT->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
 		HIPBODYJOINT_LEFT->SetPosition(Vector3(0.0, -0.5, -0.5));
 		HIPBODYJOINT_LEFT->SetOtherBody(HIP_LEFT->GetComponent<NewtonRigidBody>());
-
-		NewtonHingeConstraint* HIPBODYJOINT_LEFT_R = bodyNode->CreateComponent<NewtonHingeConstraint>();
-		HIPBODYJOINT_LEFT_R->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
-		HIPBODYJOINT_LEFT_R->SetPosition(Vector3(0.0, -0.5, -0.5));
-		HIPBODYJOINT_LEFT_R->SetOtherBody(HIP_LEFT->GetComponent<NewtonRigidBody>());
+		leftHinges.push_back(HIPBODYJOINT_LEFT);
 
 
 
@@ -56,15 +56,7 @@ public:
 		KNEEJOINT_LEFT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
 		KNEEJOINT_LEFT->SetWorldPosition(KNEE_LEFT->GetWorldPosition());
 		KNEEJOINT_LEFT->SetOtherBody(KNEE2_LEFT->GetComponent<NewtonRigidBody>());
-
-		NewtonHingeConstraint* KNEEJOINT_LEFT_R = HIP_LEFT->CreateComponent<NewtonHingeConstraint>();
-		KNEEJOINT_LEFT_R->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
-		KNEEJOINT_LEFT_R->SetWorldPosition(KNEE_LEFT->GetWorldPosition());
-		KNEEJOINT_LEFT_R->SetOtherBody(KNEE2_LEFT->GetComponent<NewtonRigidBody>());
-
-
-
-
+		leftHinges.push_back(KNEEJOINT_LEFT);
 
 
 
@@ -78,16 +70,31 @@ public:
 		KNEEJOINT2_LEFT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
 		KNEEJOINT2_LEFT->SetWorldPosition(KNEE3_LEFT->GetWorldPosition());
 		KNEEJOINT2_LEFT->SetOtherBody(KNEE_LOWER_LEFT->GetComponent<NewtonRigidBody>());
+		leftHinges.push_back(KNEEJOINT2_LEFT);
 
-		NewtonHingeConstraint* KNEEJOINT2_LEFT_R = KNEE2_LEFT->CreateComponent<NewtonHingeConstraint>();
-		KNEEJOINT2_LEFT_R->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
-		KNEEJOINT2_LEFT_R->SetWorldPosition(KNEE3_LEFT->GetWorldPosition());
-		KNEEJOINT2_LEFT_R->SetOtherBody(KNEE_LOWER_LEFT->GetComponent<NewtonRigidBody>());
 
 
 		FOOT_LEFT = SpawnSamplePhysicsCylinder(KNEE_LOWER_LEFT, Vector3(0, -3, -0.5), 0.2, 0.25);
 		FOOT_LEFT->RemoveComponent<NewtonRigidBody>();
 		FOOT_LEFT->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(10.0f);
+
+
+
+		Node* FOOT_LEFT2 = SpawnSamplePhysicsCylinder(KNEE_LOWER_LEFT, Vector3(0, -3, -0.75), 0.2, 0.25);
+		FOOT_LEFT2->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(10.0f);
+
+		NewtonHingeConstraint* ENDJOINT_LEFT = KNEE_LOWER_LEFT->CreateComponent<NewtonHingeConstraint>();
+		ENDJOINT_LEFT->SetWorldPosition(FOOT_LEFT->GetWorldPosition());
+		ENDJOINT_LEFT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
+		ENDJOINT_LEFT->SetOtherBody(FOOT_LEFT2->GetComponent<NewtonRigidBody>());
+		leftHinges.push_back(ENDJOINT_LEFT);
+
+
+
+
+
+
+
 
 		//RIGHT LEG
 		Node* HIP_RIGHT = SpawnSamplePhysicsCylinder(rootNode, Vector3(0.0, -0.5, 0.5), 0.5, 0.25);
@@ -97,11 +104,8 @@ public:
 		HIPBODYJOINT_RIGHT->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
 		HIPBODYJOINT_RIGHT->SetPosition(Vector3(0.0, -0.5, 0.5));
 		HIPBODYJOINT_RIGHT->SetOtherBody(HIP_RIGHT->GetComponent<NewtonRigidBody>());
+		rightHinges.push_back(HIPBODYJOINT_RIGHT);
 
-		NewtonHingeConstraint* HIPBODYJOINT_RIGHT_R = bodyNode->CreateComponent<NewtonHingeConstraint>();
-		HIPBODYJOINT_RIGHT_R->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
-		HIPBODYJOINT_RIGHT_R->SetPosition(Vector3(0.0, -0.5, 0.5));
-		HIPBODYJOINT_RIGHT_R->SetOtherBody(HIP_RIGHT->GetComponent<NewtonRigidBody>());
 
 
 		Node* KNEE_RIGHT = SpawnSamplePhysicsCylinder(HIP_RIGHT, Vector3(0.5, -1.5, 0.75), 0.3, 0.25);
@@ -114,11 +118,7 @@ public:
 		KNEEJOINT_RIGHT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
 		KNEEJOINT_RIGHT->SetWorldPosition(KNEE_RIGHT->GetWorldPosition());
 		KNEEJOINT_RIGHT->SetOtherBody(KNEE2_RIGHT->GetComponent<NewtonRigidBody>());
-
-		NewtonHingeConstraint* KNEEJOINT_RIGHT_R = HIP_RIGHT->CreateComponent<NewtonHingeConstraint>();
-		KNEEJOINT_RIGHT_R->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
-		KNEEJOINT_RIGHT_R->SetWorldPosition(KNEE_RIGHT->GetWorldPosition());
-		KNEEJOINT_RIGHT_R->SetOtherBody(KNEE2_RIGHT->GetComponent<NewtonRigidBody>());
+		rightHinges.push_back(KNEEJOINT_RIGHT);
 
 
 		Node* KNEE3_RIGHT = SpawnSamplePhysicsCylinder(KNEE2_RIGHT, Vector3(0.5, -2.5, 0.75), 0.3, 0.25);
@@ -131,15 +131,21 @@ public:
 		KNEEJOINT2_RIGHT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
 		KNEEJOINT2_RIGHT->SetWorldPosition(KNEE3_RIGHT->GetWorldPosition());
 		KNEEJOINT2_RIGHT->SetOtherBody(KNEE_LOWER_RIGHT->GetComponent<NewtonRigidBody>());
-
-		NewtonHingeConstraint* KNEEJOINT2_RIGHT_R = KNEE2_RIGHT->CreateComponent<NewtonHingeConstraint>();
-		KNEEJOINT2_RIGHT_R->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
-		KNEEJOINT2_RIGHT_R->SetWorldPosition(KNEE3_RIGHT->GetWorldPosition());
-		KNEEJOINT2_RIGHT_R->SetOtherBody(KNEE_LOWER_RIGHT->GetComponent<NewtonRigidBody>());
+		rightHinges.push_back(KNEEJOINT2_RIGHT);
 
 		FOOT_RIGHT = SpawnSamplePhysicsCylinder(KNEE_LOWER_RIGHT, Vector3(0, -3, 0.5), 0.2, 0.25);
 		FOOT_RIGHT->RemoveComponent<NewtonRigidBody>();
 		FOOT_RIGHT->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(10.0f);
+
+
+		Node* FOOT_RIGHT2 = SpawnSamplePhysicsCylinder(KNEE_LOWER_RIGHT, Vector3(0, -3, 0.75), 0.2, 0.25);
+		FOOT_RIGHT2->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(10.0f);
+
+		NewtonHingeConstraint* ENDJOINT_RIGHT = KNEE_LOWER_RIGHT->CreateComponent<NewtonHingeConstraint>();
+		ENDJOINT_RIGHT->SetWorldPosition(FOOT_RIGHT->GetWorldPosition());
+		ENDJOINT_RIGHT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
+		ENDJOINT_RIGHT->SetOtherBody(FOOT_RIGHT2->GetComponent<NewtonRigidBody>());
+		rightHinges.push_back(ENDJOINT_RIGHT);
 
 
 
@@ -151,12 +157,57 @@ public:
 		motors.push_back(KNEEJOINT2_LEFT);
 		motors.push_back(KNEEJOINT2_RIGHT);
 
+
 		rootNode->SetWorldPosition(worldPos);
 		//rootNode->Rotate(Quaternion(RandomNormal(0, 45), Vector3(0, 0, 1)));
 	}
 
+	void Update(float timestep) override
+	{
+		GYM::Update(timestep);
 
-	virtual void ResizeVectors()
+		ChainJacobian chainJac;
+		NewtonModel* model = rightHinges[0]->GetModel();
+		Matrix3x4 rootTransform = rightHinges[0]->GetOwnWorldFrame();
+		Matrix3x4 endEffectorWorld = rightHinges.back()->GetOwnWorldFrame();
+		Matrix3x4 endEffectorRelRoot = rootTransform.Inverse() * endEffectorWorld;
+
+		static float vertical = 1.0f;
+		ui::SliderFloat("vertical", &vertical, 0.0f, 10.0f);
+
+		Vector3 targetRightFootPosWorld = rightHinges[0]->GetOwnWorldFrame().Translation() - Vector3(0, vertical, 0);
+
+		Vector3 targetPos = rootTransform.Inverse() * targetRightFootPosWorld;
+		Vector3 delta = (targetPos - endEffectorRelRoot.Translation());
+
+
+
+		static float gain = 3.0f;
+		static float damping = 1.0f;
+		ui::SliderFloat("Gain", &gain, 1.0f, 100.0f);
+		ui::SliderFloat("Damping", &damping, 0.0f, 10.0f);
+
+
+		Vector3 rightFootForce = gain * delta - damping * (rootTransform.RotationMatrix().Inverse() * rightHinges.back()->GetOwnWorldFrameVel());
+		Vector3 rightFootTorque(0, 0, 0);
+
+
+
+		model->CalculateChainJabobian(rightHinges, chainJac);
+		ea::vector<float> jointTorques;
+		model->SolveForJointTorques(chainJac, rightHinges, rightFootForce, rightFootTorque, jointTorques);
+
+		for(int i = 0; i < rightHinges.size(); i++)
+		{
+			float torque = jointTorques[i];
+			torque = Clamp(torque, -1000.0f, 1000.0f);
+
+			rightHinges[i]->SetCommandedTorque(torque);
+		}
+
+	}
+
+	void ResizeVectors() override
 	{
 		actionVec.resize(6);
 		actionVec_1 = actionVec;
@@ -165,7 +216,7 @@ public:
 		stateVec_1 = stateVec;
 	}
 
-	virtual void FormResponses(float timeStep)
+	void FormResponses(float timeStep) override
 	{
 		GYM::FormResponses(timeStep);
 	
@@ -256,7 +307,7 @@ public:
 
 	}
 
-	virtual void ApplyActionVec(float timeStep)
+	void ApplyActionVec(float timeStep) override
 	{
 		GYM::ApplyActionVec(timeStep);
 
@@ -265,12 +316,17 @@ public:
 
 	}
 
-	virtual void DrawDebugGeometry(DebugRenderer* debugRenderer)
+	void DrawDebugGeometry(DebugRenderer* debugRenderer) override
 	{
 		debugRenderer->AddLine(bodyNode->GetWorldPosition(), bodyNode->GetWorldPosition() + targetWorldVel * 5.0f, Color::RED);
 	}
 
 	ea::vector<NewtonHingeConstraint*> motors;
+
+	ea::vector<NewtonHingeConstraint*> leftHinges;
+	ea::vector<NewtonHingeConstraint*> rightHinges;
+
+
 	WeakPtr<Node> bodyNode;
 	WeakPtr<Node> FOOT_RIGHT;
 	WeakPtr<Node> FOOT_LEFT;
