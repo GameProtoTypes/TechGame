@@ -26,14 +26,13 @@ public:
 		rootNode = scene_->CreateChild("ATRT");
 		rootNode->AddTag("ATRT");
 
-		orbitNode = rootNode->CreateChild("Orbit");
+
 		motors.clear();
 		leftHinges.clear();
 		rightHinges.clear();
 		//Body
 		bodyNode = SpawnSamplePhysicsBox(rootNode, Vector3::ZERO, Vector3(1, 1, 1));
-		
-
+		orbitNode = bodyNode->CreateChild("Orbit");
 		//LEFT LEG
 		Node* HIP_LEFT = SpawnSamplePhysicsCylinder(rootNode, Vector3(0.0, -0.5, -0.5), 0.5, 0.25);
 		HIP_LEFT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
@@ -166,19 +165,34 @@ public:
 	{
 		GYM::Update(timestep);
 
-		ChainJacobian chainJac;
+
 		NewtonModel* model = rightHinges[0]->GetModel();
-		Matrix3x4 rootTransform = rightHinges[0]->GetOwnWorldFrame();
-		Matrix3x4 endEffectorWorld = rightHinges.back()->GetOwnWorldFrame();
-		Matrix3x4 endEffectorRelRoot = rootTransform.Inverse() * endEffectorWorld;
 
-		static float vertical = 1.0f;
-		ui::SliderFloat("vertical", &vertical, 0.0f, 10.0f);
+		Matrix3x4 rootTransformRight = rightHinges[0]->GetOwnWorldFrame();
+		Matrix3x4 endEffectorRightWorld = rightHinges.back()->GetOwnWorldFrame();
+		Matrix3x4 endEffectorRightRelRoot = rootTransformRight.Inverse() * endEffectorRightWorld;
 
-		Vector3 targetRightFootPosWorld = rightHinges[0]->GetOwnWorldFrame().Translation() - Vector3(0, vertical, 0);
+		Matrix3x4 rootTransformLeft = leftHinges[0]->GetOwnWorldFrame();
+		Matrix3x4 endEffectorLeftWorld = leftHinges.back()->GetOwnWorldFrame();
+		Matrix3x4 endEffectorLeftRelRoot = rootTransformLeft.Inverse() * endEffectorLeftWorld;
 
-		Vector3 targetPos = rootTransform.Inverse() * targetRightFootPosWorld;
-		Vector3 delta = (targetPos - endEffectorRelRoot.Translation());
+
+		static float vertical = -2.0f;
+		//ui::SliderFloat("right offset x", &vertical, 0.0f, 10.0f);
+		Vector3 rightFootWorldOffset = Vector3(0, vertical, 0);
+		targetRightFootPosWorld = rootTransformRight.Translation() + rightFootWorldOffset;
+
+		Vector3 leftFootWorldOffset = Vector3(0, vertical, 0);
+		targetLeftFootPosWorld = rootTransformLeft.Translation() + leftFootWorldOffset;
+
+
+
+
+		targetRightPos = rootTransformRight.Inverse() * targetRightFootPosWorld;
+		Vector3 deltaRight = (targetRightPos - endEffectorRightRelRoot.Translation());
+
+		targetLeftPos = rootTransformLeft.Inverse() * targetLeftFootPosWorld;
+		Vector3 deltaLeft = (targetLeftPos - endEffectorLeftRelRoot.Translation());
 
 
 
@@ -188,23 +202,38 @@ public:
 		ui::SliderFloat("Damping", &damping, 0.0f, 10.0f);
 
 
-		Vector3 rightFootForce = gain * delta - damping * (rootTransform.RotationMatrix().Inverse() * rightHinges.back()->GetOwnWorldFrameVel());
+		Vector3 rightFootForce = gain * deltaRight - damping * (rootTransformRight.RotationMatrix().Inverse() * rightHinges.back()->GetOwnWorldFrameVel());
 		Vector3 rightFootTorque(0, 0, 0);
+		Vector3 leftFootForce = gain * deltaLeft - damping * (rootTransformLeft.RotationMatrix().Inverse() * leftHinges.back()->GetOwnWorldFrameVel());
+		Vector3 leftFootTorque(0, 0, 0);
+
+		ChainJacobian chainJacRight;
+		ChainJacobian chainJacLeft;
+
+		model->CalculateChainJabobian(rightHinges, chainJacRight);
+		model->CalculateChainJabobian(leftHinges, chainJacLeft);
+		ea::vector<float> jointTorquesRight;
+		ea::vector<float> jointTorquesLeft;
+		model->SolveForJointTorques(chainJacRight, rightHinges, rightFootForce, rightFootTorque, jointTorquesRight);
+		model->SolveForJointTorques(chainJacLeft, leftHinges, leftFootForce, leftFootTorque, jointTorquesLeft);
 
 
-
-		model->CalculateChainJabobian(rightHinges, chainJac);
-		ea::vector<float> jointTorques;
-		model->SolveForJointTorques(chainJac, rightHinges, rightFootForce, rightFootTorque, jointTorques);
 
 		for(int i = 0; i < rightHinges.size(); i++)
 		{
-			float torque = jointTorques[i];
+			float torque = jointTorquesRight[i];
 			torque = Clamp(torque, -1000.0f, 1000.0f);
 
 			rightHinges[i]->SetCommandedTorque(torque);
 		}
 
+		for (int i = 0; i < leftHinges.size(); i++)
+		{
+			float torque = jointTorquesLeft[i];
+			torque = Clamp(torque, -1000.0f, 1000.0f);
+
+			leftHinges[i]->SetCommandedTorque(torque);
+		}
 	}
 
 	void ResizeVectors() override
@@ -319,6 +348,10 @@ public:
 	void DrawDebugGeometry(DebugRenderer* debugRenderer) override
 	{
 		debugRenderer->AddLine(bodyNode->GetWorldPosition(), bodyNode->GetWorldPosition() + targetWorldVel * 5.0f, Color::RED);
+
+
+		debugRenderer->AddFrame(Matrix3x4(targetLeftFootPosWorld, Quaternion::IDENTITY, 1.0f));
+		debugRenderer->AddFrame(Matrix3x4(targetRightFootPosWorld, Quaternion::IDENTITY, 1.0f));
 	}
 
 	ea::vector<NewtonHingeConstraint*> motors;
@@ -333,7 +366,11 @@ public:
 	WeakPtr<Node> KNEE_LOWER_RIGHT;
 	WeakPtr<Node> KNEE_LOWER_LEFT;
 
+	Vector3 targetRightFootPosWorld;
+	Vector3 targetLeftFootPosWorld;
 
+	Vector3 targetRightPos;
+	Vector3 targetLeftPos;
 
 	Vector3 targetWorldVel;
 };
