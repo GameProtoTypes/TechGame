@@ -198,8 +198,7 @@ private:
     MathExtras::PID<float> robotPIDControllers[6];
     MathExtras::SinglePoleLPFilter<float> robotControlFilters[6];
     float robotJointSpeedTargets[6];
-    Vector3 j_w_i[6];
-    Vector3 j_v_i[6];
+
     WeakPtr<Node> endEffectorTarget;
     ndModel newtonRobotArmModel;
     void UpdateRobotArm(float timestep);
