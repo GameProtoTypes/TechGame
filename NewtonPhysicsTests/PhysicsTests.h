@@ -33,7 +33,7 @@ namespace Urho3D
 {
 class Node;
 class Scene;
-class NewtonHingeConstraint;
+class NewtonRevoluteJoint;
 
 
 
@@ -179,7 +179,7 @@ private:
     Quaternion pickPullCameraStartOrientation;
     Vector3 pickPullStartPositionWorld;
     Vector3 pickPullEndPositionWorld;
-    NewtonHingeConstraint* hingeActuatorTest = nullptr;
+    NewtonRevoluteJoint* hingeActuatorTest = nullptr;
     float timeAccum = 0.0f;
 
 
@@ -193,7 +193,7 @@ private:
     WeakPtr<Node> robotRoot;
     WeakPtr<NewtonRigidBody> robotBaseBody;
     WeakPtr<NewtonRigidBody> robotEndBody;
-    WeakPtr<NewtonHingeConstraint> robotHinges[6];//base to end
+    WeakPtr<NewtonRevoluteJoint> robotHinges[6];//base to end
     MathExtras::PID<float> robotPIDControllers[6];
     MathExtras::SinglePoleLPFilter<float> robotControlFilters[6];
     float robotJointSpeedTargets[6];
@@ -207,6 +207,7 @@ private:
     void ReleasePickTargetOnPhysics();
     void UpdatePickPull();
     RayQueryResult GetCameraPickNode();
+    bool pickPullFreeze = false;
 
     //temp variable to tracking world position across updates.
     ea::vector<float> worldPosHistory_;

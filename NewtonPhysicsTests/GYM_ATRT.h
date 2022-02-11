@@ -37,7 +37,7 @@ public:
 		Node* HIP_LEFT = SpawnSamplePhysicsCylinder(rootNode, Vector3(0.0, -0.5, -0.5), 0.5, 0.25);
 		HIP_LEFT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
 
-		NewtonHingeConstraint* HIPBODYJOINT_LEFT = bodyNode->CreateComponent<NewtonHingeConstraint>();
+		NewtonRevoluteJoint* HIPBODYJOINT_LEFT = bodyNode->CreateComponent<NewtonRevoluteJoint>();
 		HIPBODYJOINT_LEFT->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
 		HIPBODYJOINT_LEFT->SetPosition(Vector3(0.0, -0.5, -0.5));
 		HIPBODYJOINT_LEFT->SetOtherBody(HIP_LEFT->GetComponent<NewtonRigidBody>());
@@ -51,7 +51,7 @@ public:
 		Node* KNEE2_LEFT = SpawnSamplePhysicsCylinder(rootNode, Vector3(0.5, -1.5, -0.75), 0.3, 0.25);
 		KNEE2_LEFT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
 
-		NewtonHingeConstraint* KNEEJOINT_LEFT = HIP_LEFT->CreateComponent<NewtonHingeConstraint>();
+		NewtonRevoluteJoint* KNEEJOINT_LEFT = HIP_LEFT->CreateComponent<NewtonRevoluteJoint>();
 		KNEEJOINT_LEFT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
 		KNEEJOINT_LEFT->SetWorldPosition(KNEE_LEFT->GetWorldPosition());
 		KNEEJOINT_LEFT->SetOtherBody(KNEE2_LEFT->GetComponent<NewtonRigidBody>());
@@ -65,7 +65,7 @@ public:
 		KNEE_LOWER_LEFT = SpawnSamplePhysicsCylinder(rootNode, Vector3(0.5, -2.5, -0.75), 0.3, 0.25);
 		KNEE_LOWER_LEFT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
 
-		NewtonHingeConstraint* KNEEJOINT2_LEFT = KNEE2_LEFT->CreateComponent<NewtonHingeConstraint>();
+		NewtonRevoluteJoint* KNEEJOINT2_LEFT = KNEE2_LEFT->CreateComponent<NewtonRevoluteJoint>();
 		KNEEJOINT2_LEFT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
 		KNEEJOINT2_LEFT->SetWorldPosition(KNEE3_LEFT->GetWorldPosition());
 		KNEEJOINT2_LEFT->SetOtherBody(KNEE_LOWER_LEFT->GetComponent<NewtonRigidBody>());
@@ -79,13 +79,15 @@ public:
 
 
 
-		Node* FOOT_LEFT2 = SpawnSamplePhysicsCylinder(KNEE_LOWER_LEFT, Vector3(0, -3, -0.75), 0.2, 0.25);
+		Node* FOOT_LEFT2 = SpawnSamplePhysicsBox(KNEE_LOWER_LEFT, Vector3(-0.2, -3, -0.6), Vector3(0.1, 0.3, 0.75));
 		FOOT_LEFT2->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(10.0f);
 
-		NewtonHingeConstraint* ENDJOINT_LEFT = KNEE_LOWER_LEFT->CreateComponent<NewtonHingeConstraint>();
+		NewtonRevoluteJoint* ENDJOINT_LEFT = KNEE_LOWER_LEFT->CreateComponent<NewtonRevoluteJoint>();
 		ENDJOINT_LEFT->SetWorldPosition(FOOT_LEFT->GetWorldPosition());
 		ENDJOINT_LEFT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
 		ENDJOINT_LEFT->SetOtherBody(FOOT_LEFT2->GetComponent<NewtonRigidBody>());
+		ENDJOINT_LEFT->SetMinAngle(-80.0f);
+		ENDJOINT_LEFT->SetMaxAngle(20.0f);
 		leftHinges.push_back(ENDJOINT_LEFT);
 
 
@@ -99,7 +101,7 @@ public:
 		Node* HIP_RIGHT = SpawnSamplePhysicsCylinder(rootNode, Vector3(0.0, -0.5, 0.5), 0.5, 0.25);
 		HIP_RIGHT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
 
-		NewtonHingeConstraint* HIPBODYJOINT_RIGHT = bodyNode->CreateComponent<NewtonHingeConstraint>();
+		NewtonRevoluteJoint* HIPBODYJOINT_RIGHT = bodyNode->CreateComponent<NewtonRevoluteJoint>();
 		HIPBODYJOINT_RIGHT->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
 		HIPBODYJOINT_RIGHT->SetPosition(Vector3(0.0, -0.5, 0.5));
 		HIPBODYJOINT_RIGHT->SetOtherBody(HIP_RIGHT->GetComponent<NewtonRigidBody>());
@@ -113,7 +115,7 @@ public:
 		Node* KNEE2_RIGHT = SpawnSamplePhysicsCylinder(rootNode, Vector3(0.5, -1.5, 0.5), 0.3, 0.25);
 		KNEE2_RIGHT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
 
-		NewtonHingeConstraint* KNEEJOINT_RIGHT = HIP_RIGHT->CreateComponent<NewtonHingeConstraint>();
+		NewtonRevoluteJoint* KNEEJOINT_RIGHT = HIP_RIGHT->CreateComponent<NewtonRevoluteJoint>();
 		KNEEJOINT_RIGHT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
 		KNEEJOINT_RIGHT->SetWorldPosition(KNEE_RIGHT->GetWorldPosition());
 		KNEEJOINT_RIGHT->SetOtherBody(KNEE2_RIGHT->GetComponent<NewtonRigidBody>());
@@ -126,7 +128,7 @@ public:
 		KNEE_LOWER_RIGHT = SpawnSamplePhysicsCylinder(rootNode, Vector3(0.5, -2.5, 0.5), 0.3, 0.25);
 		KNEE_LOWER_RIGHT->Rotate(Quaternion(90, Vector3(1, 0, 0)));
 
-		NewtonHingeConstraint* KNEEJOINT2_RIGHT = KNEE2_RIGHT->CreateComponent<NewtonHingeConstraint>();
+		NewtonRevoluteJoint* KNEEJOINT2_RIGHT = KNEE2_RIGHT->CreateComponent<NewtonRevoluteJoint>();
 		KNEEJOINT2_RIGHT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
 		KNEEJOINT2_RIGHT->SetWorldPosition(KNEE3_RIGHT->GetWorldPosition());
 		KNEEJOINT2_RIGHT->SetOtherBody(KNEE_LOWER_RIGHT->GetComponent<NewtonRigidBody>());
@@ -137,13 +139,15 @@ public:
 		FOOT_RIGHT->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(10.0f);
 
 
-		Node* FOOT_RIGHT2 = SpawnSamplePhysicsCylinder(KNEE_LOWER_RIGHT, Vector3(0, -3, 0.75), 0.2, 0.25);
+		Node* FOOT_RIGHT2 = SpawnSamplePhysicsBox(KNEE_LOWER_RIGHT, Vector3(-0.2, -3, 0.6), Vector3(0.1,0.3,0.75));
 		FOOT_RIGHT2->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(10.0f);
 
-		NewtonHingeConstraint* ENDJOINT_RIGHT = KNEE_LOWER_RIGHT->CreateComponent<NewtonHingeConstraint>();
+		NewtonRevoluteJoint* ENDJOINT_RIGHT = KNEE_LOWER_RIGHT->CreateComponent<NewtonRevoluteJoint>();
 		ENDJOINT_RIGHT->SetWorldPosition(FOOT_RIGHT->GetWorldPosition());
 		ENDJOINT_RIGHT->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
 		ENDJOINT_RIGHT->SetOtherBody(FOOT_RIGHT2->GetComponent<NewtonRigidBody>());
+		ENDJOINT_RIGHT->SetMinAngle(-80.0f);
+		ENDJOINT_RIGHT->SetMaxAngle(20.0f);
 		rightHinges.push_back(ENDJOINT_RIGHT);
 
 
@@ -177,26 +181,40 @@ public:
 		Matrix3x4 endEffectorLeftRelRoot = rootTransformLeft.Inverse() * endEffectorLeftWorld;
 
 
-		static float vertical = -2.0f;
-		//ui::SliderFloat("right offset x", &vertical, 0.0f, 10.0f);
-		Vector3 rightFootWorldOffset = Vector3(0, vertical, 0);
-		targetRightFootPosWorld = rootTransformRight.Translation() + rightFootWorldOffset;
+		static float vertical = 2.5f;
+		static float timeFactor = 50.0f;
+		static float footRaiseAmplitude = -0.1f;
+		static float footStrideAmplitude = -0.2f;
+		static float footStrideOffset = -0.2f;
+		ui::SliderFloat("Vertical", &vertical, 0.0f, 5.0f);
+		ui::SliderFloat("Time Factor", &timeFactor, 0.0f, 100.0f);
+		ui::SliderFloat("footRaiseAmplitude", &footRaiseAmplitude, -1.0f, 1.0f);
+		ui::SliderFloat("footStrideAmplitude", &footStrideAmplitude, -1.0f, 1.0f);
+		ui::SliderFloat("footStrideOffset", &footStrideOffset, -1.0f, 1.0f);
 
-		Vector3 leftFootWorldOffset = Vector3(0, vertical, 0);
-		targetLeftFootPosWorld = rootTransformLeft.Translation() + leftFootWorldOffset;
+
+		footPhaseDeg += timeFactor*timestep;
+		if (footPhaseDeg > 360.0)
+			footPhaseDeg = 360.0 - footPhaseDeg;
+
+		Vector3 rightFootWorldOffset = Vector3(0,-vertical + footRaiseAmplitude * Sin(footPhaseDeg), Sin(footPhaseDeg + 90.0f) * footStrideAmplitude + footStrideOffset);
+		targetRightFootPosWorld = (rootTransformRight * rightFootWorldOffset);
+
+		Vector3 leftFootWorldOffset = Vector3(0, -vertical - footRaiseAmplitude * Sin(footPhaseDeg), -Sin(footPhaseDeg + 90.0f) * footStrideAmplitude + footStrideOffset);
+		targetLeftFootPosWorld = (rootTransformLeft * leftFootWorldOffset);
 
 
 
 
-		targetRightPos = rootTransformRight.Inverse() * targetRightFootPosWorld;
+		Vector3 targetRightPos = rootTransformRight.Inverse() * targetRightFootPosWorld;
 		Vector3 deltaRight = (targetRightPos - endEffectorRightRelRoot.Translation());
 
-		targetLeftPos = rootTransformLeft.Inverse() * targetLeftFootPosWorld;
+		Vector3 targetLeftPos = rootTransformLeft.Inverse() * targetLeftFootPosWorld;
 		Vector3 deltaLeft = (targetLeftPos - endEffectorLeftRelRoot.Translation());
 
 
 
-		static float gain = 3.0f;
+		static float gain = 12.0f;
 		static float damping = 1.0f;
 		ui::SliderFloat("Gain", &gain, 1.0f, 100.0f);
 		ui::SliderFloat("Damping", &damping, 0.0f, 10.0f);
@@ -354,10 +372,10 @@ public:
 		debugRenderer->AddFrame(Matrix3x4(targetRightFootPosWorld, Quaternion::IDENTITY, 1.0f));
 	}
 
-	ea::vector<NewtonHingeConstraint*> motors;
+	ea::vector<NewtonRevoluteJoint*> motors;
 
-	ea::vector<NewtonHingeConstraint*> leftHinges;
-	ea::vector<NewtonHingeConstraint*> rightHinges;
+	ea::vector<NewtonRevoluteJoint*> leftHinges;
+	ea::vector<NewtonRevoluteJoint*> rightHinges;
 
 
 	WeakPtr<Node> bodyNode;
@@ -369,8 +387,7 @@ public:
 	Vector3 targetRightFootPosWorld;
 	Vector3 targetLeftFootPosWorld;
 
-	Vector3 targetRightPos;
-	Vector3 targetLeftPos;
+	float footPhaseDeg = 0.0f;
 
 	Vector3 targetWorldVel;
 };

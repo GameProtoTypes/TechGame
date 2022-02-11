@@ -7,7 +7,7 @@
 #include "NewtonConstraint.h"
 #include "NewtonSliderConstraint.h"
 #include "NewtonFullyFixedConstraint.h"
-#include "NewtonHingeConstraint.h"
+#include "NewtonRevoluteJoint.h"
 
 #include "MathExtras.h"
 
@@ -418,9 +418,9 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			//}
 			//else
 			//{
-			//	constraint = holeBody->GetNode()->CreateComponent<NewtonHingeConstraint>();
-			//	static_cast<NewtonHingeConstraint*>(constraint)->SetEnableLimits(false);
-			//	static_cast<NewtonHingeConstraint*>(constraint)->SetFriction(twistFriction);
+			//	constraint = holeBody->GetNode()->CreateComponent<NewtonRevoluteJoint>();
+			//	static_cast<NewtonRevoluteJoint*>(constraint)->SetEnableLimits(false);
+			//	static_cast<NewtonRevoluteJoint*>(constraint)->SetFriction(twistFriction);
 			//}
 
 				ComputeSlideLimits(theHoleRow, theRodRow, pieceManager, constraint, rodBody, diffSnap45);

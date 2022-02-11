@@ -57,7 +57,7 @@
 #include "NewtonBallAndSocketConstraint.h"
 #include "NewtonKinematicsJoint.h"
 #include "NewtonFullyFixedConstraint.h"
-#include "NewtonHingeConstraint.h"
+#include "NewtonRevoluteJoint.h"
 #include "NewtonSliderConstraint.h"
 #include "NewtonPhysicsEvents.h"
 #include "NewtonRigidBody.h"
@@ -389,7 +389,19 @@ void PhysicsTests::MoveCamera(float timeStep)
 
 
     if (input->GetMouseButtonPress(MOUSEB_LEFT))
-        CreatePickTargetNodeOnPhysics();
+    {
+        if(pickPullNode)
+        {
+            ReleasePickTargetOnPhysics();
+            
+        }
+        else
+        {
+            CreatePickTargetNodeOnPhysics();
+        }
+
+    }
+        
 
 	hoverNode = GetCameraPickNode().node_;
 
@@ -1248,7 +1260,7 @@ void PhysicsTests::SpawnSegway(Vector3 worldPosition)
     Node* Wheel = SpawnSamplePhysicsCylinder(root, Vector3(0, -3, 0), 1.0, 0.125);
     Wheel->Rotate(Quaternion(90, Vector3(1, 0, 0)));
 
-    NewtonHingeConstraint* motor = Body->CreateComponent<NewtonHingeConstraint>();
+    NewtonRevoluteJoint* motor = Body->CreateComponent<NewtonRevoluteJoint>();
     motor->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
     motor->SetPosition(Vector3(0, -3, 0));
     motor->SetEnableLimits(false);
@@ -1259,7 +1271,7 @@ void PhysicsTests::SpawnSegway(Vector3 worldPosition)
 	//top weigth
 	Node* top = SpawnSamplePhysicsCylinder(root, Vector3(0, 3, 0), 1);
 
-	NewtonHingeConstraint* topMotor = Body->CreateComponent<NewtonHingeConstraint>();
+	NewtonRevoluteJoint* topMotor = Body->CreateComponent<NewtonRevoluteJoint>();
 
 	topMotor->SetPosition(Vector3(0, 3, 0));
 	topMotor->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
@@ -1284,32 +1296,32 @@ void PhysicsTests::SpawnRobotArm(Vector3 worldPosition)
 
 	Node* base2 = SpawnSamplePhysicsCylinder(root, Vector3(0,1,0), 1, 1);
 
-	NewtonHingeConstraint* motor1 = base->CreateComponent<NewtonHingeConstraint>();
+	NewtonRevoluteJoint* motor1 = base->CreateComponent<NewtonRevoluteJoint>();
 	motor1->SetOtherBody(base2->GetComponent<NewtonRigidBody>());
 	motor1->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
 	motor1->SetEnableLimits(false);
     robotHinges[0] = motor1;
 
 	Node* arm1 = SpawnSamplePhysicsBox(root, Vector3(0, 2, 0), Vector3(1, 3, 1));
-	NewtonHingeConstraint* motor2 = base2->CreateComponent<NewtonHingeConstraint>();
+	NewtonRevoluteJoint* motor2 = base2->CreateComponent<NewtonRevoluteJoint>();
 	motor2->SetOtherBody(arm1->GetComponent<NewtonRigidBody>());
     robotHinges[1] = motor2;
 
 	Node* arm2 = SpawnSamplePhysicsBox(root, Vector3(0, 4, 0), Vector3(1, 3, 1));
-	NewtonHingeConstraint* motor3 = arm1->CreateComponent<NewtonHingeConstraint>();
+	NewtonRevoluteJoint* motor3 = arm1->CreateComponent<NewtonRevoluteJoint>();
 	motor3->SetOtherBody(arm2->GetComponent<NewtonRigidBody>());
 	motor3->SetPosition(Vector3(0,1,0));
     robotHinges[2] = motor3;
 
 
 	Node* arm3 = SpawnSamplePhysicsBox(root, Vector3(0, 6, 0), Vector3(1, 3, 1));
-	NewtonHingeConstraint* motor4 = arm2->CreateComponent<NewtonHingeConstraint>();
+	NewtonRevoluteJoint* motor4 = arm2->CreateComponent<NewtonRevoluteJoint>();
 	motor4->SetOtherBody(arm3->GetComponent<NewtonRigidBody>());
 	motor4->SetPosition(Vector3(0, 1, 0));
     robotHinges[3] = motor4;
 
 	Node* wrist = SpawnSamplePhysicsCylinder(root, Vector3(0, 7.5, 0), 0.5, 0.5);
-	NewtonHingeConstraint* motor5 = arm3->CreateComponent<NewtonHingeConstraint>();
+	NewtonRevoluteJoint* motor5 = arm3->CreateComponent<NewtonRevoluteJoint>();
 	motor5->SetOtherBody(wrist->GetComponent<NewtonRigidBody>());
 	motor5->SetPosition(Vector3(0, 1, 0));
 	motor5->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
@@ -1317,7 +1329,7 @@ void PhysicsTests::SpawnRobotArm(Vector3 worldPosition)
 
 
 	Node* arm4 = SpawnSamplePhysicsBox(root, Vector3(0, 8.5, 0), Vector3(0.5, 1.5, 0.5));
-	NewtonHingeConstraint* motor6 = wrist->CreateComponent<NewtonHingeConstraint>();
+	NewtonRevoluteJoint* motor6 = wrist->CreateComponent<NewtonRevoluteJoint>();
 	motor6->SetOtherBody(arm4->GetComponent<NewtonRigidBody>());
 	motor6->SetPosition(Vector3(0, 0, 0));
     robotHinges[5] = motor6;
@@ -1384,7 +1396,7 @@ void PhysicsTests::SpawnRejointingTest(Vector3 worldPosition)
 	reJointB->SetName("reJointB");
 
 
-	NewtonHingeConstraint* constraint = reJointA->CreateComponent<NewtonHingeConstraint>();
+	NewtonRevoluteJoint* constraint = reJointA->CreateComponent<NewtonRevoluteJoint>();
 	constraint->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
 
 
@@ -1676,7 +1688,8 @@ void PhysicsTests::TransportNode()
 
 void PhysicsTests::HandleMouseButtonUp(StringHash eventType, VariantMap& eventData)
 {
-    ReleasePickTargetOnPhysics();
+    if(!pickPullFreeze)
+		ReleasePickTargetOnPhysics();
 }
 
 void PhysicsTests::HandleMouseButtonDown(StringHash eventType, VariantMap& eventData)
@@ -1934,11 +1947,11 @@ void PhysicsTests::UpdateRobotArm(float timestep)
     Vector3 rootWorldOmega = robotHinges[0]->GetOwnWorldFrameOmega();
     Matrix3x4 endEffectorWorld = robotHinges[5]->GetOwnWorldFrame();
     Matrix3x4 endEffectorRelRoot = rootTransform.Inverse() * endEffectorWorld;
-    Vector3 hingeLocalRotationAxis = NewtonHingeConstraint::LocalHingeAxis();
+    Vector3 hingeLocalRotationAxis = NewtonRevoluteJoint::LocalHingeAxis();
     Vector3 d_n_0 = endEffectorRelRoot.Translation();
 
 
-    ea::vector<NewtonHingeConstraint*> constraintChain;
+    ea::vector<NewtonRevoluteJoint*> constraintChain;
     for (int i = 0; i < 6; i++)
         constraintChain.push_back(robotHinges[i]);
 
@@ -1961,7 +1974,7 @@ void PhysicsTests::UpdateRobotArm(float timestep)
 
     Vector3 endForce = gain * delta - damping * (rootTransform.RotationMatrix().Inverse() * robotHinges[5]->GetOwnWorldFrameVel());
     Vector3 endTorque = Vector3::ZERO;
-    ea::vector<NewtonHingeConstraint*> chain;
+    ea::vector<NewtonRevoluteJoint*> chain;
     for (int i = 0; i < 6; i++)
         chain.push_back(robotHinges[i]);
     ChainJacobian chainJac;
@@ -2045,7 +2058,7 @@ void PhysicsTests::ReleasePickTargetOnPhysics()
         pickPullNode->RemoveComponent<NewtonKinematicsControllerConstraint>();
         pickPullNode = nullptr;
     }
-
+    pickPullFreeze = false;
     cameraNode_->RemoveChild(cameraNode_->GetChild("CameraPullPoint"));
 }
 void PhysicsTests::UpdatePickPull()
@@ -2055,21 +2068,25 @@ void PhysicsTests::UpdatePickPull()
     if (pickTarget == nullptr)
         return;
     if (pickPullNode == nullptr)
+    {
         return;
-
+    }
 
     Node* pickSource = pickPullNode->GetChild("PickPullSurfaceNode");
 
     if (pickSource == nullptr)
         return;
 
-    pickPullNode->GetComponent<NewtonKinematicsControllerConstraint>()->SetOtherPosition(pickTarget->GetWorldPosition());
-    pickPullNode->GetComponent<NewtonKinematicsControllerConstraint>()->SetOtherRotation(cameraNode_->GetWorldRotation() );
+    if (GetSubsystem<Input>()->GetKeyPress(KEY_G))
+        pickPullFreeze = !pickPullFreeze;
 
+
+    if (!pickPullFreeze)
+    {
+        pickPullNode->GetComponent<NewtonKinematicsControllerConstraint>()->SetOtherPosition(pickTarget->GetWorldPosition());
+        pickPullNode->GetComponent<NewtonKinematicsControllerConstraint>()->SetOtherRotation(cameraNode_->GetWorldRotation());
+    }
 }
-
-
-
 
 
 

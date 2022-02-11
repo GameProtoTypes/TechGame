@@ -42,7 +42,7 @@ public:
 		C->GetComponent<NewtonRigidBody>()->SetCollisionOverride(bodyNode->GetComponent<NewtonRigidBody>(), false);
 
 		//make back spring.
-		backSuspension = bodyNode->CreateComponent<NewtonHingeConstraint>();
+		backSuspension = bodyNode->CreateComponent<NewtonRevoluteJoint>();
 		backSuspension->SetOtherBody(C->GetComponent<NewtonRigidBody>());
 		backSuspension->SetWorldRotation(Quaternion(90, 0, 90));
 		backSuspension->SetWorldPosition(bodyNode->GetWorldPosition() + Vector3(0, -0.5, 0));
@@ -59,7 +59,7 @@ public:
 		E->SetWorldRotation(Quaternion(0, 0, 20));
 
 
-		NewtonHingeConstraint* hinge = E->CreateComponent<NewtonHingeConstraint>();
+		NewtonRevoluteJoint* hinge = E->CreateComponent<NewtonRevoluteJoint>();
 		hinge->SetOtherBody(bodyNode->GetComponent<NewtonRigidBody>());
 		hinge->SetWorldPosition(Vector3::ZERO + Vector3(1.2, 0.8, 0));
 		hinge->SetWorldRotation(Quaternion(0, 0, -90 + 20));
@@ -94,7 +94,7 @@ public:
 		backWheel->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(wheelFriction);
 
 
-		NewtonHingeConstraint* motor = backWheel->CreateComponent<NewtonHingeConstraint>();
+		NewtonRevoluteJoint* motor = backWheel->CreateComponent<NewtonRevoluteJoint>();
 		motor->SetOtherBody(C->GetComponent<NewtonRigidBody>());
 		motor->SetWorldPosition(Vector3::ZERO + backWheelOffset);
 		motor->SetWorldRotation(Quaternion(0, 90, 0));
@@ -110,8 +110,8 @@ public:
 		frontWheel->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(wheelFriction);
 
 
-		NewtonHingeConstraint* frontAxle = frontWheel->CreateComponent<NewtonHingeConstraint>();
-		//frontAxle->SetPowerMode(NewtonHingeConstraint::MOTOR_TORQUE);
+		NewtonRevoluteJoint* frontAxle = frontWheel->CreateComponent<NewtonRevoluteJoint>();
+		//frontAxle->SetPowerMode(NewtonRevoluteJoint::MOTOR_TORQUE);
 		frontAxle->SetOtherBody(F->GetComponent<NewtonRigidBody>());
 		frontAxle->SetWorldPosition(Vector3::ZERO + frontWheelOffset);
 		frontAxle->SetWorldRotation(Quaternion(0, 90, 0));
@@ -350,7 +350,7 @@ public:
 
 	}
 
-	ea::vector<NewtonHingeConstraint*> motors;
+	ea::vector<NewtonRevoluteJoint*> motors;
 	WeakPtr<Node> bodyNode;
 
 	Vector3 targetAngularVel;
@@ -370,6 +370,6 @@ public:
 	float baseVelFactorParam = 10.0f;
 	float hingeTorquePParam = 10.0f;
 
-	WeakPtr<NewtonHingeConstraint> backSuspension;
+	WeakPtr<NewtonRevoluteJoint> backSuspension;
 	WeakPtr<NewtonSliderConstraint> frontSuspension;
 };

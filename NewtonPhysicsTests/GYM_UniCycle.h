@@ -36,7 +36,7 @@ public:
 		Wheel->Rotate(Quaternion(90, Vector3(1, 0, 0)));
 		Wheel->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(20);
 
-		NewtonHingeConstraint* motor = bodyNode->CreateComponent<NewtonHingeConstraint>();
+		NewtonRevoluteJoint* motor = bodyNode->CreateComponent<NewtonRevoluteJoint>();
 		motor->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
 		motor->SetPosition(Vector3(0, -3, 0));
 		motor->SetEnableLimits(false);
@@ -114,7 +114,7 @@ public:
 		debugRenderer->AddCross(Vector3(targetX, worldPos.y_, worldPos.z_), 1, Color::GREEN);
 	}
 
-	ea::vector<NewtonHingeConstraint*> motors;
+	ea::vector<NewtonRevoluteJoint*> motors;
 	WeakPtr<Node> bodyNode;
 	WeakPtr<Node> top;
 	float targetX = 0.0f;

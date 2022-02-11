@@ -5,7 +5,7 @@
 #include "NewtonCollisionShapesDerived.h"
 #include "PieceManager.h"
 #include "PieceGear.h"
-#include "NewtonHingeConstraint.h"
+#include "NewtonRevoluteJoint.h"
 
 
 Node* PieceManager::CreatePiece(ea::string name, bool loadExisting)
@@ -1210,7 +1210,7 @@ Urho3D::Node* PieceManager::CreatePieceAssembly(ea::string name, bool loadExisti
 
 
 			//make motor constraint between the 2 bodies
-			NewtonHingeConstraint* constraint = outerHousingBody->GetNode()->CreateComponent<NewtonHingeConstraint>();
+			NewtonRevoluteJoint* constraint = outerHousingBody->GetNode()->CreateComponent<NewtonRevoluteJoint>();
 
 			constraint->SetOtherBody(innerHousingBody);
 			
