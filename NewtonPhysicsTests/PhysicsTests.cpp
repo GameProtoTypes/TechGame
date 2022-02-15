@@ -1210,16 +1210,18 @@ void PhysicsTests::ResetGYMs()
 	}
 
 
-	//int sqrt = Sqrt(gymCli->numGYMS);
+	int sqrt = Sqrt(gymCli->numGYMS);
 
 	int i = 0; 
-
-	for (int y = 0; y <= gymCli->numGYMS; y++)
+    
+	for (int y = 0; y <= sqrt; y++)
 	{
-		if (i >= gyms.size()) continue;
-		gyms[i]->worldPos = Vector3(0, 3.5, y*5);
-		i++;
-
+        for (int x = 0; x <= sqrt; x++)
+        {
+            if (i >= gyms.size()) continue;
+            gyms[i]->worldPos = Vector3(x * 10, 3.5, y * 10);
+            i++;
+        }
 	}
 	
 

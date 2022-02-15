@@ -39,7 +39,7 @@ def eval_genomes(genomes, config):
             gymIdx+=1
 
         
-        states, rewards, ends = gym.TakeActions(actions,True)
+        states, rewards, ends = gym.TakeActions(actions,False)
 
         #print(np.shape(fitnesses))
         #print(np.shape(states))
