@@ -82,10 +82,7 @@
 PhysicsTests::PhysicsTests(Context* context) : Application(context),
                                                yaw_(0.0f),
                                                pitch_(0.0f),
-                                               touchEnabled_(false),
                                                useMouseMode_(MM_ABSOLUTE),
-                                               screenJoystickIndex_(M_MAX_UNSIGNED),
-                                               screenJoystickSettingsIndex_(M_MAX_UNSIGNED),
                                                paused_(false)
 {}
 
@@ -99,14 +96,6 @@ void PhysicsTests::Start(const ea::vector<ea::string>& args)
 
 void PhysicsTests::Start()
 {
-    // Execute base class startup
-	if (GetPlatform() == "Android" || GetPlatform() == "iOS")
-		// On mobile platform, enable touch by adding a screen joystick
-		InitTouchInput();
-	else if (GetSubsystem<Input>()->GetNumJoysticks() == 0)
-		// On desktop platform, do not detect touch when we already got a joystick
-		SubscribeToEvent(E_TOUCHBEGIN, URHO3D_HANDLER(PhysicsTests, HandleTouchBegin));
-
 
 	// Set custom window Title & Icon
 	SetWindowTitleAndIcon();
@@ -131,6 +120,7 @@ void PhysicsTests::Start()
 	context_->RegisterFactory<GYM_UniCycle>();
 	
 	GetSubsystem<Engine>()->SetMinFps(60);
+    GetSubsystem<Engine>()->SetMaxFps(120);
 
 
     // Create the scene content
@@ -1263,7 +1253,7 @@ void PhysicsTests::SpawnSegway(Vector3 worldPosition)
     NewtonRevoluteJoint* motor = Body->CreateComponent<NewtonRevoluteJoint>();
     motor->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
     motor->SetPosition(Vector3(0, -3, 0));
-    motor->SetEnableLimits(false);
+    motor->SetEnableHingeLimits(false);
     motor->SetOtherBody(Wheel->GetComponent<NewtonRigidBody>());
 	//motor->SetMotorTorque(1);
 	//motor->SetMotorMaxAngularRate(99999.0f);
@@ -1275,7 +1265,7 @@ void PhysicsTests::SpawnSegway(Vector3 worldPosition)
 
 	topMotor->SetPosition(Vector3(0, 3, 0));
 	topMotor->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
-	topMotor->SetEnableLimits(false);
+	topMotor->SetEnableHingeLimits(false);
 	topMotor->SetOtherBody(top->GetComponent<NewtonRigidBody>());
 
 
@@ -1299,7 +1289,7 @@ void PhysicsTests::SpawnRobotArm(Vector3 worldPosition)
 	NewtonRevoluteJoint* motor1 = base->CreateComponent<NewtonRevoluteJoint>();
 	motor1->SetOtherBody(base2->GetComponent<NewtonRigidBody>());
 	motor1->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
-	motor1->SetEnableLimits(false);
+	motor1->SetEnableHingeLimits(false);
     robotHinges[0] = motor1;
 
 	Node* arm1 = SpawnSamplePhysicsBox(root, Vector3(0, 2, 0), Vector3(1, 3, 1));
@@ -1343,7 +1333,7 @@ void PhysicsTests::SpawnRobotArm(Vector3 worldPosition)
     for(int i = 0 ; i < 6; i++)
     {
         robotHinges[i]->SetFrictionCoef(1.0f);
-        robotHinges[i]->SetEnableLimits(false);
+        robotHinges[i]->SetEnableHingeLimits(false);
         robotHinges[i]->GetOtherBody()->SetNoCollideOverride(true);
     }
 
@@ -1494,6 +1484,14 @@ if (drawDebug_) {
 	bool orbitGYMPressed = ui::Checkbox("Orbit GYM", &orbitGYM);
 
 
+
+    ui::Begin("Frame Stats");
+    ui::Text("Time Step: %f", timeStep);
+    ui::Text("fps: %f", GetSubsystem<Time>()->GetFramesPerSecond());
+    ui::End();
+
+
+
 	ui::Text("NumGYMS: %d", context_->GetSubsystem<GymClient>()->numGYMS);
 	if (doFrSim)
 	{
@@ -1563,9 +1561,11 @@ if (drawDebug_) {
 
 
 
+    static bool debugPhysics = false;
+    ui::Checkbox("Debug Physics", &debugPhysics);
+    if(debugPhysics)
+		scene_->GetComponent<NewtonPhysicsWorld>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), false);
 
-
-	scene_->GetComponent<NewtonPhysicsWorld>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), false);
 	GetSubsystem<VisualDebugger>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>());
 
 	for (int i = 0; i < gyms.size(); i++)
@@ -1575,7 +1575,8 @@ if (drawDebug_) {
 
     if(endEffectorTarget)
 		scene_->GetComponent<DebugRenderer>()->AddNode(endEffectorTarget);
-    
+
+
 }
 
 	
@@ -2092,24 +2093,7 @@ void PhysicsTests::UpdatePickPull()
 
 
 
-void PhysicsTests::InitTouchInput()
-{
-	touchEnabled_ = true;
 
-	ResourceCache* cache = GetSubsystem<ResourceCache>();
-	Input* input = GetSubsystem<Input>();
-	XMLFile* layout = cache->GetResource<XMLFile>("UI/ScreenJoystick_Samples.xml");
-	const ea::string& patchString = GetScreenJoystickPatchString();
-	if (!patchString.empty())
-	{
-		// Patch the screen joystick layout further on demand
-		SharedPtr<XMLFile> patchFile(new XMLFile(context_));
-		if (patchFile->FromString(patchString))
-			layout->Patch(patchFile);
-	}
-	screenJoystickIndex_ = (unsigned)input->AddScreenJoystick(layout, cache->GetResource<XMLFile>("UI/DefaultStyle.xml"));
-	input->SetScreenJoystickVisible(screenJoystickSettingsIndex_, true);
-}
 
 void PhysicsTests::InitMouseMode(MouseMode mode)
 {
@@ -2204,141 +2188,94 @@ void PhysicsTests::HandleKeyDown(StringHash /*eventType*/, VariantMap& eventData
 	}
 #endif
 
-	// Common rendering quality controls, only when UI has no focused element
-	if (!GetSubsystem<UI>()->GetFocusElement())
+	// Common rendering quality controls
+	Renderer* renderer = GetSubsystem<Renderer>();
+
+	// Preferences / Pause
+	if (key == KEY_SELECT)
 	{
-		Renderer* renderer = GetSubsystem<Renderer>();
-
-		// Preferences / Pause
-		if (key == KEY_SELECT && touchEnabled_)
-		{
-			paused_ = !paused_;
-
-			Input* input = GetSubsystem<Input>();
-			if (screenJoystickSettingsIndex_ == M_MAX_UNSIGNED)
-			{
-				// Lazy initialization
-				ResourceCache* cache = GetSubsystem<ResourceCache>();
-				screenJoystickSettingsIndex_ = (unsigned)input->AddScreenJoystick(cache->GetResource<XMLFile>("UI/ScreenJoystickSettings_Samples.xml"), cache->GetResource<XMLFile>("UI/DefaultStyle.xml"));
-			}
-			else
-				input->SetScreenJoystickVisible(screenJoystickSettingsIndex_, paused_);
-		}
-
-		// Texture quality
-		else if (key == '1')
-		{
-			auto quality = (unsigned)renderer->GetTextureQuality();
-			++quality;
-			if (quality > QUALITY_HIGH)
-				quality = QUALITY_LOW;
-			renderer->SetTextureQuality((MaterialQuality)quality);
-		}
-
-		// Material quality
-		else if (key == '2')
-		{
-			auto quality = (unsigned)renderer->GetMaterialQuality();
-			++quality;
-			if (quality > QUALITY_HIGH)
-				quality = QUALITY_LOW;
-			renderer->SetMaterialQuality((MaterialQuality)quality);
-		}
-
-		// Specular lighting
-		else if (key == '3')
-			renderer->SetSpecularLighting(!renderer->GetSpecularLighting());
-
-		// Shadow rendering
-		else if (key == '4')
-			renderer->SetDrawShadows(!renderer->GetDrawShadows());
-
-		// Shadow map resolution
-		else if (key == '5')
-		{
-			int shadowMapSize = renderer->GetShadowMapSize();
-			shadowMapSize *= 2;
-			if (shadowMapSize > 2048)
-				shadowMapSize = 512;
-			renderer->SetShadowMapSize(shadowMapSize);
-		}
-
-		// Shadow depth and filtering quality
-		else if (key == '6')
-		{
-			ShadowQuality quality = renderer->GetShadowQuality();
-			quality = (ShadowQuality)(quality + 1);
-			if (quality > SHADOWQUALITY_BLUR_VSM)
-				quality = SHADOWQUALITY_SIMPLE_16BIT;
-			renderer->SetShadowQuality(quality);
-		}
-
-		// Occlusion culling
-		else if (key == '7')
-		{
-			bool occlusion = renderer->GetMaxOccluderTriangles() > 0;
-			occlusion = !occlusion;
-			renderer->SetMaxOccluderTriangles(occlusion ? 5000 : 0);
-		}
-
-		// Instancing
-		else if (key == '8')
-			renderer->SetDynamicInstancing(!renderer->GetDynamicInstancing());
-
-		// Take screenshot
-		else if (key == '9')
-		{
-			Graphics* graphics = GetSubsystem<Graphics>();
-			Image screenshot(context_);
-			graphics->TakeScreenShot(screenshot);
-			// Here we save in the Data folder with date and time appended
-			screenshot.SavePNG(GetSubsystem<FileSystem>()->GetProgramDir() + "Data/Screenshot_" +
-				Time::GetTimeStamp().replaced(':', '_').replaced('.', '_').replaced(' ', '_') + ".png");
-		}
+		paused_ = !paused_;
 	}
+
+	// Texture quality
+	else if (key == '1')
+	{
+		auto quality = (unsigned)renderer->GetTextureQuality();
+		++quality;
+		if (quality > QUALITY_HIGH)
+			quality = QUALITY_LOW;
+		renderer->SetTextureQuality((MaterialQuality)quality);
+	}
+
+	// Material quality
+	else if (key == '2')
+	{
+		auto quality = (unsigned)renderer->GetMaterialQuality();
+		++quality;
+		if (quality > QUALITY_HIGH)
+			quality = QUALITY_LOW;
+		renderer->SetMaterialQuality((MaterialQuality)quality);
+	}
+
+	// Specular lighting
+	else if (key == '3')
+		renderer->SetSpecularLighting(!renderer->GetSpecularLighting());
+
+	// Shadow rendering
+	else if (key == '4')
+		renderer->SetDrawShadows(!renderer->GetDrawShadows());
+
+	// Shadow map resolution
+	else if (key == '5')
+	{
+		int shadowMapSize = renderer->GetShadowMapSize();
+		shadowMapSize *= 2;
+		if (shadowMapSize > 2048)
+			shadowMapSize = 512;
+		renderer->SetShadowMapSize(shadowMapSize);
+	}
+
+	// Shadow depth and filtering quality
+	else if (key == '6')
+	{
+		ShadowQuality quality = renderer->GetShadowQuality();
+		quality = (ShadowQuality)(quality + 1);
+		if (quality > SHADOWQUALITY_BLUR_VSM)
+			quality = SHADOWQUALITY_SIMPLE_16BIT;
+		renderer->SetShadowQuality(quality);
+	}
+
+	// Occlusion culling
+	else if (key == '7')
+	{
+		bool occlusion = renderer->GetMaxOccluderTriangles() > 0;
+		occlusion = !occlusion;
+		renderer->SetMaxOccluderTriangles(occlusion ? 5000 : 0);
+	}
+
+	// Instancing
+	else if (key == '8')
+		renderer->SetDynamicInstancing(!renderer->GetDynamicInstancing());
+
+	// Take screenshot
+	else if (key == '9')
+	{
+		Graphics* graphics = GetSubsystem<Graphics>();
+		Image screenshot(context_);
+		graphics->TakeScreenShot(screenshot);
+		// Here we save in the Data folder with date and time appended
+		screenshot.SavePNG(GetSubsystem<FileSystem>()->GetProgramDir() + "Data/Screenshot_" +
+			Time::GetTimeStamp().replaced(':', '_').replaced('.', '_').replaced(' ', '_') + ".png");
+	}
+	
 }
 
 void PhysicsTests::HandleSceneUpdate(StringHash /*eventType*/, VariantMap& eventData)
 {
-	// Move the camera by touch, if the camera node is initialized by descendant sample class
-	if (touchEnabled_ && cameraNode_)
-	{
-		Input* input = GetSubsystem<Input>();
-		for (unsigned i = 0; i < input->GetNumTouches(); ++i)
-		{
-			TouchState* state = input->GetTouch(i);
-			if (!state->touchedElement_)    // Touch on empty space
-			{
-				if (state->delta_.x_ || state->delta_.y_)
-				{
-					Camera* camera = cameraNode_->GetComponent<Camera>();
-					if (!camera)
-						return;
-
-					Graphics* graphics = GetSubsystem<Graphics>();
-					yaw_ += TOUCH_SENSITIVITY * camera->GetFov() / graphics->GetHeight() * state->delta_.x_;
-					pitch_ += TOUCH_SENSITIVITY * camera->GetFov() / graphics->GetHeight() * state->delta_.y_;
-
-					// Construct new orientation for the camera scene node from yaw and pitch; roll is fixed to zero
-					cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
-				}
-				else
-				{
-					// Move the cursor to the touch position
-					Cursor* cursor = GetSubsystem<UI>()->GetCursor();
-					if (cursor && cursor->IsVisible())
-						cursor->SetPosition(state->position_);
-				}
-			}
-		}
-	}
 }
 
 void PhysicsTests::HandleTouchBegin(StringHash /*eventType*/, VariantMap& eventData)
 {
-	// On some platforms like Windows the presence of touch input can only be detected dynamically
-	InitTouchInput();
-	UnsubscribeFromEvent("TouchBegin");
 }
 
 // If the user clicks the canvas, attempt to switch to relative mouse mode on web platform

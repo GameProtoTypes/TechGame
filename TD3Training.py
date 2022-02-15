@@ -34,7 +34,9 @@ if __name__ == "__main__":
 	
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--policy_name", default="TD3")					# Policy name
-	parser.add_argument("--env_name", default="TrialBike")			        # gym environment name
+	parser.add_argument("--netwidth", default="10")
+	parser.add_argument("--netdepth", default="2")#todo
+	parser.add_argument("--env_name", default="ATRT")			        # gym environment name
 	parser.add_argument("--seed", default=0, type=int)					# Sets Gym, PyTorch and Numpy seeds
 	parser.add_argument("--start_timesteps", default=1e4, type=int)		# How many time steps purely random policy is run for
 	parser.add_argument("--eval_freq", default=1e4, type=float)			# How often (time steps) we evaluate
@@ -80,7 +82,7 @@ if __name__ == "__main__":
 	max_action = 1.0
 
 	# Initialize policy
-	if args.policy_name == "TD3": policy = TD3.TD3(state_dim, action_dim, max_action)
+	if args.policy_name == "TD3": policy = TD3.TD3(state_dim, action_dim, max_action,netdepth=int(args.netdepth), netwidth=int(args.netwidth))
 	elif args.policy_name == "OurDDPG": policy = OurDDPG.DDPG(state_dim, action_dim, max_action)
 	elif args.policy_name == "DDPG": policy = DDPG.DDPG(state_dim, action_dim, max_action)
 
@@ -155,7 +157,7 @@ if __name__ == "__main__":
 
 
 		# Perform actions
-		new_obs, rewards, dones = gym.TakeActions(np.transpose(actions), False) 
+		new_obs, rewards, dones = gym.TakeActions(np.transpose(actions), True) 
 		
 		episode_rewards += np.transpose(rewards)
 

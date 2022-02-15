@@ -63,7 +63,7 @@ public:
 		hinge->SetOtherBody(bodyNode->GetComponent<NewtonRigidBody>());
 		hinge->SetWorldPosition(Vector3::ZERO + Vector3(1.2, 0.8, 0));
 		hinge->SetWorldRotation(Quaternion(0, 0, -90 + 20));
-		//hinge->SetEnableLimits(true);
+		//hinge->SetEnableHingeLimits(true);
 	//	hinge->SetMaxAngle(30);
 	//	hinge->SetMinAngle(-30);
 		//hinge->SetSolveMode(SOLVE_MODE_EXACT);
@@ -98,7 +98,7 @@ public:
 		motor->SetOtherBody(C->GetComponent<NewtonRigidBody>());
 		motor->SetWorldPosition(Vector3::ZERO + backWheelOffset);
 		motor->SetWorldRotation(Quaternion(0, 90, 0));
-		motor->SetEnableLimits(false);
+		motor->SetEnableHingeLimits(false);
 
 
 		Vector3 frontWheelOffset = Vector3(1.8, -1, 0);
@@ -115,7 +115,7 @@ public:
 		frontAxle->SetOtherBody(F->GetComponent<NewtonRigidBody>());
 		frontAxle->SetWorldPosition(Vector3::ZERO + frontWheelOffset);
 		frontAxle->SetWorldRotation(Quaternion(0, 90, 0));
-		frontAxle->SetEnableLimits(false);
+		frontAxle->SetEnableHingeLimits(false);
 		//frontAxle->SetSolveMode(SOLVE_MODE_EXACT);
 		//frontAxle->SetMotorTargetAngularRate(10);
 
@@ -211,9 +211,10 @@ public:
 		frontSuspension->SetCommandedForce(-k * frontSuspension->GetDisplacement() - d*frontSuspension->GetVel());
 
 		//Back Spring Dynamics
-		k = 100;
+		k = 10;
 		d = 10;
-		backSuspension->SetCommandedTorque(-k * backSuspension->GetAngle()- d*backSuspension->GetHingeAngularVelocity());
+		ui::Text("backagnel: %f", backSuspension->GetAngle());
+		backSuspension->SetCommandedTorque(k * (backSuspension->GetAngle()) + d*backSuspension->GetHingeAngularVelocity());
 
 		
 
@@ -273,7 +274,7 @@ public:
 		float steerError = targetSteerAngle - curSteerAngle;
 		stat4.push_back(steerError);
 		float hingeTorque = hingeTorquePParam * steerError - 0.0f*motors[0]->GetWorldAngularRate().Length();
-		motors[0]->SetCommandedTorque(hingeTorque);
+		motors[0]->SetCommandedTorque(-hingeTorque);
 		frontHingeTorques.push_back(hingeTorque);
 
 
@@ -282,7 +283,7 @@ public:
 		float targetForwardTilt = 0.0f;
 		float forwardTiltError = targetForwardTilt - curForwardTilt;
 
-		motors[1]->SetCommandedTorque(throttleTorque);
+		motors[1]->SetCommandedTorque(-throttleTorque);
 		stat6.push_back(motors[1]->GetWorldAngularRate().Length());
 		motorTorques.push_back(throttleTorque);
 

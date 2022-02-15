@@ -73,27 +73,7 @@ public:
 	virtual void Start(const ea::vector<ea::string>& args);
 
 protected:
-    /// Return XML patch instructions for screen joystick layout for a specific sample app, if any.
-    ea::string GetScreenJoystickPatchString() const  { return
-        "<patch>"
-        "    <remove sel=\"/element/element[./attribute[@name='Name' and @value='Button0']]/attribute[@name='Is Visible']\" />"
-        "    <replace sel=\"/element/element[./attribute[@name='Name' and @value='Button0']]/element[./attribute[@name='Name' and @value='Label']]/attribute[@name='Text']/@value\">Spawn</replace>"
-        "    <add sel=\"/element/element[./attribute[@name='Name' and @value='Button0']]\">"
-        "        <element type=\"Text\">"
-        "            <attribute name=\"Name\" value=\"MouseButtonBinding\" />"
-        "            <attribute name=\"Text\" value=\"LEFT\" />"
-        "        </element>"
-        "    </add>"
-        "    <remove sel=\"/element/element[./attribute[@name='Name' and @value='Button1']]/attribute[@name='Is Visible']\" />"
-        "    <replace sel=\"/element/element[./attribute[@name='Name' and @value='Button1']]/element[./attribute[@name='Name' and @value='Label']]/attribute[@name='Text']/@value\">Debug</replace>"
-        "    <add sel=\"/element/element[./attribute[@name='Name' and @value='Button1']]\">"
-        "        <element type=\"Text\">"
-        "            <attribute name=\"Name\" value=\"KeyBinding\" />"
-        "            <attribute name=\"Text\" value=\"SPACE\" />"
-        "        </element>"
-        "    </add>"
-        "</patch>";
-    }
+   
 
 private:
     /// Construct the scene content.
@@ -229,8 +209,6 @@ private:
 
 	protected:
 
-		/// Initialize touch input on mobile platform.
-		void InitTouchInput();
 		/// Initialize mouse mode on non-web platform.
 		void InitMouseMode(MouseMode mode);
 		/// Control logo visibility.
@@ -248,8 +226,6 @@ private:
 		float yaw_;
 		/// Camera pitch angle.
 		float pitch_;
-		/// Flag to indicate whether touch input has been enabled.
-		bool touchEnabled_;
 		/// Mouse mode option to use in the sample.
 		MouseMode useMouseMode_;
 
@@ -272,10 +248,7 @@ private:
 	/// Handle touch begin event to initialize touch input on desktop platform.
 	void HandleTouchBegin(StringHash eventType, VariantMap& eventData);
 
-	/// Screen joystick index for navigational controls (mobile platforms only).
-	unsigned screenJoystickIndex_;
-	/// Screen joystick index for settings (mobile platforms only).
-	unsigned screenJoystickSettingsIndex_;
+
 	/// Pause flag.
 	bool paused_;
 
@@ -283,12 +256,6 @@ private:
 
 
 	bool orbitGYM = true;
-
-
-
-
-
-
 
 
 };

@@ -39,7 +39,7 @@ public:
 		NewtonRevoluteJoint* motor = bodyNode->CreateComponent<NewtonRevoluteJoint>();
 		motor->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
 		motor->SetPosition(Vector3(0, -3, 0));
-		motor->SetEnableLimits(false);
+		motor->SetEnableHingeLimits(false);
 		motor->SetOtherBody(Wheel->GetComponent<NewtonRigidBody>());
 		//motor->SetMotorTorque(1);
 

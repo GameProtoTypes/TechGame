@@ -419,7 +419,7 @@ bool PiecePointRow::AttachRows(PiecePointRow* rowA, PiecePointRow* rowB, PiecePo
 			//else
 			//{
 			//	constraint = holeBody->GetNode()->CreateComponent<NewtonRevoluteJoint>();
-			//	static_cast<NewtonRevoluteJoint*>(constraint)->SetEnableLimits(false);
+			//	static_cast<NewtonRevoluteJoint*>(constraint)->SetEnableHingeLimits(false);
 			//	static_cast<NewtonRevoluteJoint*>(constraint)->SetFriction(twistFriction);
 			//}
 

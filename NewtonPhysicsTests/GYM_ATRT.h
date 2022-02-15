@@ -30,8 +30,10 @@ public:
 		motors.clear();
 		leftHinges.clear();
 		rightHinges.clear();
+
 		//Body
 		bodyNode = SpawnSamplePhysicsBox(rootNode, Vector3::ZERO, Vector3(1, 1, 1));
+		bodyNode->GetComponent<NewtonRigidBody>()->SetMassScale(10);
 		orbitNode = bodyNode->CreateChild("Orbit");
 		//LEFT LEG
 		Node* HIP_LEFT = SpawnSamplePhysicsCylinder(rootNode, Vector3(0.0, -0.5, -0.5), 0.5, 0.25);
@@ -79,7 +81,7 @@ public:
 
 
 
-		Node* FOOT_LEFT2 = SpawnSamplePhysicsBox(KNEE_LOWER_LEFT, Vector3(-0.2, -3, -0.6), Vector3(0.1, 0.3, 0.75));
+		FOOT_LEFT2 = SpawnSamplePhysicsBox(KNEE_LOWER_LEFT, Vector3(-0.2, -3, -0.6), Vector3(0.1, 0.3, 0.75));
 		FOOT_LEFT2->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(10.0f);
 
 		NewtonRevoluteJoint* ENDJOINT_LEFT = KNEE_LOWER_LEFT->CreateComponent<NewtonRevoluteJoint>();
@@ -139,7 +141,7 @@ public:
 		FOOT_RIGHT->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(10.0f);
 
 
-		Node* FOOT_RIGHT2 = SpawnSamplePhysicsBox(KNEE_LOWER_RIGHT, Vector3(-0.2, -3, 0.6), Vector3(0.1,0.3,0.75));
+		FOOT_RIGHT2 = SpawnSamplePhysicsBox(KNEE_LOWER_RIGHT, Vector3(-0.2, -3, 0.6), Vector3(0.1,0.3,0.75));
 		FOOT_RIGHT2->GetDerivedComponent<NewtonCollisionShape>()->SetFriction(10.0f);
 
 		NewtonRevoluteJoint* ENDJOINT_RIGHT = KNEE_LOWER_RIGHT->CreateComponent<NewtonRevoluteJoint>();
@@ -149,6 +151,7 @@ public:
 		ENDJOINT_RIGHT->SetMinAngle(-80.0f);
 		ENDJOINT_RIGHT->SetMaxAngle(20.0f);
 		rightHinges.push_back(ENDJOINT_RIGHT);
+
 
 
 
@@ -163,11 +166,33 @@ public:
 
 		rootNode->SetWorldPosition(worldPos);
 		//rootNode->Rotate(Quaternion(RandomNormal(0, 45), Vector3(0, 0, 1)));
+
+		scene_->GetComponent<NewtonPhysicsWorld>()->BuildAndUpdateNewtonModels();
+
 	}
 
 	void Update(float timestep) override
 	{
 		GYM::Update(timestep);
+
+		static float minAngle = -25.0f;
+		//ui::SliderFloat("minAngles", &minAngle, -45.0f, 0.0f);
+		static float maxAngle = 45.0f;
+		//ui::SliderFloat("maxAngles", &maxAngle, 0, 45.0f);
+		for (int i = 0; i < rightHinges.size(); i++)
+		{
+			rightHinges[i]->SetMinAngle(minAngle);
+			leftHinges[i]->SetMinAngle(minAngle);
+			rightHinges[i]->SetMaxAngle(maxAngle);
+			leftHinges[i]->SetMaxAngle(maxAngle);
+		}
+
+		leftHinges.back()->SetEnableHingeLimits(false);
+		rightHinges.back()->SetEnableHingeLimits(false);
+
+
+		leftHinges[1]->SetMinAngle(0.0f);
+		rightHinges[1]->SetMinAngle(0.0f);
 
 
 		NewtonModel* model = rightHinges[0]->GetModel();
@@ -180,28 +205,27 @@ public:
 		Matrix3x4 endEffectorLeftWorld = leftHinges.back()->GetOwnWorldFrame();
 		Matrix3x4 endEffectorLeftRelRoot = rootTransformLeft.Inverse() * endEffectorLeftWorld;
 
-
-		static float vertical = 2.5f;
+		
 		static float timeFactor = 50.0f;
 		static float footRaiseAmplitude = -0.1f;
 		static float footStrideAmplitude = -0.2f;
 		static float footStrideOffset = -0.2f;
-		ui::SliderFloat("Vertical", &vertical, 0.0f, 5.0f);
-		ui::SliderFloat("Time Factor", &timeFactor, 0.0f, 100.0f);
-		ui::SliderFloat("footRaiseAmplitude", &footRaiseAmplitude, -1.0f, 1.0f);
-		ui::SliderFloat("footStrideAmplitude", &footStrideAmplitude, -1.0f, 1.0f);
-		ui::SliderFloat("footStrideOffset", &footStrideOffset, -1.0f, 1.0f);
+		//ui::SliderFloat("Vertical", &verticalFeetOffset, 0.0f, 5.0f);
+		//ui::SliderFloat("Time Factor", &timeFactor, 0.0f, 500.0f);
+		//ui::SliderFloat("footRaiseAmplitude", &footRaiseAmplitude, -1.0f, 1.0f);
+		//ui::SliderFloat("footStrideAmplitude", &footStrideAmplitude, -1.0f, 1.0f);
+		//ui::SliderFloat("footStrideOffset", &footStrideOffset, -1.0f, 1.0f);
 
 
 		footPhaseDeg += timeFactor*timestep;
 		if (footPhaseDeg > 360.0)
 			footPhaseDeg = 360.0 - footPhaseDeg;
 
-		Vector3 rightFootWorldOffset = Vector3(0,-vertical + footRaiseAmplitude * Sin(footPhaseDeg), Sin(footPhaseDeg + 90.0f) * footStrideAmplitude + footStrideOffset);
-		targetRightFootPosWorld = (rootTransformRight * rightFootWorldOffset);
+		//rightFootLocalOffset = Vector3(0,-verticalFeetOffset + footRaiseAmplitude * Sin(footPhaseDeg), Sin(footPhaseDeg + 90.0f) * footStrideAmplitude + footStrideOffset);
+		targetRightFootPosWorld = (rootTransformRight * rightFootLocalOffset);
 
-		Vector3 leftFootWorldOffset = Vector3(0, -vertical - footRaiseAmplitude * Sin(footPhaseDeg), -Sin(footPhaseDeg + 90.0f) * footStrideAmplitude + footStrideOffset);
-		targetLeftFootPosWorld = (rootTransformLeft * leftFootWorldOffset);
+		//leftFootLocalOffset = Vector3(0, -verticalFeetOffset - footRaiseAmplitude * Sin(footPhaseDeg), -Sin(footPhaseDeg + 90.0f) * footStrideAmplitude + footStrideOffset);
+		targetLeftFootPosWorld = (rootTransformLeft * leftFootLocalOffset);
 
 
 
@@ -214,16 +238,18 @@ public:
 
 
 
-		static float gain = 12.0f;
+		static float gain = 51.0f;
 		static float damping = 1.0f;
-		ui::SliderFloat("Gain", &gain, 1.0f, 100.0f);
-		ui::SliderFloat("Damping", &damping, 0.0f, 10.0f);
+		//ui::SliderFloat("Gain", &gain, 1.0f, 100.0f);
+		//ui::SliderFloat("Damping", &damping, 0.0f, 10.0f);
 
+		float leftFootLevelingTorque = FOOT_LEFT2->GetWorldDirection().y_;
+		float rightFootLevelingTorque = FOOT_RIGHT2->GetWorldDirection().y_;
 
 		Vector3 rightFootForce = gain * deltaRight - damping * (rootTransformRight.RotationMatrix().Inverse() * rightHinges.back()->GetOwnWorldFrameVel());
-		Vector3 rightFootTorque(0, 0, 0);
+		Vector3 rightFootTorque(rightFootLevelingTorque, 0, 0);
 		Vector3 leftFootForce = gain * deltaLeft - damping * (rootTransformLeft.RotationMatrix().Inverse() * leftHinges.back()->GetOwnWorldFrameVel());
-		Vector3 leftFootTorque(0, 0, 0);
+		Vector3 leftFootTorque(leftFootLevelingTorque, 0, 0 );
 
 		ChainJacobian chainJacRight;
 		ChainJacobian chainJacLeft;
@@ -252,11 +278,21 @@ public:
 
 			leftHinges[i]->SetCommandedTorque(torque);
 		}
+
+		//add to torque on hips to keep body level.
+		//float curLeftHipTrq = leftHinges[0]->GetCommandedTorque();
+		//float curRightHipTrq = rightHinges[0]->GetCommandedTorque();
+
+		//float bodyLevelTorque = 0.5f*bodyNode->GetWorldDirection().y_;
+		//leftHinges[0]->SetCommandedTorque(curLeftHipTrq + bodyLevelTorque);
+		//rightHinges[0]->SetCommandedTorque(curRightHipTrq + bodyLevelTorque);
+
+
 	}
 
 	void ResizeVectors() override
 	{
-		actionVec.resize(6);
+		actionVec.resize(4);
 		actionVec_1 = actionVec;
 
 		FormResponses(0.0f);
@@ -268,19 +304,14 @@ public:
 		GYM::FormResponses(timeStep);
 	
 
-		int vertState = SetNextState((bodyNode->GetWorldPosition().y_ - 2.0f)*0.5f);//Vertical Translation
+		int vertState = SetNextState((bodyNode->GetWorldPosition().y_ - 3.2f)*0.5f);//Vertical Translation
 
-		//linear velocity
-		//Vector3 worldVel = bodyNode->GetComponent<NewtonRigidBody>()->GetLinearVelocity();
-		//SetNextState(worldVel.x_ / 10.0f);                     
-		//SetNextState(worldVel.y_ / 10.0f);
-		//SetNextState(worldVel.z_ / 10.0f);
 
 		//local linear velocity
 		Vector3 vel = bodyNode->GetComponent<NewtonRigidBody>()->GetLinearVelocity(Urho3D::TS_LOCAL);
-		SetNextState(vel.x_ / 10.0f);
-		SetNextState(vel.y_ / 10.0f);
-		SetNextState(vel.z_ / 10.0f);
+		SetNextState(vel.x_ );
+		SetNextState(vel.y_ );
+		SetNextState(vel.z_ );
 
 
 
@@ -288,69 +319,15 @@ public:
 		int rolltilt = SetNextState(bodyNode->GetWorldDirection().y_);//roll indicator
 
 
-		SetNextState(FOOT_LEFT->GetWorldPosition().y_);
-		SetNextState(FOOT_RIGHT->GetWorldPosition().y_);
-		
+
+		//SetNextRewardPart(stateVec[vertState]);//vertical displacement
+		SetNextRewardPart(1.0f);//vertical displacement
 
 
-		//SetNextState(targetWorldVel.x_);
-		//SetNextState(targetWorldVel.z_);
-
-		for (int i = 0; i < motors.size(); i++)
-		{
-			//SetNextState(motors[i]->GetOwnBody()->GetNode()->GetPosition().x_);
-			//SetNextState(motors[i]->GetOwnBody()->GetNode()->GetPosition().y_);
-
-			SetNextState(sin(motors[i]->GetAngle()));
-			SetNextState(cos(motors[i]->GetAngle()));
-
-			SetNextState(motors[i]->GetWorldAngularRate().Length()/10.0f);
-		}
-
-
-		//BuildStateDerivatives(timeStep);
-
-
-
-		SetNextRewardPart(Pow(2.0f, stateVec[vertState]));//vertical displacement
-
-
-		float discountFeetAboveKnee = 0.0f;
-		if (FOOT_LEFT->GetWorldPosition().y_ >= KNEE_LOWER_LEFT->GetWorldPosition().y_)
-		{
-			discountFeetAboveKnee = -10000;
-		}
-		if (FOOT_RIGHT->GetWorldPosition().y_ >= KNEE_LOWER_RIGHT->GetWorldPosition().y_)
-		{
-			discountFeetAboveKnee = -10000;
-		}
-
-		SetNextRewardPart(discountFeetAboveKnee);
-
-
-//SetNextRewardPart(-0.1*Abs(stateVec[fbtilt]));
-//SetNextRewardPart(-0.1*Abs(stateVec[rolltilt]));
-
-
-
-
-		//float velocityAgreement = worldVel.DotProduct(targetWorldVel.Normalized()) / targetWorldVel.Length();
-		//SetNextRewardPart(10*velocityAgreement);
-		//SetNextRewardPart(0.1*timeStep);
-		//SetNextRewardPart(-(Abs(actionVec_1[0])+
-		//	Abs(actionVec_1[1]) +
-		//		Abs(actionVec_1[2]) +
-		//			Abs(actionVec_1[3]) +
-		//				Abs(actionVec_1[4]) +
-		//					Abs(actionVec_1[5])));//prev torques
-
-
-
-		if (bodyNode->GetWorldPosition().y_ < 1.0f)
+		if (bodyNode->GetWorldPosition().y_ < 1.5f)
 		{
 			end = 1;
 		}
-
 
 	}
 
@@ -358,18 +335,24 @@ public:
 	{
 		GYM::ApplyActionVec(timeStep);
 
-		//for(int m = 0; m < motors.size(); m++ )
-			//motors[m]->SetMotorTorque(actionVec[m] * 10);
+		rightFootLocalOffset.y_ = -verticalFeetOffset + actionVec[0] ;
+		rightFootLocalOffset.z_ = actionVec[1] ;
+
+		leftFootLocalOffset.y_ = - verticalFeetOffset + actionVec[2] ;
+		leftFootLocalOffset.z_ = actionVec[3] ;
 
 	}
 
 	void DrawDebugGeometry(DebugRenderer* debugRenderer) override
 	{
 		debugRenderer->AddLine(bodyNode->GetWorldPosition(), bodyNode->GetWorldPosition() + targetWorldVel * 5.0f, Color::RED);
-
-
 		debugRenderer->AddFrame(Matrix3x4(targetLeftFootPosWorld, Quaternion::IDENTITY, 1.0f));
 		debugRenderer->AddFrame(Matrix3x4(targetRightFootPosWorld, Quaternion::IDENTITY, 1.0f));
+
+		if(end )
+		{
+			debugRenderer->AddBoundingBox(bodyNode->GetComponent<NewtonRigidBody>()->GetModel()->GetBoundingBox(), Matrix3x4::IDENTITY, Color::BLACK, true, false);
+		}
 	}
 
 	ea::vector<NewtonRevoluteJoint*> motors;
@@ -379,10 +362,17 @@ public:
 
 
 	WeakPtr<Node> bodyNode;
+	WeakPtr<Node> FOOT_RIGHT2;
+	WeakPtr<Node> FOOT_LEFT2;
 	WeakPtr<Node> FOOT_RIGHT;
 	WeakPtr<Node> FOOT_LEFT;
 	WeakPtr<Node> KNEE_LOWER_RIGHT;
 	WeakPtr<Node> KNEE_LOWER_LEFT;
+
+	float verticalFeetOffset = 2.4f;
+
+	Vector3 rightFootLocalOffset;
+	Vector3 leftFootLocalOffset;
 
 	Vector3 targetRightFootPosWorld;
 	Vector3 targetLeftFootPosWorld;
