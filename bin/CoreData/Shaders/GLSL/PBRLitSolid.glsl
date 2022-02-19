@@ -148,6 +148,8 @@ void PS()
     vec3 specColor = mix(0.08 * cMatSpecColor.rgb, diffColor.rgb, metalness);
     diffColor.rgb = diffColor.rgb - diffColor.rgb * metalness;
 
+
+
     // Get normal
     #if defined(NORMALMAP) || defined(DIRBILLBOARD)
         vec3 tangent = vTangent.xyz;
@@ -203,6 +205,8 @@ void PS()
         vec3 BRDF = GetBRDF(vWorldPos.xyz, lightDir, lightVec, toCamera, normal, roughness, diffColor.rgb, specColor);
 
         finalColor.rgb = BRDF * lightColor * (atten * shadow) / M_PI;
+
+
 
         #ifdef AMBIENT
             finalColor += vVertexLight * diffColor.rgb;

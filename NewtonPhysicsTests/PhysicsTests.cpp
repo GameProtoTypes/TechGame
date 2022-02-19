@@ -212,7 +212,7 @@ void PhysicsTests::CreateScene()
     //SpawnSamplePhysicsCylinder(scene_, Vector3(5, 2, 0), 0.25f,4);
     redBox = SpawnSamplePhysicsBox(scene_, Vector3(5, 5, 0), Vector3(0.2f,0.2f,0.2f), Color::RED);
 
-    //SpawnMaterialsTest(Vector3(0,-25,100));
+    SpawnMaterialsTest(Vector3(0,-25,100));
 
 
     //SpawnCompoundedRectTest(Vector3(0, 2, 0));
@@ -227,7 +227,7 @@ void PhysicsTests::CreateScene()
 
 	//SpawnATRT(Vector3(5, 5, 0));
 
-	ResetGYMs();	
+	//ResetGYMs();	
 
 	//SpawnSegway(Vector3(0,5,10));
 
@@ -540,16 +540,7 @@ void PhysicsTests::MoveCamera(float timeStep)
 
 
 
-	if (input->GetKeyPress(KEY_4))
-	{
-		ToggleRejointTest();
 
-	}
-
-	if (input->GetKeyPress(KEY_5))
-	{
-		scene_->GetChild("cylinder1")->SetWorldPosition(Vector3(10, 10, 0));
-	}
 
 
 }
@@ -897,7 +888,7 @@ void PhysicsTests::SpawnMaterialsTest(Vector3 worldPosition)
 
         collisionShape->SetStaticFriction(0.1f*i - 0.05f);
         collisionShape->SetKineticFriction(0.1f*i);
-      
+
     }
 
     SpawnCompoundedRectTest(ramp->GetWorldPosition() + Vector3(-5, 8, 10));
@@ -2232,7 +2223,7 @@ void PhysicsTests::HandleKeyDown(StringHash /*eventType*/, VariantMap& eventData
 	{
 		int shadowMapSize = renderer->GetShadowMapSize();
 		shadowMapSize *= 2;
-		if (shadowMapSize > 2048)
+		if (shadowMapSize > 4096)
 			shadowMapSize = 512;
 		renderer->SetShadowMapSize(shadowMapSize);
 	}

@@ -173,6 +173,11 @@ Node* SpawnSamplePhysicsBox(Node* parentNode, const Vector3& worldPosition, cons
     boxVis->SetScale(size);
 
     Model* sphereMdl = parentNode->GetSubsystem<ResourceCache>()->GetResource<Model>("Models/Box.mdl");
+
+
+
+
+
     SharedPtr<Material> sphereMat = SharedPtr<Material>(parentNode->GetSubsystem<ResourceCache>()->GetResource<Material>(SAMPLE_MATERIAL));
     color.a_ = 0.0f;
 	sphereMat->SetShaderParameter("MatDiffColor", color);
