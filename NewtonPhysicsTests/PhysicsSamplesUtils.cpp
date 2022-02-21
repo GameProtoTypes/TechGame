@@ -6,7 +6,7 @@
 #include "Urho3D/Resource/ResourceCache.h"
 #include "NewtonRigidBody.h"
 #include "NewtonCollisionShapesDerived.h"
-
+#include "Urho3D/Graphics/Geometry.h"
 
 Node* SpawnSamplePhysicsSphere(Node* parentNode, const Vector3& worldPosition, float radius)
 {
@@ -192,6 +192,7 @@ Node* SpawnSamplePhysicsBox(Node* parentNode, const Vector3& worldPosition, cons
     sphere1StMdl->SetMaterial(sphereMat);
 
 
+
     NewtonRigidBody* s1RigBody = box->CreateComponent<NewtonRigidBody>();
 
     NewtonCollisionShape_Box* s1ColShape = box->CreateComponent<NewtonCollisionShape_Box>();
@@ -204,4 +205,120 @@ Node* SpawnSamplePhysicsBox(Node* parentNode, const Vector3& worldPosition, cons
 
     return box;
 }
+
+void RebuildToWorldUV(StaticModel* staticModel, float scale)
+{
+    SharedPtr<Model> newModel = SharedPtr<Model>(staticModel->GetModel()->Clone());
+    SharedPtr<Material> material = SharedPtr<Material>(staticModel->GetMaterial());
+    //staticModel->SetModel(nullptr);
+    int numGeoms = newModel->GetNumGeometries();
+
+    for (int i = 0; i < numGeoms; i++)
+    {
+
+        SharedPtr<Geometry> geom = SharedPtr<Geometry>(newModel->GetGeometry(i, 0));
+
+        
+
+        const unsigned char* vertexData;
+        const unsigned char* indexData;
+        unsigned elementSize, indexSize;
+        const  ea::vector<VertexElement>* elements;
+
+        geom->GetRawData(vertexData, elementSize, indexData, indexSize, elements);
+
+        bool hasPosition = VertexBuffer::HasElement(*elements, TYPE_VECTOR3, SEM_POSITION);
+        bool hasUV = VertexBuffer::HasElement(*elements, TYPE_VECTOR2, SEM_TEXCOORD);
+        bool hasNormal = VertexBuffer::HasElement(*elements, TYPE_VECTOR3, SEM_NORMAL);
+
+        if (vertexData && indexData && hasPosition && hasUV && hasNormal)
+        {
+            unsigned vertexStart = geom->GetVertexStart();
+            unsigned vertexCount = geom->GetVertexCount();
+            unsigned indexStart = geom->GetIndexStart();
+            unsigned indexCount = geom->GetIndexCount();
+
+
+
+            unsigned positionOffset = VertexBuffer::GetElementOffset(*elements, TYPE_VECTOR3, SEM_POSITION);
+            unsigned uvOffset = VertexBuffer::GetElementOffset(*elements, TYPE_VECTOR2, SEM_TEXCOORD);
+            unsigned normalOffset = VertexBuffer::GetElementOffset(*elements, TYPE_VECTOR3, SEM_NORMAL);
+
+
+            geom->GetVertexBuffer(i)->Lock(vertexStart, vertexCount);
+            //geom->GetIndexBuffer()->Lock(indexStart, indexCount);
+           
+            Matrix3x4 nodeWorldTransform = staticModel->GetNode()->GetWorldTransform();
+
+            for (unsigned curIdx = indexStart; curIdx < indexStart + indexCount; curIdx += 3)
+            {
+                //get indexes
+                unsigned i1, i2, i3;
+                if (indexSize == 2) {
+                    i1 = *reinterpret_cast<const unsigned short*>(indexData + curIdx * indexSize);
+                    i2 = *reinterpret_cast<const unsigned short*>(indexData + (curIdx + 1) * indexSize);
+                    i3 = *reinterpret_cast<const unsigned short*>(indexData + (curIdx + 2) * indexSize);
+                }
+                else if (indexSize == 4)
+                {
+                    i1 = *reinterpret_cast<const unsigned*>(indexData + curIdx * indexSize);
+                    i2 = *reinterpret_cast<const unsigned*>(indexData + (curIdx + 1) * indexSize);
+                    i3 = *reinterpret_cast<const unsigned*>(indexData + (curIdx + 2) * indexSize);
+                }
+
+                //lookup triangle using indexes.
+                Vector3* v1 = reinterpret_cast<Vector3*>((unsigned char*)vertexData + i1 * elementSize + positionOffset);
+                Vector3* v2 = reinterpret_cast<Vector3*>((unsigned char*)vertexData + i2 * elementSize + positionOffset);
+                Vector3* v3 = reinterpret_cast<Vector3*>((unsigned char*)vertexData + i3 * elementSize + positionOffset);
+
+                //lookup UV using indexes.
+                Vector2* uv1 = reinterpret_cast<Vector2*>((unsigned char*)vertexData + i1 * elementSize + uvOffset);
+                Vector2* uv2 = reinterpret_cast<Vector2*>((unsigned char*)vertexData + i2 * elementSize + uvOffset);
+                Vector2* uv3 = reinterpret_cast<Vector2*>((unsigned char*)vertexData + i3 * elementSize + uvOffset);
+
+                //lookup normal using indexes.
+                Vector3* norm1 = reinterpret_cast<Vector3*>((unsigned char*)vertexData + i1 * elementSize + normalOffset);
+                Vector3* norm2 = reinterpret_cast<Vector3*>((unsigned char*)vertexData + i2 * elementSize + normalOffset);
+                Vector3* norm3 = reinterpret_cast<Vector3*>((unsigned char*)vertexData + i3 * elementSize + normalOffset);
+
+               
+               
+
+                float uscale = scale;
+                float vscale = scale;
+
+                Vector3 v1World = nodeWorldTransform * *v1;
+                Vector3 v2World = nodeWorldTransform * *v2;
+                Vector3 v3World = nodeWorldTransform * *v3;
+               
+                Vector3 norm1World = nodeWorldTransform.RotationMatrix() * (*norm1);
+                Vector3 norm2World = nodeWorldTransform.RotationMatrix() * (*norm2);
+                Vector3 norm3World = nodeWorldTransform.RotationMatrix() * (*norm3);
+
+                Quaternion delta;
+                delta.FromRotationTo(norm1World, Vector3::UP);
+                delta.RotationMatrix();
+
+                Vector3 v1UpPlane = delta.RotationMatrix() * v1World;
+                Vector3 v2UpPlane = delta.RotationMatrix() * v2World;
+                Vector3 v3UpPlane = delta.RotationMatrix() * v3World;
+                
+
+                *uv1 = Vector2(v1UpPlane.x_, v1UpPlane.z_)* scale;
+                *uv2 = Vector2(v2UpPlane.x_, v2UpPlane.z_)* scale;
+                *uv3 = Vector2(v3UpPlane.x_, v3UpPlane.z_)* scale;
+
+            }
+        }
+        geom->GetVertexBuffer(i)->Unlock();
+        //geom->GetIndexBuffer()->Unlock();
+    }
+    
+    staticModel->SetModel(newModel);
+    staticModel->SetMaterial(material);
+
+}
+
+
+
 

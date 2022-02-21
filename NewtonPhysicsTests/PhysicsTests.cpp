@@ -118,6 +118,8 @@ void PhysicsTests::Start()
 	context_->RegisterFactory<GYM_TrialBike>();
 	context_->RegisterFactory<GYM_ATRT>();
 	context_->RegisterFactory<GYM_UniCycle>();
+
+    context_->RegisterFactory<Gizmo>();
 	
 	GetSubsystem<Engine>()->SetMinFps(60);
     GetSubsystem<Engine>()->SetMaxFps(120);
@@ -212,7 +214,7 @@ void PhysicsTests::CreateScene()
     //SpawnSamplePhysicsCylinder(scene_, Vector3(5, 2, 0), 0.25f,4);
     redBox = SpawnSamplePhysicsBox(scene_, Vector3(5, 5, 0), Vector3(0.2f,0.2f,0.2f), Color::RED);
 
-    SpawnMaterialsTest(Vector3(0,-25,100));
+    SpawnMaterialsTest(Vector3(0,10,0));
 
 
     //SpawnCompoundedRectTest(Vector3(0, 2, 0));
@@ -274,6 +276,9 @@ void PhysicsTests::CreateUI()
 	crossHair->SetPosition((graphics->GetWidth() - crossHair->GetWidth()) / 2, (graphics->GetHeight() - crossHair->GetHeight()) / 2);
 	crossHair->SetName("crossHair");
 
+
+    gizmo_ = context_->CreateObject<Gizmo>();
+
 }
 
 void PhysicsTests::SetupViewport()
@@ -324,13 +329,6 @@ void PhysicsTests::MoveCamera(float timeStep)
 
 
 
-	// Use this frame's mouse motion to adjust camera node yaw and pitch. Clamp the pitch between -90 and 90 degrees
-	IntVector2 mouseMove = input->GetMouseMove();
-	yaw_ += MOUSE_SENSITIVITY * mouseMove.x_;
-	pitch_ += MOUSE_SENSITIVITY * mouseMove.y_;
-	pitch_ = Clamp(pitch_, -90.0f, 90.0f);
-
-	// Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
 
 	if (orbitGYM && gyms.size())
 	{
@@ -344,9 +342,16 @@ void PhysicsTests::MoveCamera(float timeStep)
 		cameraNode_->Translate(Vector3(0, 0, 100.0*timeStep*(delta.Length() - 20.0f)));
 
 	}
-	else if (!GetSubsystem<Input>()->IsMouseVisible())
-	{
+	else if (!GetSubsystem<Input>()->IsMouseVisible() || input->GetMouseButtonDown(MOUSEB_RIGHT))
+	{	
+        IntVector2 mouseMove = input->GetMouseMove();
+	    yaw_ += MOUSE_SENSITIVITY * mouseMove.x_;
+	    pitch_ += MOUSE_SENSITIVITY * mouseMove.y_;
+	    pitch_ = Clamp(pitch_, -90.0f, 90.0f);
+
 		cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
+
+
 	}
 
 
@@ -392,8 +397,29 @@ void PhysicsTests::MoveCamera(float timeStep)
 
     }
         
+    
+	noseHoverNode = GetCameraPickNode().node_;
+    mouseHoverNode = GetCameraMousePickNode().node_;
 
-	hoverNode = GetCameraPickNode().node_;
+
+
+    if (noseHoverNode)
+    {
+        if(GetRootRigidBody(noseHoverNode, false))
+            noseHoverNode = GetRootRigidBody(noseHoverNode, false)->GetNode();
+
+    }
+        
+    if (mouseHoverNode)
+    {
+        if(GetRootRigidBody(mouseHoverNode, false))
+            mouseHoverNode = GetRootRigidBody(mouseHoverNode, false)->GetNode();
+
+    }
+
+
+    if (input->GetMouseButtonPress(MOUSEB_LEFT))
+        selectedNode = mouseHoverNode;
 
 
     if (input->GetKeyPress(KEY_R)) {
@@ -409,14 +435,6 @@ void PhysicsTests::MoveCamera(float timeStep)
        
     }
 
-
-   // if (input->GetMouseButtonPress(MOUSEB_RIGHT))
-    //    DecomposePhysicsTree();
-
-    if (input->GetMouseButtonPress(MOUSEB_RIGHT))
-    {
-        SpawnRandomObjects();
-    }
 
     if (input->GetKeyPress(KEY_T))
         TransportNode();
@@ -509,7 +527,7 @@ void PhysicsTests::MoveCamera(float timeStep)
 
     // Toggle physics debug geometry with space
     if (input->GetKeyPress(KEY_SPACE))
-        drawDebug_ = !drawDebug_;
+        enableEditor_ = !enableEditor_;
 
 
     if (0) {
@@ -873,11 +891,11 @@ void PhysicsTests::SpawnLinearJointedObject(float size, Vector3 worldPosition)
 void PhysicsTests::SpawnMaterialsTest(Vector3 worldPosition)
 {
 
-    Node* ramp = SpawnSamplePhysicsBox(scene_, worldPosition, Vector3(100, 1, 100));
+    Node* ramp = SpawnSamplePhysicsBox(scene_, worldPosition, Vector3(10, 1, 10));
     ramp->Rotate(Quaternion(-20.0f, 0, 0));
-    ramp->Translate(Vector3(0, 50, 0), TS_WORLD);
+    //ramp->Translate(Vector3(0, 50, 0), TS_WORLD);
     ramp->GetComponent<NewtonRigidBody>()->SetMassScale(0);
-
+    RebuildToWorldUV(ramp->GetComponent<StaticModel>(true));
 
     for (int i = 0; i < 5; i++)
     {
@@ -1461,6 +1479,13 @@ void PhysicsTests::HandleUpdate(StringHash eventType, VariantMap& eventData)
 		GymCli->rewards[i] = gyms[i]->reward;
 		GymCli->ends[i] = gyms[i]->end;
 	}
+
+
+
+    if(gizmoManip_1 && !gizmoManip && selectedNode)
+        RebuildToWorldUV(selectedNode->GetComponent<StaticModel>(true));
+
+
    
 }
 
@@ -1468,13 +1493,70 @@ void PhysicsTests::HandlePostRenderUpdate(StringHash eventType, VariantMap& even
 {
 	// Take the frame time step, which is stored as a float
 	float timeStep = eventData[Update::P_TIMESTEP].GetFloat();
-if (drawDebug_) {
+if (enableEditor_) {
+
+    ui::SetNextWindowPos(ImVec2(0, 0));
+    ui::SetNextWindowSize(ImVec2(GetSubsystem<Graphics>()->GetSize().x_, GetSubsystem<Graphics>()->GetSize().y_));
+    bool b = false;
+    if (ui::BeginMainMenuBar())
+    {
+        if (ui::BeginMenu("File"))
+        {
+            ui::MenuItem("Save", "CTRL+S");
+            ui::MenuItem("Load", "CTRL+L");
+            ui::MenuItem("Clear", "");
+            ui::MenuItem("Upload", "");
+
+            ui::Separator();
+
+            ui::MenuItem("Quit");
+
+            ui::EndMenu();
+        }
+        ui::EndMainMenuBar();
+    }
+
+   
+
+    ui::Begin("Editor", &b, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoTitleBar);
+    if (selectedNode) 
+    {
+
+        gizmoManip_1 = gizmoManip;
+        gizmoManip = gizmo_->ManipulateNode(cameraNode_->GetComponent<Camera>(), selectedNode);
+        if(gizmoManip)
+        {
+            if (selectedNode)
+                if (selectedNode->GetComponent<NewtonRigidBody>())
+                    selectedNode->GetComponent<NewtonRigidBody>()->SetLinearVelocity(Vector3::ZERO);
+        }
+        if (!gizmoManip && gizmoManip_1)
+        {
+            if (selectedNode)
+            {
+                if (selectedNode->GetComponent<NewtonRigidBody>())
+                    selectedNode->GetComponent<NewtonRigidBody>()->MarkDirty(true);
+
+                
+            }
+
+        }
+    }
+    ui::End();
+
+
+
+
 	bool doFrSim = ui::Button("ForwardSim", ImVec2(100, 20));
 	bool openGYM = ui::Button("Connect to GYM Server", ImVec2(100, 20));
 	bool resetGYM = ui::Button("Reset", ImVec2(100, 20));
 	bool saveNewtonPressed = ui::Button("Save Newton Scene", ImVec2(100, 20));
 
 	bool orbitGYMPressed = ui::Checkbox("Orbit GYM", &orbitGYM);
+   
+
+    gizmo_->RenderUI2();
+
 
 
 
@@ -1493,7 +1575,6 @@ if (drawDebug_) {
 
 	if (openGYM)
 	{
-
 		context_->GetSubsystem<GymClient>()->Connect();
 	}
 	if (orbitGYMPressed || resetGYM) {
@@ -1518,40 +1599,67 @@ if (drawDebug_) {
 
 	if (gyms.size())
 	{
-
 		gyms[0]->DrawUIStats(timeStep);
 	}
 
+    if (ui::Button("Spawn stuff", ImVec2(100, 20)))
+    {
+        SpawnRandomObjects();
+    }
 
 
-	if(hoverNode )
+
+
+	if(selectedNode )
 	{
 		ea::vector<NewtonRigidBody*> rigBodies;
-		GetRootRigidBodies(rigBodies, hoverNode, true);
-		if (rigBodies.size())
+		GetRootRigidBodies(rigBodies, selectedNode, false);
+        for (NewtonRigidBody* body : rigBodies)
 		{
-
 			ui::Begin("NewtonBody Info");
 
-
-			Matrix3 inertia = rigBodies[0]->GetMassMatrix();
+			Matrix3 inertia = body->GetMassMatrix();
 			ui::Text("Inertia Matrix:");
 			ui::Text("%f,%f,%f\r\n%f,%f,%f\r\n%f,%f,%f\r\n", 
 				inertia.m00_, inertia.m01_, inertia.m02_,
 				inertia.m10_, inertia.m11_, inertia.m12_,
 				inertia.m20_, inertia.m21_, inertia.m22_);
 
-			ui::Text("Mass: %f", rigBodies[0]->GetEffectiveMass());
-			Vector3 netForce = rigBodies[0]->GetNetWorldForce();
+			ui::Text("Mass: %f", body->GetEffectiveMass());
+			Vector3 netForce = body->GetNetWorldForce();
 			ui::Text("Net Force (NoGrav)(World): %f,%f,%f", netForce.x_, netForce.y_, netForce.z_);
-			Vector3 netTorque = rigBodies[0]->GetNetWorldTorque();
+			Vector3 netTorque = body->GetNetWorldTorque();
 			ui::Text("Net Torque (NoGrav)(World): %f,%f,%f", netTorque.x_, netTorque.y_, netTorque.z_);
 
 			ui::End();
 		}
+
+        if (ui::Button("Duplicate", ImVec2(100, 50)))
+        {
+            Node* dupedNode = selectedNode->Clone();
+            dupedNode->Translate(Vector3(0, 10, 0),TS_WORLD);
+            //manual copy things
+            dupedNode->GetComponent<StaticModel>(true)->SetModel(selectedNode->GetComponent<StaticModel>(true)->GetModel());
+            dupedNode->GetComponent<StaticModel>(true)->SetMaterial(selectedNode->GetComponent<StaticModel>(true)->GetMaterial());
+            RebuildToWorldUV(dupedNode->GetComponent<StaticModel>(true));
+        }
 	}
-
-
+    if (mouseHoverNode)
+    {
+        NewtonRigidBody* body = GetRootRigidBody(mouseHoverNode, false);
+        if(body)
+        {
+            body->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), false, false, true,false);
+        }
+    }
+    if (selectedNode)
+    {
+        NewtonRigidBody* body = GetRootRigidBody(selectedNode, false);
+        if (body)
+        {
+            body->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), false);
+        }
+    }
 
 
     static bool debugPhysics = false;
@@ -1568,7 +1676,6 @@ if (drawDebug_) {
 
     if(endEffectorTarget)
 		scene_->GetComponent<DebugRenderer>()->AddNode(endEffectorTarget);
-
 
 }
 
@@ -1595,20 +1702,6 @@ void PhysicsTests::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventD
 void PhysicsTests::HandlePhysicsPostStep(StringHash eventType, VariantMap& eventData)
 {
     float timeStep = eventData[NewtonPhysicsPostStep::P_TIMESTEP].GetFloat();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1732,6 +1825,23 @@ RayQueryResult PhysicsTests::GetCameraPickNode()
     return RayQueryResult();
 }
 
+RayQueryResult PhysicsTests::GetCameraMousePickNode()
+{
+    Graphics* graphics = GetSubsystem<Graphics>();
+
+    float width = graphics->GetWidth();
+    float height = graphics->GetHeight();
+    Vector2 screenCoord = Vector2(GetSubsystem<Input>()->GetMousePosition())* Vector2(1 / width, 1 / height);
+    Ray ray = cameraNode_->GetComponent<Camera>()->GetScreenRay(screenCoord.x_, screenCoord.y_);
+    ea::vector<RayQueryResult> res;
+    RayOctreeQuery querry(res, ray);
+    scene_->GetComponent<Octree>()->Raycast(querry);
+
+    if (res.size() > 1) {
+        return res[1];
+    }
+    return RayQueryResult();
+}
 
 
 
@@ -1744,13 +1854,13 @@ void PhysicsTests::CreateScenery(Vector3 worldPosition)
         // Create a floor object, 1000 x 1000 world units. Adjust position so that the ground is at zero Y
         Node* floorNode = scene_->CreateChild("Floor");
         floorNode->SetPosition(worldPosition - Vector3(20, 0.5f, 0));
-        floorNode->SetScale(Vector3(1000.0f, 1.0f, 1000.0f));
+        floorNode->SetScale(Vector3(100.0f, 1.0f, 100.0f));
         floorNode->Rotate(Quaternion(180, Vector3(1, 0, 0)));
         auto* floorObject = floorNode->CreateComponent<StaticModel>();
         floorObject->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
 		SharedPtr<Material> floorMat = cache->GetResource<Material>("Materials/Brick.xml")->Clone();
 
-		floorMat->SetUVTransform(Vector2(), 0, 500);
+		floorMat->SetUVTransform(Vector2(), 0, 50);
 		floorMat->SetShaderParameter("MatDiffColor", Vector4(4.0, 4.0, 4.0, 1.0f));
         floorMat->SetShaderParameter("MatDiffColor", Vector4(4.0, 4.0, 4.0, 1.0f));
 		floorObject->SetMaterial(floorMat);

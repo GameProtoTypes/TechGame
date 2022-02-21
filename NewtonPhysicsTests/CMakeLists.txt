@@ -15,7 +15,7 @@ endif ()
 
 # Define executable name.
 add_executable(NewtonPhysicsTests ${TARGET_TYPE} ${SOURCE_FILES})
-target_link_libraries(NewtonPhysicsTests PUBLIC rbfx-newton rbfx-visualdebugger rbfx-mathextras Urho3D)
+target_link_libraries(NewtonPhysicsTests PUBLIC rbfx-newton rbfx-visualdebugger rbfx-mathextras Toolbox Urho3D )
 
 
 

@@ -25,6 +25,8 @@
 #include "Samples/Sample.h"
 #include "NewtonConstraint.h"
 #include <Urho3D/MLControl/Gym.h>
+#include "Tools/Toolbox/SystemUI/Gizmo.h"
+
 
 #include "MathExtras_DSP/MathExtras_DSP.h"
 
@@ -137,7 +139,7 @@ private:
     void HandlePhysicsPostStep(StringHash eventType, VariantMap& eventData);
 
     /// Flag for drawing debug geometry.
-    bool drawDebug_ = false;
+    bool enableEditor_ = false;
     void DecomposePhysicsTree();
     void RecomposePhysicsTree();
     void  TransportNode();
@@ -154,7 +156,9 @@ private:
 
 
     Node* pickPullNode = nullptr;
-	WeakPtr<Node> hoverNode;
+	WeakPtr<Node> noseHoverNode;
+    WeakPtr<Node> mouseHoverNode;
+    WeakPtr<Node> selectedNode;
     WeakPtr<Node> noseNode;
     Quaternion pickPullCameraStartOrientation;
     Vector3 pickPullStartPositionWorld;
@@ -162,6 +166,8 @@ private:
     NewtonRevoluteJoint* hingeActuatorTest = nullptr;
     float timeAccum = 0.0f;
 
+    bool gizmoManip = false;
+    bool gizmoManip_1 = false;
 
     WeakPtr<Node> redBox;
 
@@ -187,6 +193,7 @@ private:
     void ReleasePickTargetOnPhysics();
     void UpdatePickPull();
     RayQueryResult GetCameraPickNode();
+    RayQueryResult GetCameraMousePickNode();
     bool pickPullFreeze = false;
 
     //temp variable to tracking world position across updates.
@@ -198,6 +205,7 @@ private:
 
     WeakPtr<Node> kinematicNode_;
 
+    SharedPtr<Gizmo> gizmo_;
 
     void CreateScenery(Vector3 worldPosition);
     void RemovePickNode(bool removeRigidBodyOnly = false);
