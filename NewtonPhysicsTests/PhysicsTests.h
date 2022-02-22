@@ -159,11 +159,27 @@ private:
 	WeakPtr<Node> noseHoverNode;
     WeakPtr<Node> mouseHoverNode;
     WeakPtr<Node> selectedNode;
+    WeakPtr<Node> selectedNode_ManipChild;
     WeakPtr<Node> noseNode;
     Quaternion pickPullCameraStartOrientation;
     Vector3 pickPullStartPositionWorld;
     Vector3 pickPullEndPositionWorld;
     NewtonRevoluteJoint* hingeActuatorTest = nullptr;
+
+    enum GizmoPhysicsMode {
+        GizmoPhysicsMode_KinJoint = 0,
+        GizmoPhysicsMode_DirectTransform
+    };
+    GizmoPhysicsMode gizmoPhysMode_ = GizmoPhysicsMode_DirectTransform;
+
+    enum GizmoSelectionLocationMode {
+        GizmoSelectionLocationMode_Surface = 0,
+        GizmoSelectionLocationMode_NodeCenter,
+        GizmoSelectionLocationMode_COM
+    };
+    GizmoSelectionLocationMode gizmoSelLocMode_ = GizmoSelectionLocationMode_NodeCenter;
+
+
     float timeAccum = 0.0f;
 
     bool gizmoManip = false;

@@ -233,7 +233,7 @@ void PhysicsTests::CreateScene()
 
 	//SpawnSegway(Vector3(0,5,10));
 
-	//SpawnRobotArm(Vector3(0, 5, 0));
+	SpawnRobotArm(Vector3(0, 5, 0));
 
 
     //SpawnKinematicBodyTest(Vector3(0, 0, 0), Quaternion::IDENTITY);
@@ -340,7 +340,6 @@ void PhysicsTests::MoveCamera(float timeStep)
 		cameraNode_->SetWorldPosition(curPos);
 
 		cameraNode_->Translate(Vector3(0, 0, 100.0*timeStep*(delta.Length() - 20.0f)));
-
 	}
 	else if (!GetSubsystem<Input>()->IsMouseVisible() || input->GetMouseButtonDown(MOUSEB_RIGHT))
 	{	
@@ -383,43 +382,58 @@ void PhysicsTests::MoveCamera(float timeStep)
 
 
 
-    if (input->GetMouseButtonPress(MOUSEB_LEFT))
-    {
-        if(pickPullNode)
-        {
-            ReleasePickTargetOnPhysics();
-            
-        }
-        else
-        {
-            CreatePickTargetNodeOnPhysics();
-        }
-
-    }
-        
-    
-	noseHoverNode = GetCameraPickNode().node_;
-    mouseHoverNode = GetCameraMousePickNode().node_;
+    RayQueryResult mousePick = GetCameraMousePickNode();
+    mouseHoverNode = mousePick.node_;
 
 
-
-    if (noseHoverNode)
-    {
-        if(GetRootRigidBody(noseHoverNode, false))
-            noseHoverNode = GetRootRigidBody(noseHoverNode, false)->GetNode();
-
-    }
-        
     if (mouseHoverNode)
     {
-        if(GetRootRigidBody(mouseHoverNode, false))
-            mouseHoverNode = GetRootRigidBody(mouseHoverNode, false)->GetNode();
+        NewtonRigidBody* rigBody = GetRootRigidBody(mouseHoverNode, false);
+        if (rigBody)
+        {
+            mouseHoverNode = rigBody->GetNode();
 
+
+        }
     }
+        
 
 
     if (input->GetMouseButtonPress(MOUSEB_LEFT))
+    {
         selectedNode = mouseHoverNode;
+
+        if (selectedNode_ManipChild != nullptr)
+        {
+            selectedNode_ManipChild->Remove();
+            selectedNode_ManipChild = nullptr;
+        }
+
+        if (selectedNode != nullptr)
+        {
+            NewtonRigidBody* rigBody = GetRootRigidBody(selectedNode, false);
+
+                selectedNode_ManipChild = mouseHoverNode->CreateChild("ManipChild");
+                selectedNode_ManipChild->SetTemporary(true);
+
+                if (gizmoSelLocMode_ == GizmoSelectionLocationMode_NodeCenter)
+                {
+                    //do nothing
+                }
+                else if (gizmoSelLocMode_ == GizmoSelectionLocationMode_COM)
+                {
+                    if(rigBody != nullptr)
+                        selectedNode_ManipChild->SetWorldTransform(rigBody->GetCOMWorldTransform());
+
+                }
+                else if (gizmoSelLocMode_ == GizmoSelectionLocationMode_Surface)
+                {
+                    
+                    selectedNode_ManipChild->SetWorldPosition(mousePick.position_);
+                }
+            
+        }
+    }
 
 
     if (input->GetKeyPress(KEY_R)) {
@@ -435,18 +449,6 @@ void PhysicsTests::MoveCamera(float timeStep)
        
     }
 
-
-    if (input->GetKeyPress(KEY_T))
-        TransportNode();
-
-    if (input->GetKeyPress(KEY_Y))
-        RecomposePhysicsTree();
-
-    if (input->GetKeyPress(KEY_DELETE))
-    {
-        //if()
-        RemovePickNode(input->GetKeyDown(KEY_SHIFT));
-    }
 
     if (input->GetKeyPress(KEY_PERIOD))
     {
@@ -1355,14 +1357,6 @@ void PhysicsTests::SpawnRobotArm(Vector3 worldPosition)
     robotPIDControllers[4].PGain = 500.0f;
     robotPIDControllers[5].PGain = 200.0f;
 
-    /*robotPIDControllers[0].IGain = 3.0f;
-    robotPIDControllers[1].IGain = 3.0f;
-    robotPIDControllers[2].IGain = 3.0f;
-    robotPIDControllers[3].IGain = 3.0f;
-    robotPIDControllers[4].IGain = 2.0f;
-    robotPIDControllers[5].IGain = 1.0f;*/
-
-
 
 	root->SetWorldPosition(worldPosition);
 }
@@ -1438,7 +1432,6 @@ void PhysicsTests::HandleUpdate(StringHash eventType, VariantMap& eventData)
     // Move the camera, scale movement with time step
     MoveCamera(timeStep);
 
-    UpdatePickPull();
 
 
 
@@ -1482,6 +1475,10 @@ void PhysicsTests::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 
 
+
+
+
+    //rebuild uvs that need rebuild (in general everything that need rebuilt)
     if(gizmoManip_1 && !gizmoManip && selectedNode)
         RebuildToWorldUV(selectedNode->GetComponent<StaticModel>(true));
 
@@ -1521,30 +1518,20 @@ if (enableEditor_) {
     ui::Begin("Editor", &b, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoTitleBar);
     if (selectedNode) 
     {
-
         gizmoManip_1 = gizmoManip;
-        gizmoManip = gizmo_->ManipulateNode(cameraNode_->GetComponent<Camera>(), selectedNode);
+        gizmoManip = gizmo_->ManipulateNodeAround(cameraNode_->GetComponent<Camera>(), selectedNode, selectedNode_ManipChild->GetWorldTransform());
         if(gizmoManip)
         {
             if (selectedNode)
                 if (selectedNode->GetComponent<NewtonRigidBody>())
+                {
                     selectedNode->GetComponent<NewtonRigidBody>()->SetLinearVelocity(Vector3::ZERO);
-        }
-        if (!gizmoManip && gizmoManip_1)
-        {
-            if (selectedNode)
-            {
-                if (selectedNode->GetComponent<NewtonRigidBody>())
-                    selectedNode->GetComponent<NewtonRigidBody>()->MarkDirty(true);
-
-                
-            }
-
+                    if(gizmo_->GetOperation() == GizmoOperation::GIZMOOP_SCALE)
+                        selectedNode->GetComponent<NewtonRigidBody>()->MarkDirty(true);
+                }
         }
     }
     ui::End();
-
-
 
 
 	bool doFrSim = ui::Button("ForwardSim", ImVec2(100, 20));
@@ -1554,6 +1541,28 @@ if (enableEditor_) {
 
 	bool orbitGYMPressed = ui::Checkbox("Orbit GYM", &orbitGYM);
    
+    ui::Text("Selection Mode");
+    if (ui::RadioButton("Node Center", gizmoSelLocMode_ == GizmoSelectionLocationMode_NodeCenter))
+        gizmoSelLocMode_ = GizmoSelectionLocationMode_NodeCenter;
+    ui::SameLine();
+    if (ui::RadioButton("Surface", gizmoSelLocMode_ == GizmoSelectionLocationMode_Surface))
+        gizmoSelLocMode_ = GizmoSelectionLocationMode_Surface;
+    if (ui::RadioButton("COM", gizmoSelLocMode_ == GizmoSelectionLocationMode_COM))
+        gizmoSelLocMode_ = GizmoSelectionLocationMode_COM;
+
+
+    
+    
+    ui::Text("Manipulation Mode");
+    if (ui::RadioButton("PhysPull", gizmoPhysMode_ == GizmoPhysicsMode_KinJoint))
+        gizmoPhysMode_ = GizmoPhysicsMode_KinJoint;
+    ui::SameLine();
+    if (ui::RadioButton("Direct", gizmoPhysMode_ == GizmoPhysicsMode_DirectTransform))
+        gizmoPhysMode_ = GizmoPhysicsMode_DirectTransform;
+
+
+
+
 
     gizmo_->RenderUI2();
 
