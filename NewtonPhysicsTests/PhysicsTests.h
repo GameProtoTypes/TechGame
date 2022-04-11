@@ -159,7 +159,8 @@ private:
 	WeakPtr<Node> noseHoverNode;
     WeakPtr<Node> mouseHoverNode;
     WeakPtr<Node> selectedNode;
-    WeakPtr<Node> selectedNode_ManipChild;
+    WeakPtr<Node> selectedNode_ManipNodeTarget;
+    WeakPtr<Node> selectedNode_ManipNodeChild;
     WeakPtr<Node> noseNode;
     Quaternion pickPullCameraStartOrientation;
     Vector3 pickPullStartPositionWorld;

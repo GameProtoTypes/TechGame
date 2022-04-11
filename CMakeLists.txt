@@ -18,6 +18,12 @@ add_subdirectory("./rbfx")
 add_subdirectory("./rbfx-newton")
 add_subdirectory("./rbfx-mathextras")
 add_subdirectory("./rbfx-visualdebugger")
+
+add_subdirectory("./boost")
+add_subdirectory("./catkin")
+add_subdirectory("./urdf/urdf")
+add_subdirectory("./urdfdom_headers")
+
 #add_subdirectory("./rbfx-torch")
 add_subdirectory("./TechGame")
 add_subdirectory("./NewtonPhysicsTests")

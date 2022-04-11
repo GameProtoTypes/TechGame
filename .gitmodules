@@ -13,3 +13,13 @@
 [submodule "rbfx-mathextras/MathExtras_DSP"]
 	path = rbfx-mathextras/MathExtras_DSP
 	url = https://github.com/TrevorCash/MathExtras_DSP
+[submodule "urdfdom_headers"]
+	path = urdfdom_headers
+	url = https://github.com/ros/urdfdom_headers
+[submodule "urdf"]
+	path = urdf
+	url = https://github.com/ros/urdf
+[submodule "catkin"]
+	path = catkin
+	url = https://github.com/ros/catkin
+

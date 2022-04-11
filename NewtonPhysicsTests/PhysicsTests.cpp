@@ -397,42 +397,81 @@ void PhysicsTests::MoveCamera(float timeStep)
         }
     }
         
-
-
-    if (input->GetMouseButtonPress(MOUSEB_LEFT))
+    if (input->GetKeyPress(KEY_ESCAPE))
     {
+        if (selectedNode != nullptr)
+            if (selectedNode->HasComponent<NewtonKinematicsControllerConstraint>())
+                selectedNode->RemoveComponent<NewtonKinematicsControllerConstraint>();
+
+        if (selectedNode_ManipNodeTarget != nullptr)
+        {
+            selectedNode_ManipNodeTarget->Remove();
+            selectedNode_ManipNodeTarget = nullptr;
+        }
+        if (selectedNode_ManipNodeChild != nullptr)
+        {
+            selectedNode_ManipNodeChild->Remove();
+            selectedNode_ManipNodeChild = nullptr;
+        }
+
+        selectedNode = nullptr;
+    }
+    else if (input->GetMouseButtonPress(MOUSEB_LEFT))
+    {
+        if(selectedNode != nullptr)
+            if (selectedNode->HasComponent<NewtonKinematicsControllerConstraint>())
+                selectedNode->RemoveComponent<NewtonKinematicsControllerConstraint>();
+
+
         selectedNode = mouseHoverNode;
 
-        if (selectedNode_ManipChild != nullptr)
+        if (selectedNode_ManipNodeTarget != nullptr)
         {
-            selectedNode_ManipChild->Remove();
-            selectedNode_ManipChild = nullptr;
+            selectedNode_ManipNodeTarget->Remove();
+            selectedNode_ManipNodeTarget = nullptr;
         }
+        if (selectedNode_ManipNodeChild != nullptr)
+        {
+            selectedNode_ManipNodeChild->Remove();
+            selectedNode_ManipNodeChild = nullptr;
+        }
+
+
 
         if (selectedNode != nullptr)
         {
             NewtonRigidBody* rigBody = GetRootRigidBody(selectedNode, false);
 
-                selectedNode_ManipChild = mouseHoverNode->CreateChild("ManipChild");
-                selectedNode_ManipChild->SetTemporary(true);
+                selectedNode_ManipNodeTarget = scene_->CreateChild("ManipNode");
+                selectedNode_ManipNodeTarget->SetTemporary(true);
+
+                selectedNode_ManipNodeChild = selectedNode->CreateChild("ManipChild");
+                selectedNode_ManipNodeChild->SetTemporary(true);
 
                 if (gizmoSelLocMode_ == GizmoSelectionLocationMode_NodeCenter)
                 {
-                    //do nothing
+                    selectedNode_ManipNodeTarget->SetWorldPosition(selectedNode->GetWorldPosition());
+                    selectedNode_ManipNodeChild->SetWorldPosition(selectedNode->GetWorldPosition());
                 }
                 else if (gizmoSelLocMode_ == GizmoSelectionLocationMode_COM)
                 {
-                    if(rigBody != nullptr)
-                        selectedNode_ManipChild->SetWorldTransform(rigBody->GetCOMWorldTransform());
+                    if (rigBody != nullptr)
+                    {
+                        selectedNode_ManipNodeTarget->SetWorldTransform(rigBody->GetCOMWorldTransform());
+                        selectedNode_ManipNodeChild->SetWorldTransform(rigBody->GetCOMWorldTransform());
+                    }
 
                 }
                 else if (gizmoSelLocMode_ == GizmoSelectionLocationMode_Surface)
                 {
                     
-                    selectedNode_ManipChild->SetWorldPosition(mousePick.position_);
+                    selectedNode_ManipNodeTarget->SetWorldPosition(mousePick.position_);
+                    selectedNode_ManipNodeChild->SetWorldPosition(mousePick.position_);
                 }
-            
+
         }
+
+
     }
 
 
@@ -1519,13 +1558,40 @@ if (enableEditor_) {
     if (selectedNode) 
     {
         gizmoManip_1 = gizmoManip;
-        gizmoManip = gizmo_->ManipulateNodeAround(cameraNode_->GetComponent<Camera>(), selectedNode, selectedNode_ManipChild->GetWorldTransform());
+        if (gizmoPhysMode_ == GizmoPhysicsMode_DirectTransform)
+        {
+            gizmo_->alwaysActive = true;
+            gizmoManip = gizmo_->ManipulateNodeAround(cameraNode_->GetComponent<Camera>(), selectedNode, selectedNode_ManipNodeChild->GetWorldTransform());
+        }
+        else if(gizmoPhysMode_ == GizmoPhysicsMode_KinJoint)
+        {
+            gizmo_->alwaysActive = false;
+            gizmoManip = gizmo_->ManipulateNodeAround(cameraNode_->GetComponent<Camera>(), selectedNode_ManipNodeTarget, selectedNode_ManipNodeTarget->GetWorldTransform());
+
+            if (selectedNode->HasComponent<NewtonRigidBody>()) 
+            {
+                NewtonKinematicsControllerConstraint* kinConstraint = selectedNode->GetOrCreateComponent<NewtonKinematicsControllerConstraint>();
+                kinConstraint->SetTemporary(true);
+                kinConstraint->SetConstrainRotation(gizmo_->GetOperation() == GizmoOperation::GIZMOOP_ROTATE);
+                kinConstraint->SetOwnWorldPosition(selectedNode_ManipNodeChild->GetWorldPosition());
+                kinConstraint->SetOwnWorldRotation(selectedNode_ManipNodeChild->GetWorldRotation());
+                kinConstraint->SetOtherWorldPosition(selectedNode_ManipNodeTarget->GetWorldPosition());
+                kinConstraint->SetOtherWorldRotation(selectedNode_ManipNodeTarget->GetWorldRotation());
+            }
+        }
+
+        
+       
         if(gizmoManip)
         {
             if (selectedNode)
                 if (selectedNode->GetComponent<NewtonRigidBody>())
                 {
-                    selectedNode->GetComponent<NewtonRigidBody>()->SetLinearVelocity(Vector3::ZERO);
+                    if (gizmoPhysMode_ == GizmoPhysicsMode_DirectTransform)
+                    {
+                        selectedNode->GetComponent<NewtonRigidBody>()->SetLinearVelocity(Vector3::ZERO, false);
+                    }
+
                     if(gizmo_->GetOperation() == GizmoOperation::GIZMOOP_SCALE)
                         selectedNode->GetComponent<NewtonRigidBody>()->MarkDirty(true);
                 }
