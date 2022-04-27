@@ -258,8 +258,8 @@ public:
 		model->CalculateChainJabobian(leftHinges, chainJacLeft);
 		ea::vector<float> jointTorquesRight;
 		ea::vector<float> jointTorquesLeft;
-		model->SolveForJointTorques(chainJacRight, rightHinges, rightFootForce, rightFootTorque, jointTorquesRight);
-		model->SolveForJointTorques(chainJacLeft, leftHinges, leftFootForce, leftFootTorque, jointTorquesLeft);
+		model->ComputeJointTorquesForEndEffector(chainJacRight, rightHinges, rightFootForce, rightFootTorque, jointTorquesRight);
+		model->ComputeJointTorquesForEndEffector(chainJacLeft, leftHinges, leftFootForce, leftFootTorque, jointTorquesLeft);
 
 
 

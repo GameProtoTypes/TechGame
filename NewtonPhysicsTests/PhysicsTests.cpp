@@ -2159,18 +2159,28 @@ void PhysicsTests::UpdateRobotArm(float timestep)
     ChainJacobian chainJac;
 
     robotHinges[0]->GetModel()->CalculateChainJabobian(chain, chainJac);
-    ea::vector<float> jointTorques;
-    robotHinges[0]->GetModel()->SolveForJointTorques(chainJac, chain, endForce, endTorque, jointTorques);
+    ea::vector<float> jointTorquesAntiGravity;
+    ea::vector<float> jointTorquesControl;
+    robotHinges[0]->GetModel()->ComputeJointTorquesForEndEffector(chainJac, chain, endForce, endTorque, jointTorquesControl);
+    robotHinges[0]->GetModel()->ComputeCounterGravitationalTorque(chain, jointTorquesAntiGravity);
+
+
+    ui::Begin("Torques");
 
 
 
     for (int i = 0; i < 6; i++)
     {
-        float torque = jointTorques[i];
+        float torque = jointTorquesAntiGravity[i] +jointTorquesControl[i];
         torque = Clamp(torque, -1000.0f, 1000.0f);
 		robotHinges[i]->SetCommandedTorque(torque);
+        //robotHinges[i]->SetFrictionCoef(100.0f);    
+        
+        
+        ui::Text("AntiGravity: %f,    Control: %f", jointTorquesAntiGravity[i], jointTorquesControl[i]);
+  
     }
-
+  ui::End();
 }
 
 void PhysicsTests::CreatePickTargetNodeOnPhysics()
