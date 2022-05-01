@@ -25,7 +25,7 @@
 #include "Samples/Sample.h"
 #include "NewtonConstraint.h"
 #include <Urho3D/MLControl/Gym.h>
-#include "Tools/Toolbox/SystemUI/Gizmo.h"
+#include <Urho3D/SystemUI/Gizmo.h>
 
 
 #include "MathExtras_DSP/MathExtras_DSP.h"
@@ -125,7 +125,7 @@ private:
 	void SpawnRejointingTest(Vector3 worldPosition);
 	void SpawnCollisionOffsetTest(Vector3 worldPosition);
     void SpawnSegway(Vector3 worldPosition);
-	void SpawnRobotArm(Vector3 worldPosition);
+    void SpawnUnitsTest(Vector3 worldPosition);
 
     /// Handle the logic update event.
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
@@ -186,24 +186,14 @@ private:
     bool gizmoManip = false;
     bool gizmoManip_1 = false;
 
-    WeakPtr<Node> redBox;
+
 
 	Node* reJointRoot = nullptr;
 	Node* reJointA = nullptr;
 	Node* reJointB = nullptr;
 	void ToggleRejointTest();
 
-    WeakPtr<Node> robotRoot;
-    WeakPtr<NewtonRigidBody> robotBaseBody;
-    WeakPtr<NewtonRigidBody> robotEndBody;
-    WeakPtr<NewtonRevoluteJoint> robotHinges[6];//base to end
-    MathExtras::PID<float> robotPIDControllers[6];
-    MathExtras::SinglePoleLPFilter<float> robotControlFilters[6];
-    float robotJointSpeedTargets[6];
-
-    WeakPtr<Node> endEffectorTarget;
-    ndModel newtonRobotArmModel;
-    void UpdateRobotArm(float timestep);
+   
 
 
     void CreatePickTargetNodeOnPhysics();
@@ -228,7 +218,7 @@ private:
     void RemovePickNode(bool removeRigidBodyOnly = false);
    
    
-	void ResetGYMs();
+	void CreateResetGYMs();
 	ea::vector<SharedPtr<GYM>> gyms;
 
 

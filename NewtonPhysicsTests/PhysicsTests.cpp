@@ -72,6 +72,7 @@
 #include "GYM_TrialBike.h"
 #include "GYM_ATRT.h"
 #include "GYM_UniCycle.h"
+#include "GYM_RobotArm.h"
 
 #include "eigen/Eigen/Dense"
 #include <iostream>
@@ -118,6 +119,7 @@ void PhysicsTests::Start()
 	context_->RegisterFactory<GYM_TrialBike>();
 	context_->RegisterFactory<GYM_ATRT>();
 	context_->RegisterFactory<GYM_UniCycle>();
+    context_->RegisterFactory<GYM_RobotArm>();
 
     context_->RegisterFactory<Gizmo>();
 	
@@ -212,7 +214,6 @@ void PhysicsTests::CreateScene()
 	//cylinder->GetComponent<NewtonRigidBody>()->SetCenterOfMassLocalOffset(Vector3(5, 0, 0));
 
     //SpawnSamplePhysicsCylinder(scene_, Vector3(5, 2, 0), 0.25f,4);
-    redBox = SpawnSamplePhysicsBox(scene_, Vector3(5, 5, 0), Vector3(0.2f,0.2f,0.2f), Color::RED);
 
     SpawnMaterialsTest(Vector3(0,10,0));
 
@@ -229,11 +230,10 @@ void PhysicsTests::CreateScene()
 
 	//SpawnATRT(Vector3(5, 5, 0));
 
-	//ResetGYMs();	
+	CreateResetGYMs();	
 
 	//SpawnSegway(Vector3(0,5,10));
 
-	SpawnRobotArm(Vector3(0, 5, 0));
 
 
     //SpawnKinematicBodyTest(Vector3(0, 0, 0), Quaternion::IDENTITY);
@@ -1241,9 +1241,9 @@ void PhysicsTests::SpawnCompoundedRectTest2(Vector3 worldPosition)
 
 
 
-void PhysicsTests::ResetGYMs()
+void PhysicsTests::CreateResetGYMs()
 {
-	URHO3D_LOGINFO("ResetGYMs");
+	URHO3D_LOGINFO("CreateResetGYMs");
 	GymClient* gymCli = context_->GetSubsystem<GymClient>();
 	
 
@@ -1255,7 +1255,8 @@ void PhysicsTests::ResetGYMs()
 	while (gyms.size() < gymCli->numGYMS)
 	{
 		//gyms.push_back(context_->CreateObject<GYM_TrialBike>());
-		gyms.push_back(context_->CreateObject<GYM_ATRT>());
+		//gyms.push_back(context_->CreateObject<GYM_ATRT>());
+        gyms.push_back(context_->CreateObject<GYM_RobotArm>());
 		//gyms.push_back(context_->CreateObject<GYM_UniCycle>());
 	}
 
@@ -1274,6 +1275,7 @@ void PhysicsTests::ResetGYMs()
         }
 	}
 	
+
 
 	for (int i = 0; i < gymCli->numGYMS; i++)
 	{
@@ -1326,81 +1328,16 @@ void PhysicsTests::SpawnSegway(Vector3 worldPosition)
 }
 
 
-void PhysicsTests::SpawnRobotArm(Vector3 worldPosition)
+
+
+void PhysicsTests::SpawnUnitsTest(Vector3 worldPosition)
 {
-    robotRoot = scene_->CreateChild("RobotArm");
-    Node* root = robotRoot;
-
-	Node* base = SpawnSamplePhysicsCylinder(root, Vector3::ZERO, 2,0.5);
-	base->GetComponent<NewtonCollisionShape_Cylinder>()->SetDensity(100);
-    robotBaseBody = base->GetComponent<NewtonRigidBody>();
-    base->SetName("RobotBase");
-
-	Node* base2 = SpawnSamplePhysicsCylinder(root, Vector3(0,1,0), 1, 1);
-
-	NewtonRevoluteJoint* motor1 = base->CreateComponent<NewtonRevoluteJoint>();
-	motor1->SetOtherBody(base2->GetComponent<NewtonRigidBody>());
-	motor1->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
-	motor1->SetEnableHingeLimits(false);
-    robotHinges[0] = motor1;
-
-	Node* arm1 = SpawnSamplePhysicsBox(root, Vector3(0, 2, 0), Vector3(1, 3, 1));
-	NewtonRevoluteJoint* motor2 = base2->CreateComponent<NewtonRevoluteJoint>();
-	motor2->SetOtherBody(arm1->GetComponent<NewtonRigidBody>());
-    robotHinges[1] = motor2;
-
-	Node* arm2 = SpawnSamplePhysicsBox(root, Vector3(0, 4, 0), Vector3(1, 3, 1));
-	NewtonRevoluteJoint* motor3 = arm1->CreateComponent<NewtonRevoluteJoint>();
-	motor3->SetOtherBody(arm2->GetComponent<NewtonRigidBody>());
-	motor3->SetPosition(Vector3(0,1,0));
-    robotHinges[2] = motor3;
 
 
-	Node* arm3 = SpawnSamplePhysicsBox(root, Vector3(0, 6, 0), Vector3(1, 3, 1));
-	NewtonRevoluteJoint* motor4 = arm2->CreateComponent<NewtonRevoluteJoint>();
-	motor4->SetOtherBody(arm3->GetComponent<NewtonRigidBody>());
-	motor4->SetPosition(Vector3(0, 1, 0));
-    robotHinges[3] = motor4;
-
-	Node* wrist = SpawnSamplePhysicsCylinder(root, Vector3(0, 7.5, 0), 0.5, 0.5);
-	NewtonRevoluteJoint* motor5 = arm3->CreateComponent<NewtonRevoluteJoint>();
-	motor5->SetOtherBody(wrist->GetComponent<NewtonRigidBody>());
-	motor5->SetPosition(Vector3(0, 1, 0));
-	motor5->SetRotation(Quaternion(90, Vector3(0, 0, 1)));
-    robotHinges[4] = motor5;
 
 
-	Node* arm4 = SpawnSamplePhysicsBox(root, Vector3(0, 8.5, 0), Vector3(0.5, 1.5, 0.5));
-	NewtonRevoluteJoint* motor6 = wrist->CreateComponent<NewtonRevoluteJoint>();
-	motor6->SetOtherBody(arm4->GetComponent<NewtonRigidBody>());
-	motor6->SetPosition(Vector3(0, 0, 0));
-    robotHinges[5] = motor6;
 
-    robotEndBody = arm4->GetComponent<NewtonRigidBody>();
-
-
-    scene_->GetComponent<NewtonPhysicsWorld>()->BuildAndUpdateNewtonModels();
-
-
-    for(int i = 0 ; i < 6; i++)
-    {
-        robotHinges[i]->SetFrictionCoef(1.0f);
-        robotHinges[i]->SetEnableHingeLimits(false);
-        robotHinges[i]->GetOtherBody()->SetNoCollideOverride(true);
-    }
-
-    robotPIDControllers[0].PGain = 20000.0f;
-    robotPIDControllers[1].PGain = 20000.0f;
-    robotPIDControllers[2].PGain = 20000.0f;
-    robotPIDControllers[3].PGain = 10000.0f;
-    robotPIDControllers[4].PGain = 500.0f;
-    robotPIDControllers[5].PGain = 200.0f;
-
-
-	root->SetWorldPosition(worldPosition);
 }
-
-
 
 
 
@@ -1488,7 +1425,7 @@ void PhysicsTests::HandleUpdate(StringHash eventType, VariantMap& eventData)
 	GymClient* GymCli = context_->GetSubsystem<GymClient>();
 	if (GymCli->resetPending)
 	{
-		ResetGYMs();
+		CreateResetGYMs();
 
 		GymCli->resetPending = false;
 	}
@@ -1749,8 +1686,7 @@ if (enableEditor_) {
 		gyms[i]->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>());
 	}
 
-    if(endEffectorTarget)
-		scene_->GetComponent<DebugRenderer>()->AddNode(endEffectorTarget);
+
 
 }
 
@@ -1767,8 +1703,7 @@ void PhysicsTests::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventD
 {
     float timeStep = eventData[NewtonPhysicsPostStep::P_TIMESTEP].GetFloat();
 
-    if(robotRoot)
-		UpdateRobotArm(timeStep);
+
 
 
 
@@ -2117,71 +2052,7 @@ void PhysicsTests::ToggleRejointTest()
 
 }
 
-void PhysicsTests::UpdateRobotArm(float timestep)
-{
-    
-    //compute the Jacobian From end to base
-    Matrix3x4 rootTransform = robotHinges[0]->GetOwnWorldFrame();
-    Vector3 rootWorldVel = robotHinges[0]->GetOwnWorldFrameVel();
-    Vector3 rootWorldOmega = robotHinges[0]->GetOwnWorldFrameOmega();
-    Matrix3x4 endEffectorWorld = robotHinges[5]->GetOwnWorldFrame();
-    Matrix3x4 endEffectorRelRoot = rootTransform.Inverse() * endEffectorWorld;
-    Vector3 hingeLocalRotationAxis = NewtonRevoluteJoint::LocalHingeAxis();
-    Vector3 d_n_0 = endEffectorRelRoot.Translation();
 
-
-    ea::vector<NewtonRevoluteJoint*> constraintChain;
-    for (int i = 0; i < 6; i++)
-        constraintChain.push_back(robotHinges[i]);
-
-    ChainJacobian J_;
-    robotHinges[0]->GetModel()->CalculateChainJabobian(constraintChain, J_);
-
-
-
-    static Vector3 targetVel;
-    Vector3 targetPos = (rootTransform.Inverse() * redBox->GetWorldTransform()).Translation();
-    Vector3 delta = (targetPos - endEffectorRelRoot.Translation());
-
-
-
-    static float gain = 300.0f;
-    static float damping = 100.0f;
-    ui::SliderFloat("Gain", &gain, 1.0f, 1000.0f);
-    ui::SliderFloat("Damping", &damping, 0.0f, 100.0f);
-
-
-    Vector3 endForce = gain * delta - damping * (rootTransform.RotationMatrix().Inverse() * robotHinges[5]->GetOwnWorldFrameVel());
-    Vector3 endTorque = Vector3::ZERO;
-    ea::vector<NewtonRevoluteJoint*> chain;
-    for (int i = 0; i < 6; i++)
-        chain.push_back(robotHinges[i]);
-    ChainJacobian chainJac;
-
-    robotHinges[0]->GetModel()->CalculateChainJabobian(chain, chainJac);
-    ea::vector<float> jointTorquesAntiGravity;
-    ea::vector<float> jointTorquesControl;
-    robotHinges[0]->GetModel()->ComputeJointTorquesForEndEffector(chainJac, chain, endForce, endTorque, jointTorquesControl);
-    robotHinges[0]->GetModel()->ComputeCounterGravitationalTorque(chain, jointTorquesAntiGravity);
-
-
-    ui::Begin("Torques");
-
-
-
-    for (int i = 0; i < 6; i++)
-    {
-        float torque = jointTorquesAntiGravity[i] +jointTorquesControl[i];
-        torque = Clamp(torque, -1000.0f, 1000.0f);
-		robotHinges[i]->SetCommandedTorque(torque);
-        //robotHinges[i]->SetFrictionCoef(100.0f);    
-        
-        
-        ui::Text("AntiGravity: %f,    Control: %f", jointTorquesAntiGravity[i], jointTorquesControl[i]);
-  
-    }
-  ui::End();
-}
 
 void PhysicsTests::CreatePickTargetNodeOnPhysics()
 {
