@@ -121,7 +121,7 @@ void PhysicsTests::Start()
 	context_->RegisterFactory<GYM_UniCycle>();
     context_->RegisterFactory<GYM_RobotArm>();
 
-    context_->RegisterFactory<Gizmo>();
+
 	
 	GetSubsystem<Engine>()->SetMinFps(60);
     GetSubsystem<Engine>()->SetMaxFps(120);
@@ -215,7 +215,7 @@ void PhysicsTests::CreateScene()
 
     //SpawnSamplePhysicsCylinder(scene_, Vector3(5, 2, 0), 0.25f,4);
 
-    SpawnMaterialsTest(Vector3(0,10,0));
+    //SpawnMaterialsTest(Vector3(0,10,0));
 
 
     //SpawnCompoundedRectTest(Vector3(0, 2, 0));
@@ -1678,6 +1678,10 @@ if (enableEditor_) {
     ui::Checkbox("Debug Physics", &debugPhysics);
     if(debugPhysics)
 		scene_->GetComponent<NewtonPhysicsWorld>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>(), false);
+
+    //draw world coordinate frame.
+    scene_->GetComponent<DebugRenderer>()->AddFrame(Matrix3x4::IDENTITY, 2.0f, Color::RED, Color::GREEN, Color::BLUE, false);
+
 
 	GetSubsystem<VisualDebugger>()->DrawDebugGeometry(scene_->GetComponent<DebugRenderer>());
 

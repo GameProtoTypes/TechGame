@@ -60,8 +60,8 @@ public:
 	{
 		// Engine is not initialized yet. Set up all the parameters now.
 		engineParameters_[EP_FULL_SCREEN] = false;
-		engineParameters_[EP_WINDOW_HEIGHT] = 1200;
-		engineParameters_[EP_WINDOW_WIDTH] = 2500;
+		engineParameters_[EP_WINDOW_HEIGHT] = 1080;
+		engineParameters_[EP_WINDOW_WIDTH] = 1920;
 		engineParameters_[EP_WINDOW_RESIZABLE] = true;
 		// Resource prefix path is a list of semicolon-separated paths which will be checked for containing resource directories. They are relative to application executable file.
 		engineParameters_[EP_RESOURCE_PREFIX_PATHS] = ".;./../../../bin";
