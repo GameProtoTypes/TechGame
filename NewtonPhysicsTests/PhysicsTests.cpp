@@ -35,6 +35,8 @@
 #include <Urho3D/Input/Input.h>
 #include <Urho3D/IO/File.h>
 #include <Urho3D/IO/FileSystem.h>
+#include <Urho3D/Network/Network.h>
+#include <Urho3D/Replica/ReplicationManager.h>
 
 #include "Urho3D/Physics/PhysicsWorld.h"
 #include <Urho3D/Physics/RigidBody.h>
@@ -164,6 +166,7 @@ void PhysicsTests::CreateScene()
 
     //scene_->CreateComponent<NewtonCollisionShape_SceneCollision>();
     scene_->CreateComponent<DebugRenderer>();
+    scene_->CreateComponent<ReplicationManager>(LOCAL);
 
     // Create a Zone component for ambient lighting & fog control
     Node* zoneNode = scene_->CreateChild("Zone");
@@ -230,7 +233,7 @@ void PhysicsTests::CreateScene()
 
 	//SpawnATRT(Vector3(5, 5, 0));
 
-	CreateResetGYMs();	
+	//CreateResetGYMs();	
 
 	//SpawnSegway(Vector3(0,5,10));
 
@@ -1256,7 +1259,7 @@ void PhysicsTests::CreateResetGYMs()
 	{
 		//gyms.push_back(context_->CreateObject<GYM_TrialBike>());
 		//gyms.push_back(context_->CreateObject<GYM_ATRT>());
-        gyms.push_back(context_->CreateObject<GYM_RobotArm>());
+        //gyms.push_back(context_->CreateObject<GYM_RobotArm>());
 		//gyms.push_back(context_->CreateObject<GYM_UniCycle>());
 	}
 
@@ -1576,6 +1579,53 @@ if (enableEditor_) {
     ui::Text("Time Step: %f", timeStep);
     ui::Text("fps: %f", GetSubsystem<Time>()->GetFramesPerSecond());
     ui::End();
+
+
+    ui::Begin("Network Connection");
+
+
+    auto* network = GetSubsystem<Network>();
+    if (network->IsServerRunning())
+    {
+        ui::Text("Num Connected Clients: %d", network->GetClientConnections().size());
+        
+
+        if (ui::Button("Stop Server"))
+        {
+            network->StopServer();
+        }
+    }
+    else
+    {
+        if (network->GetServerConnection() != nullptr)
+        {
+            ui::Text("Connected to server");
+            if (ui::Button("Disconnect"))
+            {
+                network->Disconnect();
+            }
+        }
+        else
+        {
+            if (ui::Button("Start Server"))
+            {
+                network->StartServer(12345);
+            }
+            else if (ui::Button("Connect To Local Server"))
+            {
+                network->Connect("127.0.0.1", 12345, scene_);
+
+            }
+        }
+    }
+
+
+
+    ui::End();
+
+
+
+
 
 
 

@@ -7,11 +7,20 @@
 #include "NewtonRigidBody.h"
 #include "NewtonCollisionShapesDerived.h"
 #include "Urho3D/Graphics/Geometry.h"
+#include "Urho3D/Replica/NetworkObject.h"
+#include "Urho3D/Replica/StaticNetworkObject.h"
+
+
+void SampleCommonNodeSetup(Node* node)
+{
+}
 
 Node* SpawnSamplePhysicsSphere(Node* parentNode, const Vector3& worldPosition, float radius)
 {
         Node* sphere1 = parentNode->CreateChild("SamplePhysicsSphere");
-        Node* sphereVis = sphere1->CreateChild();
+        SampleCommonNodeSetup(sphere1);
+
+        Node* sphereVis = sphere1->CreateChild();;
         sphereVis->SetScale(Vector3(radius, radius, radius)*2.0f);
 
         Model* sphereMdl = parentNode->GetSubsystem<ResourceCache>()->GetResource<Model>("Models/Sphere.mdl");
@@ -40,6 +49,7 @@ Node* SpawnSamplePhysicsSphere(Node* parentNode, const Vector3& worldPosition, f
 Node* SpawnSamplePhysicsCylinder(Node* parentNode, const Vector3& worldPosition, float radius, float height)
 {
     Node* sphere1 = parentNode->CreateChild("SamplePhysicsCylinder");
+    SampleCommonNodeSetup(sphere1);
     Node* sphereVis = sphere1->CreateChild();
     sphereVis->SetScale(Vector3(radius*2.0f, height, radius*2.0f));
 
@@ -74,6 +84,7 @@ Node* SpawnSamplePhysicsCylinder(Node* parentNode, const Vector3& worldPosition,
 Node* SpawnSamplePhysicsChamferCylinder(Node* parentNode, const Vector3& worldPosition, float radius, float height)
 {
     Node* sphere1 = parentNode->CreateChild("SamplePhysicsCylinder");
+    SampleCommonNodeSetup(sphere1);
     Node* sphereVis = sphere1->CreateChild();
     sphereVis->SetScale(Vector3(radius*2.0f, height, radius*2.0f));
 
@@ -105,6 +116,7 @@ Node* SpawnSamplePhysicsChamferCylinder(Node* parentNode, const Vector3& worldPo
 Node* SpawnSamplePhysicsCapsule(Node* parentNode, const Vector3& worldPosition, float radius, float height)
 {
     Node* sphere1 = parentNode->CreateChild("SamplePhysicsCylinder");
+    SampleCommonNodeSetup(sphere1);
     Node* sphereVis = sphere1->CreateChild();
     sphereVis->SetScale(Vector3(radius*2.0f, height, radius*2.0f));
 
@@ -137,6 +149,7 @@ Node* SpawnSamplePhysicsCapsule(Node* parentNode, const Vector3& worldPosition, 
 Node* SpawnSamplePhysicsCone(Node* parentNode, const Vector3& worldPosition, float radius, float height)
 {
     Node* sphere1 = parentNode->CreateChild("SamplePhysicsCone");
+    SampleCommonNodeSetup(sphere1);
     Node* sphereVis = sphere1->CreateChild();
     sphereVis->SetScale(Vector3(radius*2.0f, height, radius*2.0f));
 

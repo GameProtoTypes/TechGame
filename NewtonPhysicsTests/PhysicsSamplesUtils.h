@@ -8,6 +8,7 @@ using namespace Urho3D;
 #define SAMPLE_MATERIAL "Materials/Metal.xml"
 #define SAMPLE_COLOR (Vector4(0.5, 0.5f, 0.5f, 1.0f))
 
+void SampleCommonNodeSetup(Node* node);
 
 Node* SpawnSamplePhysicsCylinder(Node* parentNode, const Vector3& worldPosition, float radius = 0.5f, float height = 1.0f);
 Node* SpawnSamplePhysicsChamferCylinder(Node* parentNode, const Vector3& worldPosition, float radius = 0.5f, float height = 1.0f);
