@@ -1258,7 +1258,7 @@ void PhysicsTests::CreateResetGYMs()
 	while (gyms.size() < gymCli->numGYMS)
 	{
 		//gyms.push_back(context_->CreateObject<GYM_TrialBike>());
-		//gyms.push_back(context_->CreateObject<GYM_ATRT>());
+		gyms.push_back(context_->CreateObject<GYM_ATRT>());
         //gyms.push_back(context_->CreateObject<GYM_RobotArm>());
 		//gyms.push_back(context_->CreateObject<GYM_UniCycle>());
 	}
@@ -1426,6 +1426,7 @@ void PhysicsTests::HandleUpdate(StringHash eventType, VariantMap& eventData)
     }
 
 	GymClient* GymCli = context_->GetSubsystem<GymClient>();
+    GymCli->Update();
 	if (GymCli->resetPending)
 	{
 		CreateResetGYMs();
@@ -1918,7 +1919,7 @@ void PhysicsTests::CreateScenery(Vector3 worldPosition)
         // Create a floor object, 1000 x 1000 world units. Adjust position so that the ground is at zero Y
         Node* floorNode = scene_->CreateChild("Floor");
         floorNode->SetPosition(worldPosition - Vector3(20, 0.5f, 0));
-        floorNode->SetScale(Vector3(100.0f, 1.0f, 100.0f));
+        floorNode->SetScale(Vector3(1000.0f, 1.0f, 1000.0f));
         floorNode->Rotate(Quaternion(180, Vector3(1, 0, 0)));
         auto* floorObject = floorNode->CreateComponent<StaticModel>();
         floorObject->SetModel(cache->GetResource<Model>("Models/Box.mdl"));

@@ -35,7 +35,7 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--policy_name", default="TD3")					# Policy name
 	parser.add_argument("--netwidth", default="10")
-	parser.add_argument("--netdepth", default="2")#todo
+	parser.add_argument("--netdepth", default="4")#todo
 	parser.add_argument("--env_name", default="ATRT")			        # gym environment name
 	parser.add_argument("--seed", default=0, type=int)					# Sets Gym, PyTorch and Numpy seeds
 	parser.add_argument("--start_timesteps", default=1e4, type=int)		# How many time steps purely random policy is run for
@@ -49,7 +49,7 @@ if __name__ == "__main__":
 	parser.add_argument("--policy_noise", default=0.2, type=float)		# Noise added to target policy during critic update
 	parser.add_argument("--noise_clip", default=0.5, type=float)		# Range to clip target policy noise
 	parser.add_argument("--policy_freq", default=2, type=int)			# Frequency of delayed policy updates
-	parser.add_argument("--num_gyms", default=1, type=int)				# Number of Gyms Expected to connect to
+	parser.add_argument("--num_gyms", default=50, type=int)				# Number of Gyms Expected to connect to
 	args = parser.parse_args()
 
 	file_name = "%s_%s_%s" % (args.policy_name, args.env_name, str(args.seed))
@@ -87,7 +87,7 @@ if __name__ == "__main__":
 	elif args.policy_name == "DDPG": policy = DDPG.DDPG(state_dim, action_dim, max_action)
 
 
-	if(False):
+	if(True):
 		# load baseline policy
 		policy.load(file_name_baseline, directory="./pytorch_models")
 		total_timesteps = args.start_timesteps
