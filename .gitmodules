@@ -1,6 +1,6 @@
 [submodule "SMUrho3D"]
 	path = rbfx
-	url = https://github.com/TrevorCash/SMUrho3D
+	url = https://github.com/GameProtoTypes/SMUrho3D
 [submodule "rbfx-newton"]
 	path = rbfx-newton
 	url = https://github.com/TrevorCash/rbfx-newton
