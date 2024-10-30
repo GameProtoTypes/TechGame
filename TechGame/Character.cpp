@@ -20,6 +20,7 @@
 #include "Urho3D/Input/Input.h"
 #include "NewtonCollisionShapesDerived.h"
 #include "Newton6DOFConstraint.h"
+#include "NewtonRevoluteJoint.h"
 #include "Urho3D/Graphics/Camera.h"
 #include "Urho3D/Audio/SoundListener.h"
 #include "Urho3D/Audio/Audio.h"
@@ -257,10 +258,10 @@ void Character::ResolveNodes()
 
 
 	// Set zero angular factor so that physics doesn't turn the character on its own.
-	// Instead we will control the character yaw manually
+	// Instead control the character yaw manually
 	//body->SetAngularFactor(Vector3::ZERO);
 
-	// Set the rigidbody to signal collision also when in rest, so that we get ground collisions properly
+	// Set the rigidbody to signal collision also when in rest,  get ground collisions properly
 	body->SetCollisionEventMode(NewtonRigidBody::COLLISION_ALL);
 
 	// Set a capsule shape for collision
@@ -270,10 +271,10 @@ void Character::ResolveNodes()
 	shape->SetElasticity(0.0f);
 
 	//create 6dof constraint to limit angles
-	NewtonSixDofConstraint* constraint = node_->GetOrCreateComponent<NewtonSixDofConstraint>();
-	constraint->SetPitchLimits(0, 0);
-	constraint->SetYawLimits(0, 0);
-	constraint->SetRollLimits(0, 0);
+	NewtonRevoluteJoint* constraint = node_->GetOrCreateComponent<NewtonRevoluteJoint>();
+	constraint->SetRotation(Quaternion(90, Vector3(0, 1, 0)));
+	constraint->SetEnableHingeLimits(false);
+	constraint->SetEnableOffsetLimits(false);
 }
 
 void Character::OnNodeSet(Node* node)

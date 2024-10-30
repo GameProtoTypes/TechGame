@@ -9,7 +9,12 @@ from GYMServer import *
 
 
 
+def allOnes(array):
+    for i in range(0,len(array)):
+        if array[i] == 0:
+            return False
 
+    return True
 
 def eval_genomes(genomes, config):
     
@@ -24,7 +29,7 @@ def eval_genomes(genomes, config):
     fitnesses = np.zeros((gym.numGYMS,1))
     ends = np.zeros((gym.numGYMS,1), dtype=int)
 
-    while ends[0] == 0:
+    while ( not allOnes(ends) ):
         gymIdx = 0
         actions = []
         #print(genomes)
@@ -34,7 +39,7 @@ def eval_genomes(genomes, config):
             gymIdx+=1
 
         
-        states, rewards, ends = gym.TakeActions(actions)
+        states, rewards, ends = gym.TakeActions(actions,False)
 
         #print(np.shape(fitnesses))
         #print(np.shape(states))

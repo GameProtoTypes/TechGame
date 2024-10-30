@@ -14,5 +14,5 @@ AppVersion::~AppVersion()
 
 void AppVersion::RegisterObject(Context* context)
 {
-	context->RemoveFactory<AppVersion>();
+	context->RegisterFactory<AppVersion>();
 }
