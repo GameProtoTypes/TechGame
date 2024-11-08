@@ -3,14 +3,14 @@
 	url = https://github.com/GameProtoTypes/SMUrho3D
 [submodule "rbfx-newton"]
 	path = rbfx-newton
-	url = https://github.com/TrevorCash/rbfx-newton
+	url = https://github.com/GameProtoTypes/rbfx-newton
 [submodule "rbfx-openvr"]
 	path = rbfx-openvr
-	url = https://github.com/TrevorCash/rbfx-openvr
+	url = https://github.com/GameProtoTypes/rbfx-openvr
 [submodule "rbfx-bugsplat"]
 	path = rbfx-bugsplat
-	url = https://github.com/TrevorCash/rbfx-bugsplat
+	url = https://github.com/GameProtoTypes/rbfx-bugsplat
 [submodule "rbfx-mathextras/MathExtras_DSP"]
 	path = rbfx-mathextras/MathExtras_DSP
-	url = https://github.com/TrevorCash/MathExtras_DSP
+	url = https://github.com/GameProtoTypes/MathExtras_DSP
 
